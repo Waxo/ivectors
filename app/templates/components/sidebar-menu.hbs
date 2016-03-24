@@ -1,0 +1,24 @@
+{{#ui-sidebar class='vertical inverted menu visible thin'}}
+  <div class="item">
+    {{#link-to 'index'}}arm-tools{{/link-to}}
+  </div>
+  <div class="item">
+    <div class="header">i-vectors</div>
+    <div class="menu">
+      {{#link-to 'ivectors.prepare-prm' class='item'}}
+        Wav to PRMs
+      {{/link-to}}
+      {{#link-to 'ivectors.ubm-tv' class='item'}}
+        UBM TotalVariability
+      {{/link-to}}
+      <a class="item">
+        Extractor
+      </a>
+      <a class="item">
+        Qualifier
+      </a>
+    </div>
+  </div>
+{{/ui-sidebar}}
+
+{{yield}}

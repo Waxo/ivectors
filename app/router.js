@@ -6,6 +6,11 @@ const Router = Ember.Router.extend({
 });
 
 Router.map(function() {
+  this.route('ivectors', function() {
+    this.route('prepare-prm');
+    this.route('ubm-tv');
+    this.route('extract-classes');
+  });
 });
 
 export default Router;

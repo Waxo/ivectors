@@ -1,0 +1,23 @@
+<div class="ui steps">
+  <div class="step link {{if isUBMDone 'completed disabled' 'active'}}
+    {{if isUBMProcess 'disabled'}}"
+    {{action 'TrainUBM'}}>
+    <i class="fa {{if isUBMProcess 'refresh fa-spin' 'fa-music'}} icon"></i>
+    <div class="content">
+      <div class="title">UBM</div>
+      <div class="description">Train universal background model</div>
+    </div>
+  </div>
+  <div class="step link {{if isUBMDone '' 'disabled'}}
+    {{if isTVProcess 'disabled'}}
+    {{if isTVDone 'completed disabled' 'active'}}"
+    {{action 'TrainTotalVariability'}}>
+    <i class="fa {{if isTVProcess 'refresh fa-spin' 'fa-plug'}} icon"></i>
+    <div class="content">
+      <div class="title">TotalVariability</div>
+      <div class="description">Train TotalVariability matrix</div>
+    </div>
+  </div>
+</div>
+
+{{yield}}
