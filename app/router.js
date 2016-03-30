@@ -10,6 +10,8 @@ Router.map(function() {
     this.route('prepare-prm');
     this.route('ubm-tv');
     this.route('extract-classes');
+    this.route('wav-to-ivectors');
+    this.route('score');
   });
 });
 

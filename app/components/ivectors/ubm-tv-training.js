@@ -10,15 +10,15 @@ const prmPath = `${ivectorsPath}/prm`;
 const lblPath = `${ivectorsPath}/lbl`;
 const gmmPath = `${ivectorsPath}/gmm`;
 
-var cleanAndRegenerateGMM = function () {
+const cleanAndRegenerateGMM = function () {
   return new PromiseB((resolve) => {
-    rimraf(`${gmmPath}`)
-      .then(() => fs.mkdirAsync(`${gmmPath}`))
+    rimraf(gmmPath)
+      .then(() => fs.mkdirAsync(gmmPath))
       .finally(() => resolve());
   });
 };
 
-var cleanAndRegenerateTV = function () {
+const cleanAndRegenerateTV = function () {
   return new PromiseB((resolve) => {
     rimraf(`${ivectorsPath}/mat`)
       .then(() => fs.mkdirAsync(`${ivectorsPath}/mat`))
@@ -40,8 +40,9 @@ export default Ember.Component.extend({
         let config = `--config ${contextPath}/cfg/TrainWorld.cfg`;
         let input = `--inputFeatureFilename ${ivectorsPath}/data.lst`;
         let filePath = `--featureFilesPath ${prmPath}/`;
+        let labelPath = `--labelFilesPath ${lblPath}`;
         let mixturesPath = `--mixtureFilesPath ${gmmPath}/`;
-        let paths = `${filePath} ${mixturesPath}`;
+        let paths = `${filePath} ${mixturesPath} ${labelPath}`;
 
         let execute = `${command} ${config} ${input} ${paths}`;
         exec(execute, (error, stdout, stderr) => {
@@ -65,7 +66,6 @@ export default Ember.Component.extend({
         this.set('isTVProcess', true);
         let command = `${contextPath}/TotalVariability`;
         let config = `--config ${contextPath}/cfg/TotalVariability_fast.cfg`;
-        let input = `--inputFeatureFilename ${ivectorsPath}/data.lst`;
         let filePath = `--featureFilesPath ${prmPath}/`;
         let labelPath = `--labelFilesPath ${lblPath}/`;
         let mixturesPath = `--mixtureFilesPath ${gmmPath}/`;
@@ -73,7 +73,7 @@ export default Ember.Component.extend({
         let ndx = `--ndxFilename ${contextPath}/totalvariability.ndx`;
         let paths = `${filePath} ${labelPath} ${mixturesPath} ${matrixPath}`;
 
-        let execute = `${command} ${config} ${input} ${ndx} ${paths}`;
+        let execute = `${command} ${config} ${ndx} ${paths}`;
         exec(execute, (error, stdout, stderr) => {
           if (stderr) {
             console.log(`stderr: ${stderr}`);

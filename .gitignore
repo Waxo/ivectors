@@ -1,10 +1,23 @@
-/app/ivectors/0_1_Prepare_PRM/input
 /app/ivectors/prm
 /app/ivectors/lbl
 /app/ivectors/data.lst
 /app/ivectors/gmm
 /app/ivectors/mat
+/app/ivectors/iv
+/app/ivectors/Plda.ndx
+/app/ivectors/TrainModel.ndx
+/app/ivectors/0_1_Prepare_PRM/input
 /app/ivectors/0_2_UBM_TotalVariability/totalvariability.ndx
+/app/ivectors/0_3_Extract_Classes/ivExtractor.ndx
+/app/ivectors/1_1_Wav_to_ivectors/input.lst
+/app/ivectors/1_1_Wav_to_ivectors/iv
+/app/ivectors/1_1_Wav_to_ivectors/lbl
+/app/ivectors/1_1_Wav_to_ivectors/input
+/app/ivectors/1_1_Wav_to_ivectors/prm
+/app/ivectors/1_1_Wav_to_ivectors/ivExtractor.ndx
+/app/ivectors/2_2_WCCN/scores_WCCN_Cosine.txt
+/app/ivectors/matWCCN.matx
+/app/ivectors/2_2_WCCN/ivTest.ndx
 # See http://help.github.com/ignore-files/ for more about ignoring files.
 
 # compiled output
