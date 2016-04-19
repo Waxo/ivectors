@@ -1,7 +1,7 @@
 <div class="ui steps">
   <div class="step link {{if isPRMDone 'completed disabled' 'active'}}
     {{if isPRMProcess 'disabled'}}"
-    {{action 'CreatePRM'}}>
+    {{action 'createPRM'}}>
     <i class="fa {{if isPRMProcess 'refresh fa-spin' 'fa-music'}} icon"></i>
     <div class="content">
       <div class="title">Wav to PRM</div>
@@ -11,7 +11,7 @@
   <div class="step link {{if isPRMDone '' 'disabled'}}
     {{if isNormFeatProcess 'disabled'}}
     {{if isNormFeatDone 'completed disabled' 'active'}}"
-    {{action 'EnergyAndFeatures'}}>
+    {{action 'energyAndFeatures'}}>
     <i class="fa {{if isNormFeatProcess 'refresh fa-spin' 'fa-plug'}} icon"></i>
     <div class="content">
       <div class="title">TotalVariability</div>
@@ -21,7 +21,7 @@
   <div class="step link {{if isNormFeatDone '' 'disabled'}}
     {{if isExtractProcess 'disabled'}}
     {{if isExtractDone 'completed disabled' 'active'}}"
-    {{action 'ExtractIVectors'}}>
+    {{action 'extractIVectors'}}>
     <i class="fa {{if isExtractProcess 'refresh fa-spin' 'fa-plug'}} icon"></i>
     <div class="content">
       <div class="title">I-Vectors Extraction</div>

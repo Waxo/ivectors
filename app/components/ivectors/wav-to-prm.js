@@ -39,11 +39,13 @@ export default Ember.Component.extend({
       console.log('Energy');
       this.set('isEnergyProcess', true);
       let command = `${contextPath}/NormFeat`;
-      let config = `--config ${contextPath}/cfg/NormFeat_energy.cfg`;
-      let input = `--inputFeatureFilename ${ivectorsPath}/data.lst`;
-      let filePath = `--featureFilesPath ${prmPath}/`;
+      let options = [
+        `--config ${contextPath}/cfg/NormFeat_energy.cfg`,
+        `--inputFeatureFilename ${ivectorsPath}/data.lst`,
+        `--featureFilesPath ${prmPath}/`
+      ];
 
-      let execute = `${command} ${config} ${input} ${filePath}`;
+      let execute = `${command} ${options.join(' ')}`;
       exec(execute, (error, stdout, stderr) => {
         if (stderr) {
           console.log(`stderr: ${stderr}`);
@@ -60,11 +62,14 @@ export default Ember.Component.extend({
       console.log('Features');
       this.set('isFeaturesProcess', true);
       let command = `${contextPath}/NormFeat`;
-      let config = `--config ${contextPath}/cfg/NormFeat.cfg`;
-      let input = `--inputFeatureFilename ${ivectorsPath}/data.lst`;
-      let filePath = `--featureFilesPath ${prmPath}/`;
-      let labelPath = `--labelFilesPath ${lblPath}/`;
-      let execute = `${command} ${config} ${input} ${filePath} ${labelPath}`;
+      let options = [
+        `--config ${contextPath}/cfg/NormFeat.cfg`,
+        `--inputFeatureFilename ${ivectorsPath}/data.lst`,
+        `--featureFilesPath ${prmPath}/`,
+        `--labelFilesPath ${lblPath}/`
+      ];
+
+      let execute = `${command} ${options.join(' ')}`;
       exec(execute, (error, stdout, stderr) => {
         if (stderr) {
           console.log(`stderr: ${stderr}`);

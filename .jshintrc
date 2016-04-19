@@ -2,8 +2,8 @@
   "predef": [
     "document",
     "window",
-    "-Promise",
-    "require"
+    "require",
+    "-Promise"
   ],
   "browser": true,
   "boss": true,
@@ -22,7 +22,6 @@
   "nomen": false,
   "onevar": false,
   "plusplus": false,
-  "regexp": false,
   "undef": true,
   "sub": true,
   "strict": false,

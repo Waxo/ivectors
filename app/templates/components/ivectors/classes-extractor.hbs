@@ -2,7 +2,7 @@
   <div class="step link {{if isPrepareDone 'completed disabled' 'active'}}
     {{if isPrepareProcess 'disabled'}}"
     {{action 'PrepareExtractor'}}>
-    <i class="fa {{if isPrepareProcess 'refresh fa-spin' 'fa-music'}} icon"></i>
+    <i class="fa {{if isPrepareProcess 'refresh fa-spin' 'fa-rocket'}} icon"></i>
     <div class="content">
       <div class="title">Prepare extractor</div>
       <div class="description">Prepare the ndx file for extracting datas</div>
@@ -12,10 +12,10 @@
     {{if isExtractProcess 'disabled'}}
     {{if isExtractDone 'completed disabled' 'active'}}"
     {{action 'ExtractIVectors'}}>
-    <i class="fa {{if isExtractProcess 'refresh fa-spin' 'fa-plug'}} icon"></i>
+    <i class="fa {{if isExtractProcess 'refresh fa-spin' 'fa-cubes'}} icon"></i>
     <div class="content">
-      <div class="title">TotalVariability</div>
-      <div class="description">Train TotalVariability matrix</div>
+      <div class="title">Extract I-Vectors</div>
+      <div class="description">Create the i-vectors</div>
     </div>
   </div>
 </div>

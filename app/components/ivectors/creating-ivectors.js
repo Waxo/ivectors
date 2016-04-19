@@ -105,7 +105,7 @@ export default Ember.Component.extend({
   isExtractProcess: false,
   isExtractDone: false,
   actions: {
-    CreatePRM() {
+    createPRM() {
       console.log('PRM');
       this.set('isPRMProcess', true);
       cleanAndRegenerate().then(() => {
@@ -114,13 +114,13 @@ export default Ember.Component.extend({
           setTimeout(() => {
             this.set('isPRMProcess', false);
             this.set('isPRMDone', true);
-            this.send('EnergyAndFeatures');
+            this.send('energyAndFeatures');
           }, 1000);
         });
       });
     },
 
-    EnergyAndFeatures() {
+    energyAndFeatures() {
       this.set('isNormFeatProcess', true);
       energy()
         .then(() => normalize())
@@ -128,12 +128,12 @@ export default Ember.Component.extend({
           setTimeout(() => {
             this.set('isNormFeatProcess', false);
             this.set('isNormFeatDone', true);
-            this.send('PrepareExtractor');
+            this.send('prepareIVectorsExtractor');
           }, 1000);
         });
     },
 
-    PrepareExtractor() {
+    prepareIVectorsExtractor() {
       this.set('isExtractProcess', true);
       fs.readFileAsync(`${contextPath}/input.lst`)
         .then(data => {
@@ -147,23 +147,24 @@ export default Ember.Component.extend({
           return fs.writeFileAsync(`${contextPath}/ivExtractor.ndx`, ndx);
         })
         .then(() => {
-          this.send('ExtractIVectors');
+          this.send('extractIVectors');
         });
     },
 
-    ExtractIVectors() {
+    extractIVectors() {
       console.log('Extract I-Vectors');
       const command = `${commandPathExtractor}/IvExtractor`;
-      let options = [];
       const gmmPath = `${ivectorsPath}/gmm`;
       const matrixPath = `${ivectorsPath}/mat`;
-      options.push(`--config ${contextPath}/cfg/ivExtractor_fast.cfg`);
-      options.push(`--featureFilesPath ${prmPath}/`);
-      options.push(`--labelFilesPath ${lblPath}/`);
-      options.push(`--mixtureFilesPath ${gmmPath}/`);
-      options.push(`--matrixFilesPath ${matrixPath}/`);
-      options.push(`--saveVectorFilesPath ${ivPath}/raw/`);
-      options.push(`--targetIdList ${contextPath}/ivExtractor.ndx`);
+      let options = [
+        `--config ${contextPath}/cfg/ivExtractor_fast.cfg`,
+        `--featureFilesPath ${prmPath}/`,
+        `--labelFilesPath ${lblPath}/`,
+        `--mixtureFilesPath ${gmmPath}/`,
+        `--matrixFilesPath ${matrixPath}/`,
+        `--saveVectorFilesPath ${ivPath}/raw/`,
+        `--targetIdList ${contextPath}/ivExtractor.ndx`
+      ];
 
       let execute = `${command} ${options.join(' ')}`;
       exec(execute, (error, stdout, stderr) => {

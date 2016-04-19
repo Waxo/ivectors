@@ -1,8 +1,8 @@
 import Ember from 'ember';
 const exec = require('child_process').exec;
-const PromiseB = require('bluebird');
-const fs = PromiseB.promisifyAll(require('fs'));
-const rimraf = PromiseB.promisify(require('rimraf'));
+const BluebirdPromise = require('bluebird');
+const fs = BluebirdPromise.promisifyAll(require('fs'));
+const rimraf = BluebirdPromise.promisify(require('rimraf'));
 
 const ivectorsPath = `${process.cwd()}/app/ivectors`;
 const contextPath = `${ivectorsPath}/0_2_UBM_TotalVariability`;
@@ -11,7 +11,7 @@ const lblPath = `${ivectorsPath}/lbl`;
 const gmmPath = `${ivectorsPath}/gmm`;
 
 const cleanAndRegenerateGMM = function () {
-  return new PromiseB((resolve) => {
+  return new BluebirdPromise((resolve) => {
     rimraf(gmmPath)
       .then(() => fs.mkdirAsync(gmmPath))
       .finally(() => resolve());
@@ -19,7 +19,7 @@ const cleanAndRegenerateGMM = function () {
 };
 
 const cleanAndRegenerateTV = function () {
-  return new PromiseB((resolve) => {
+  return new BluebirdPromise((resolve) => {
     rimraf(`${ivectorsPath}/mat`)
       .then(() => fs.mkdirAsync(`${ivectorsPath}/mat`))
       .then(() => resolve());
@@ -37,14 +37,16 @@ export default Ember.Component.extend({
         console.log('UBM');
         this.set('isUBMProcess', true);
         let command = `${contextPath}/TrainWorld`;
-        let config = `--config ${contextPath}/cfg/TrainWorld.cfg`;
-        let input = `--inputFeatureFilename ${ivectorsPath}/data.lst`;
-        let filePath = `--featureFilesPath ${prmPath}/`;
-        let labelPath = `--labelFilesPath ${lblPath}`;
-        let mixturesPath = `--mixtureFilesPath ${gmmPath}/`;
-        let paths = `${filePath} ${mixturesPath} ${labelPath}`;
+        let options = [
+          `--config ${contextPath}/cfg/TrainWorld.cfg`,
+          `--inputFeatureFilename ${ivectorsPath}/data.lst`,
+          `--featureFilesPath ${prmPath}/`,
+          `--labelFilesPath ${lblPath}`,
+          `--mixtureFilesPath ${gmmPath}/`
+        ];
 
-        let execute = `${command} ${config} ${input} ${paths}`;
+        let execute = `${command} ${options.join(' ')}`;
+        console.log(execute);
         exec(execute, (error, stdout, stderr) => {
           if (stderr) {
             console.log(`stderr: ${stderr}`);
@@ -65,15 +67,16 @@ export default Ember.Component.extend({
         console.log('TotalVariability');
         this.set('isTVProcess', true);
         let command = `${contextPath}/TotalVariability`;
-        let config = `--config ${contextPath}/cfg/TotalVariability_fast.cfg`;
-        let filePath = `--featureFilesPath ${prmPath}/`;
-        let labelPath = `--labelFilesPath ${lblPath}/`;
-        let mixturesPath = `--mixtureFilesPath ${gmmPath}/`;
-        let matrixPath = `--matrixFilesPath ${ivectorsPath}/mat/`;
-        let ndx = `--ndxFilename ${contextPath}/totalvariability.ndx`;
-        let paths = `${filePath} ${labelPath} ${mixturesPath} ${matrixPath}`;
+        let options = [
+          `--config ${contextPath}/cfg/TotalVariability_fast.cfg`,
+          `--featureFilesPath ${prmPath}/`,
+          `--labelFilesPath ${lblPath}/`,
+          `--mixtureFilesPath ${gmmPath}/`,
+          `--matrixFilesPath ${ivectorsPath}/mat/`,
+          `--ndxFilename ${contextPath}/totalvariability.ndx`
+        ];
 
-        let execute = `${command} ${config} ${ndx} ${paths}`;
+        let execute = `${command} ${options.join(' ')}`;
         exec(execute, (error, stdout, stderr) => {
           if (stderr) {
             console.log(`stderr: ${stderr}`);

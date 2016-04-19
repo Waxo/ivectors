@@ -56,7 +56,7 @@ export default Ember.Component.extend({
               let filename = `${className}-${pad(index++, 5)}`;
               ndx += `${filename} ${line}` + '\n';
               plda += `${filename} `;
-              trainModel += `${className} ${filename}` + '\n';
+              trainModel += `${filename} ${filename}` + '\n';
             }
           });
           fs.writeFileSync(`${ivectorsPath}/Plda.ndx`, plda);
@@ -74,14 +74,15 @@ export default Ember.Component.extend({
         console.log('Extractor');
         this.set('isExtractProcess', true);
         let command = `${contextPath}/IvExtractor`;
-        let options = [];
-        options.push(`--config ${contextPath}/cfg/ivExtractor_fast.cfg`);
-        options.push(`--featureFilesPath ${prmPath}/`);
-        options.push(`--labelFilesPath ${lblPath}/`);
-        options.push(`--mixtureFilesPath ${gmmPath}/`);
-        options.push(`--matrixFilesPath ${matrixPath}/`);
-        options.push(`--saveVectorFilesPath ${iv}/raw/`);
-        options.push(`--targetIdList ${contextPath}/ivExtractor.ndx`);
+        let options = [
+          `--config ${contextPath}/cfg/ivExtractor_fast.cfg`,
+          `--featureFilesPath ${prmPath}/`,
+          `--labelFilesPath ${lblPath}/`,
+          `--mixtureFilesPath ${gmmPath}/`,
+          `--matrixFilesPath ${matrixPath}/`,
+          `--saveVectorFilesPath ${iv}/raw/`,
+          `--targetIdList ${contextPath}/ivExtractor.ndx`
+        ];
 
         let execute = `${command} ${options.join(' ')}`;
         exec(execute, (error, stdout, stderr) => {

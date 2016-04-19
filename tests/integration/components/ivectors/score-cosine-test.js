@@ -6,7 +6,7 @@ moduleForComponent('ivectors/score-cosine', 'Integration | Component | ivectors/
 });
 
 test('it renders', function(assert) {
-  // Set any properties with this.set('myProperty', 'value');
+  // Set any properties with this.set('myProperty', 'sum');
   // Handle any actions with this.on('myAction', function(val) { ... });
 
   this.render(hbs`{{ivectors/score-cosine}}`);

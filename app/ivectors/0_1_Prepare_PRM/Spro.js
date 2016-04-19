@@ -96,7 +96,6 @@ let SPro = Ember.Object.extend({
       });
     });
     this.set('isDone', true);
-    console.log('end');
   }
 });
 

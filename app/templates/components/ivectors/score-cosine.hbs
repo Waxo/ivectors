@@ -1,3 +1,20 @@
-<button {{action 'ScoreCosine'}}>Go</button>
+<button class="ui button" {{action 'scoreCosine'}}>Go</button>
+<button class="ui button" {{action 'showMean'}}>Mean</button>
+<button class="ui button" {{action 'showMeanMatch'}}>Mean Match</button>
+<button class="ui button" {{action 'parse'}}>Parse</button>
+
+<h2 class="ui dividing header">Results</h2>
+<div class="ui two column stackable grid container">
+  {{#each-in results as |testVector res|}}
+    <div class="ui column">
+      <h4 class="ui header">{{testVector}}</h4>
+      <ul>
+        {{#each-in res as |key value|}}
+          <li>{{key}} : {{value}}</li>
+        {{/each-in}}
+      </ul>
+    </div>
+  {{/each-in}}
+</div>
 
 {{yield}}

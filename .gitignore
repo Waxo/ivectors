@@ -6,6 +6,7 @@
 /app/ivectors/iv
 /app/ivectors/Plda.ndx
 /app/ivectors/TrainModel.ndx
+/app/ivectors/matWCCN.matx
 /app/ivectors/0_1_Prepare_PRM/input
 /app/ivectors/0_2_UBM_TotalVariability/totalvariability.ndx
 /app/ivectors/0_3_Extract_Classes/ivExtractor.ndx
@@ -16,7 +17,6 @@
 /app/ivectors/1_1_Wav_to_ivectors/prm
 /app/ivectors/1_1_Wav_to_ivectors/ivExtractor.ndx
 /app/ivectors/2_2_WCCN/scores_WCCN_Cosine.txt
-/app/ivectors/matWCCN.matx
 /app/ivectors/2_2_WCCN/ivTest.ndx
 # See http://help.github.com/ignore-files/ for more about ignoring files.
 
