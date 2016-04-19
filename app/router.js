@@ -12,7 +12,8 @@ Router.map(function() {
     this.route('extract-classes');
     this.route('wav-to-ivectors');
     this.route('score');
-    this.route('learn-common-UBM');
+    this.route('learn-common-ubm');
+    this.route('learn-dependent-ubm');
   });
 });
 

@@ -7,6 +7,7 @@
 /app/ivectors/Plda.ndx
 /app/ivectors/TrainModel.ndx
 /app/ivectors/matWCCN.matx
+/app/ivectors/dependent
 /app/ivectors/0_1_Prepare_PRM/input
 /app/ivectors/0_2_UBM_TotalVariability/totalvariability.ndx
 /app/ivectors/0_3_Extract_Classes/ivExtractor.ndx
