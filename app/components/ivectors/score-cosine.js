@@ -123,11 +123,6 @@ export default Ember.Component.extend({
           }
           this.set('results', res);
         });
-    },
-
-    parse() {
-      parseResults(`${contextPath}/scores_WCCN_Cosine.txt`)
-        .then((data)=>console.log(data));
     }
   }
 

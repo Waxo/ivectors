@@ -1,7 +1,7 @@
 <div class="ui steps">
   <div class="step link {{if isUBMDone 'completed disabled' 'active'}}
     {{if isUBMProcess 'disabled'}}"
-    {{action 'TrainUBM'}}>
+    {{action 'trainUBM'}}>
     <i class="fa {{if isUBMProcess 'refresh fa-spin' 'fa-bullhorn'}} icon"></i>
     <div class="content">
       <div class="title">UBM</div>
@@ -11,7 +11,7 @@
   <div class="step link {{if isUBMDone '' 'disabled'}}
     {{if isTVProcess 'disabled'}}
     {{if isTVDone 'completed disabled' 'active'}}"
-    {{action 'TrainTotalVariability'}}>
+    {{action 'trainTotalVariability'}}>
     <i class="fa {{if isTVProcess 'refresh fa-spin' 'fa-area-chart'}} icon"></i>
     <div class="content">
       <div class="title">TotalVariability</div>

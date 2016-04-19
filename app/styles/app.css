@@ -1,3 +1,7 @@
 #padding-container.main.container {
   padding: 2em 0 7em;
 }
+
+.ui.sidebar {
+  overflow: visible !important;
+}

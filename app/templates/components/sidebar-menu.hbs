@@ -1,31 +1,41 @@
-{{#ui-sidebar class='vertical inverted menu visible thin'}}
+{{#ui-sidebar class='vertical menu visible'}}
   <div class="item">
     {{#link-to 'index'}}arm-tools{{/link-to}}
   </div>
   <div class="item">
-    <div class="header">i-vectors</div>
+    <div class="header">I-Vectors</div>
     <div class="menu">
-      {{#link-to 'ivectors.prepare-prm' class='item'}}
-        Wav to PRMs
-      {{/link-to}}
-      {{#link-to 'ivectors.ubm-tv' class='item'}}
-        UBM TotalVariability
-      {{/link-to}}
-      {{#link-to 'ivectors.extract-classes' class='item'}}
-        Extract Classes
-      {{/link-to}}
-      {{#link-to 'ivectors.wav-to-ivectors' class='item'}}
-        Wav test prepare
-      {{/link-to}}
-      {{#link-to 'ivectors.score' class='item'}}Score ivectors{{/link-to}}
-    </div>
-  </div>
-  <div class="item">
-    <div class="header">Automatic</div>
-    <div class="menu">
-      {{#link-to 'ivectors.learn-common-UBM' class='item'}}
-        Common UBM
-      {{/link-to}}
+      {{#ui-dropdown class="item"}}
+        <i class="dropdown icon"></i>Training
+        <div class="menu">
+          {{#link-to 'ivectors.prepare-prm' class='item'}}
+            Wav to PRMs
+          {{/link-to}}
+          {{#link-to 'ivectors.ubm-tv' class='item'}}
+            UBM TotalVariability
+          {{/link-to}}
+          {{#link-to 'ivectors.extract-classes' class='item'}}
+            Extract Classes
+          {{/link-to}}
+        </div>
+      {{/ui-dropdown}}
+      {{#ui-dropdown class="item"}}
+        <i class="dropdown icon"></i>Automatic Training
+        <div class="menu">
+          {{#link-to 'ivectors.learn-common-UBM' class='item'}}
+            Common UBM
+          {{/link-to}}
+        </div>
+      {{/ui-dropdown}}
+      {{#ui-dropdown class="item"}}
+        <i class="dropdown icon"></i>Scoring
+        <div class="menu">
+          {{#link-to 'ivectors.wav-to-ivectors' class='item'}}
+            Wav test prepare
+          {{/link-to}}
+          {{#link-to 'ivectors.score' class='item'}}Score WCCN{{/link-to}}
+        </div>
+      {{/ui-dropdown}}
     </div>
   </div>
 {{/ui-sidebar}}

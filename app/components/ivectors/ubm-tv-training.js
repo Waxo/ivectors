@@ -32,7 +32,7 @@ export default Ember.Component.extend({
   isTVDone: false,
   isTVProcess: false,
   actions: {
-    TrainUBM() {
+    trainUBM() {
       cleanAndRegenerateGMM().then(() => {
         console.log('UBM');
         this.set('isUBMProcess', true);
@@ -60,7 +60,7 @@ export default Ember.Component.extend({
       });
     },
 
-    TrainTotalVariability() {
+    trainTotalVariability() {
       fs.createReadStream(`${ivectorsPath}/data.lst`)
         .pipe(fs.createWriteStream(`${contextPath}/totalvariability.ndx`));
       cleanAndRegenerateTV().then(() => {

@@ -16,7 +16,7 @@ export default Ember.Component.extend({
   isFeaturesProcess: false,
   isFeaturesDone: false,
   actions: {
-    PrepareFiles() {
+    prepareFiles() {
       console.log('Prepare');
       this.set('isPrepareProcess', true);
 
@@ -35,7 +35,7 @@ export default Ember.Component.extend({
       });
     },
 
-    NormEnergy() {
+    normEnergy() {
       console.log('Energy');
       this.set('isEnergyProcess', true);
       let command = `${contextPath}/NormFeat`;
@@ -58,7 +58,7 @@ export default Ember.Component.extend({
       });
     },
 
-    NormFeatures() {
+    normFeatures() {
       console.log('Features');
       this.set('isFeaturesProcess', true);
       let command = `${contextPath}/NormFeat`;

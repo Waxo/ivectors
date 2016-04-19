@@ -35,7 +35,7 @@ export default Ember.Component.extend({
   isExtractDone: false,
   isExtractProcess: false,
   actions: {
-    PrepareExtractor() {
+    prepareExtractor() {
       this.set('isPrepareProcess', true);
       fs.readFileAsync(`${ivectorsPath}/data.lst`)
         .then(data => {
@@ -69,7 +69,7 @@ export default Ember.Component.extend({
         });
     },
 
-    ExtractIVectors() {
+    extractIVectors() {
       cleanAndRegenerateGMM().then(() => {
         console.log('Extractor');
         this.set('isExtractProcess', true);
