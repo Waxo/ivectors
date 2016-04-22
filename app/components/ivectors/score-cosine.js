@@ -123,7 +123,31 @@ export default Ember.Component.extend({
           }
           this.set('results', res);
         });
+    },
+
+    showPercentMatch() {
+      let res = {};
+      parseResults(`${contextPath}/scores_WCCN_Cosine.txt`)
+        .then(scores => {
+          for (let ivTest in scores) {
+            if (scores.hasOwnProperty(ivTest)) {
+              res[ivTest] = {};
+              let sortable = [];
+              for (let cluster in scores[ivTest]) {
+                if (scores[ivTest].hasOwnProperty(cluster)) {
+                  sortable.push([cluster,
+                    (scores[ivTest][cluster].numberOfMatches /
+                    scores[ivTest][cluster].scores.length) * 100]);
+                }
+              }
+              sortable.sort((a, b) => b[1] - a[1]);
+              for (let i = 0; i < sortable.length; i++) {
+                res[ivTest][sortable[i][0]] = Math.floor(sortable[i][1] * 100) / 100 + ' %';
+              }
+            }
+          }
+          this.set('results', res);
+        });
     }
   }
-
 });

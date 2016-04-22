@@ -211,7 +211,9 @@ export default Ember.Component.extend({
               if (currentClass !== className) {
                 currentClass = className;
                 index = 0;
-                plda += '\n';
+                if (plda) {
+                  plda += '\n';
+                }
               }
               let filename = `${className}-${pad(index++, 5)}`;
               ndx += `${filename} ${line}` + '\n';
