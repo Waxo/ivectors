@@ -1,8 +1,8 @@
 import Ember from 'ember';
 const exec = require('child_process').exec;
-const PromiseB = require('bluebird');
-const fs = PromiseB.promisifyAll(require('fs'));
-const rimraf = PromiseB.promisify(require('rimraf'));
+const BluebirdPromise = require('bluebird');
+const fs = BluebirdPromise.promisifyAll(require('fs'));
+const rimraf = BluebirdPromise.promisify(require('rimraf'));
 const wavFileInfo = require('wav-file-info');
 
 const ivectorsPath = `${process.cwd()}/app/ivectors`;
@@ -15,7 +15,7 @@ const prmPath = `${contextPath}/prm`;
 const ivPath = `${contextPath}/iv`;
 
 const clean = function () {
-  return new PromiseB((resolve) => {
+  return new BluebirdPromise((resolve) => {
     rimraf(prmPath)
       .then(() => rimraf(ivPath))
       .then(() => rimraf(lblPath))
@@ -25,7 +25,7 @@ const clean = function () {
 };
 
 const cleanAndRegenerate = function () {
-  return new PromiseB((resolve) => {
+  return new BluebirdPromise((resolve) => {
     clean()
       .then(() => fs.mkdirAsync(prmPath))
       .then(() => fs.mkdirAsync(ivPath))
@@ -60,7 +60,7 @@ const energy = function () {
   options.push(`--featureFilesPath ${prmPath}/`);
 
   let execute = `${command} ${options.join(' ')}`;
-  return new PromiseB((resolve) => {
+  return new BluebirdPromise((resolve) => {
     exec(execute, (error, stdout, stderr) => {
       if (stderr) {
         console.log(`stderr: ${stderr}`);
@@ -83,7 +83,7 @@ const normalize = function () {
   options.push(`--labelFilesPath ${lblPath}/`);
   let execute = `${command} ${options.join(' ')}`;
 
-  return new PromiseB((resolve) => {
+  return new BluebirdPromise((resolve) => {
     exec(execute, (error, stdout, stderr) => {
       if (stderr) {
         console.log(`stderr: ${stderr}`);
