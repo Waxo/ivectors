@@ -9,7 +9,7 @@ const ivectorsPath = `${process.cwd()}/app/ivectors`;
 const prmPath = `${ivectorsPath}/prm`;
 const lblPath = `${ivectorsPath}/lbl`;
 
-const dependentPath = `${ivectorsPath}/dependent`;
+const dependentPath = `${ivectorsPath}/dependent/classes`;
 
 const preparePath = `${ivectorsPath}/0_1_Prepare_PRM`;
 const UBMPath = `${ivectorsPath}/0_2_UBM_TotalVariability`;

@@ -45,18 +45,19 @@ export default Ember.Component.extend({
     scoreCosine() {
       console.log('Cosine');
       const command = `${ivectorsPath}/IvTest`;
-      let options = [];
-      options.push(`--config ${contextPath}/cfg/ivTest_WCCN_Cosine.cfg`);
-      options.push(`--testVectorFilesPath ${ivectorsPath}/iv/raw`);
-      options.push(`--loadVectorFilesPath ${ivectorsPath}/iv/raw`);
-      options.push(`--matrixFilesPath ${matrixPath}`);
-      options.push(`--outputFilename ${contextPath}/scores_WCCN_Cosine.txt`);
-      options.push(`--backgroundNdxFilename ${ivectorsPath}/Plda.ndx`);
-      options.push(`--targetIdList ${ivectorsPath}/TrainModel.ndx`);
-      options.push(`--ndxFilename ${contextPath}/ivTest.ndx`);
+      let options = [
+        `--config ${contextPath}/cfg/ivTest_WCCN_Cosine.cfg`,
+        `--testVectorFilesPath ${ivectorsPath}/iv/raw`,
+        `--loadVectorFilesPath ${ivectorsPath}/iv/raw`,
+        `--matrixFilesPath ${matrixPath}`,
+        `--outputFilename ${contextPath}/scores_WCCN_Cosine.txt`,
+        `--backgroundNdxFilename ${ivectorsPath}/Plda.ndx`,
+        `--targetIdList ${ivectorsPath}/TrainModel.ndx`,
+        `--ndxFilename ${contextPath}/ivTest.ndx`
+      ];
 
       let execute = `${command} ${options.join(' ')}`;
-      console.log(`execute: ${execute}`);
+
       createIVTest().then(() => {
         exec(execute, (error, stdout, stderr) => {
           if (stderr) {
@@ -142,12 +143,17 @@ export default Ember.Component.extend({
               }
               sortable.sort((a, b) => b[1] - a[1]);
               for (let i = 0; i < sortable.length; i++) {
-                res[ivTest][sortable[i][0]] = Math.floor(sortable[i][1] * 100) / 100 + ' %';
+                res[ivTest][sortable[i][0]] =
+                  Math.floor(sortable[i][1] * 100) / 100 + ' %';
               }
             }
           }
           this.set('results', res);
         });
+    },
+
+    scoreCosineDependent() {
+
     }
   }
 });

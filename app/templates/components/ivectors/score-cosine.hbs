@@ -1,7 +1,16 @@
-<button class="ui button" {{action 'scoreCosine'}}>Go</button>
-<button class="ui button" {{action 'showMean'}}>Mean</button>
-<button class="ui button" {{action 'showMeanMatch'}}>Mean Match</button>
-<button class="ui button" {{action 'showPercentMatch'}}>Percent Match</button>
+<div class="ui horizontal divided list">
+  <div class="item">
+    <button class="ui button" {{action 'scoreCosine'}}>Common</button>
+    <button class="ui button" {{action 'showMean'}}>Mean</button>
+    <button class="ui button" {{action 'showMeanMatch'}}>Mean Match</button>
+    <button class="ui button" {{action 'showPercentMatch'}}>Percent Match
+    </button>
+  </div>
+  <div class="item">
+    <button class="ui button" {{action 'scoreCosineDependent'}}>Dependent</button>
+
+  </div>
+</div>
 
 <h2 class="ui dividing header">Results</h2>
 <div class="ui two column stackable grid container">
