@@ -5,8 +5,7 @@ export default function parseResults(path) {
   return new BluebirdPromise(resolve => {
     fs.readFileAsync(path)
       .then(data => {
-        data = data.toString();
-        data = data.split('\n');
+        data = data.toString().split('\n');
         let parser = {};
         data.forEach(line => {
           if (line) {
