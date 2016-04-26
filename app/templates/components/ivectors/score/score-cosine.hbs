@@ -26,18 +26,18 @@
 
 <h2 class="ui dividing header">Results</h2>
 {{#unless bestMatches}}
-<div class="ui two column stackable grid container">
-  {{#each-in results as |testVector res|}}
-    <div class="ui column">
-      <h4 class="ui header">{{testVector}}</h4>
-      <ul>
-        {{#each-in res as |key value|}}
-          <li>{{key}} : {{value}}</li>
-        {{/each-in}}
-      </ul>
-    </div>
-  {{/each-in}}
-</div>
+  <div class="ui two column stackable grid container">
+    {{#each-in results as |testVector res|}}
+      <div class="ui column">
+        <h4 class="ui header">{{testVector}}</h4>
+        <ul>
+          {{#each-in res as |key value|}}
+            <li>{{key}} : {{value}}</li>
+          {{/each-in}}
+        </ul>
+      </div>
+    {{/each-in}}
+  </div>
 {{/unless}}
 {{#if bestMatches}}
   <div class="ui two column stackable grid container">
