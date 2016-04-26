@@ -165,8 +165,33 @@ const percentMatch = scores => {
   return res;
 };
 
+const bestMatches = (scores, maxItem) => {
+  let res = {};
+
+  for (let ivTest in scores) {
+    if (scores.hasOwnProperty(ivTest)) {
+      res[ivTest] = {};
+      let sortable = [];
+      for (let cluster in scores[ivTest]) {
+        if (scores[ivTest].hasOwnProperty(cluster)) {
+          for (let i = 0; i < scores[ivTest][cluster].scores.length; i++) {
+            sortable.push([cluster, scores[ivTest][cluster].scores[i]]);
+          }
+        }
+      }
+      sortable.sort((a, b) => b[1] - a[1]);
+      for (let i = 0; i < sortable.length; i++) {
+        res[ivTest] = sortable.slice(0, maxItem);
+      }
+    }
+  }
+
+  return res;
+};
+
 export default Ember.Component.extend({
   results: {},
+  bestMatches: false,
   actions: {
     scoreCosine() {
       console.log('Cosine');
@@ -199,17 +224,20 @@ export default Ember.Component.extend({
     },
 
     showMean() {
+      this.set('bestMatches', false);
       parseResults(`${contextPath}/scores_WCCN_Cosine.txt`)
         .then(scores => this.set('results', computeMean(scores)));
 
     },
 
     showMeanMatch() {
+      this.set('bestMatches', false);
       parseResults(`${contextPath}/scores_WCCN_Cosine.txt`)
         .then((scores) => this.set('results', computeMeanMatch(scores)));
     },
 
     showPercentMatch() {
+      this.set('bestMatches', false);
       parseResults(`${contextPath}/scores_WCCN_Cosine.txt`)
         .then((scores) => this.set('results', percentMatch(scores)));
     },
@@ -261,18 +289,27 @@ export default Ember.Component.extend({
     },
 
     meanDependent() {
+      this.set('bestMatches', false);
       parseResults(fileScoreCosine)
         .then((scores) => this.set('results', computeMean(scores)));
     },
 
     meanMatchDependent() {
+      this.set('bestMatches', false);
       parseResults(fileScoreCosine)
         .then((scores) => this.set('results', computeMeanMatch(scores)));
     },
 
     percentMatchDependent() {
+      this.set('bestMatches', false);
       parseResults(fileScoreCosine)
         .then((scores) => this.set('results', percentMatch(scores)));
+    },
+
+    bestMatchesDependent() {
+      this.set('bestMatches', true);
+      parseResults(fileScoreCosine)
+        .then((scores) => this.set('results', bestMatches(scores, 10)));
     }
   }
 });
