@@ -17,6 +17,9 @@ Router.map(function() {
 
     this.route('score', function() {
       this.route('cosine');
+      this.route('efr');
+      this.route('sphnorm');
+      this.route('plda-norm');
     });
   });
 });
