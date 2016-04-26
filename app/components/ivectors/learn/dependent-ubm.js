@@ -204,9 +204,11 @@ export default Ember.Component.extend({
               `--labelFilesPath ${lblPath}/`,
               `--mixtureFilesPath ${dependentPath}/${cluster}/gmm/`
             ];
+
             let execute = `${command} ${options.join(' ')}`;
             executeUBM.push(execAsync(execute));
           });
+
           BluebirdPromise.all(executeUBM)
             .then(() => {
               this.set('isUBMProcess', false);

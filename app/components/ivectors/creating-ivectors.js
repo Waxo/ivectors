@@ -54,10 +54,11 @@ const writeDataAndLbl = function (files) {
 const energy = function () {
   console.log('Energy');
   const command = `${commandPathPRM}/NormFeat`;
-  let options = [];
-  options.push(`--config ${contextPath}/cfg/NormFeat_energy.cfg`);
-  options.push(`--inputFeatureFilename ${contextPath}/input.lst`);
-  options.push(`--featureFilesPath ${prmPath}/`);
+  let options = [
+    `--config ${contextPath}/cfg/NormFeat_energy.cfg`,
+    `--inputFeatureFilename ${contextPath}/input.lst`,
+    `--featureFilesPath ${prmPath}/`
+  ];
 
   let execute = `${command} ${options.join(' ')}`;
   return new BluebirdPromise((resolve) => {
@@ -76,11 +77,13 @@ const energy = function () {
 const normalize = function () {
   console.log('Normalize');
   let command = `${commandPathPRM}/NormFeat`;
-  let options = [];
-  options.push(`--config ${contextPath}/cfg/NormFeat.cfg`);
-  options.push(`--inputFeatureFilename ${contextPath}/input.lst`);
-  options.push(`--featureFilesPath ${prmPath}/`);
-  options.push(`--labelFilesPath ${lblPath}/`);
+  let options = [
+    `--config ${contextPath}/cfg/NormFeat.cfg`,
+    `--inputFeatureFilename ${contextPath}/input.lst`,
+    `--featureFilesPath ${prmPath}/`,
+    `--labelFilesPath ${lblPath}/`
+  ];
+
   let execute = `${command} ${options.join(' ')}`;
 
   return new BluebirdPromise((resolve) => {

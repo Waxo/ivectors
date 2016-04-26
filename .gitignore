@@ -9,6 +9,7 @@
 /app/ivectors/matWCCN.matx
 /app/ivectors/dependent
 /app/ivectors/0_1_Prepare_PRM/input
+/app/ivectors/0_1_Prepare_PRM/input.tar.7z
 /app/ivectors/0_2_UBM_TotalVariability/totalvariability.ndx
 /app/ivectors/0_3_Extract_Classes/ivExtractor.ndx
 /app/ivectors/1_1_Wav_to_ivectors/input.lst

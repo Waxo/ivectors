@@ -12,6 +12,8 @@ const contextPath = `${ivectorsPath}/2_2_WCCN`;
 const matrixPath = `${ivectorsPath}/mat`;
 const scoreDependentPath = `${dependentPath}/input/scores/WCCN_cos`;
 
+const fileScoreCosine = `${scoreDependentPath}/all_cos.txt`;
+
 let inputClasses = '';
 
 const createIVTest = () => {
@@ -171,8 +173,8 @@ export default Ember.Component.extend({
       const command = `${ivectorsPath}/IvTest`;
       let options = [
         `--config ${contextPath}/cfg/ivTest_WCCN_Cosine.cfg`,
-        `--testVectorFilesPath ${ivectorsPath}/iv/raw`,
-        `--loadVectorFilesPath ${ivectorsPath}/iv/raw`,
+        `--testVectorFilesPath ${ivectorsPath}/iv/raw/`,
+        `--loadVectorFilesPath ${ivectorsPath}/iv/raw/`,
         `--matrixFilesPath ${matrixPath}`,
         `--outputFilename ${contextPath}/scores_WCCN_Cosine.txt`,
         `--backgroundNdxFilename ${ivectorsPath}/Plda.ndx`,
@@ -253,26 +255,24 @@ export default Ember.Component.extend({
           readers.forEach(file => {
             allResults += file.toString();
           });
-          return fs.writeFileAsync(`${scoreDependentPath}/all.txt`, allResults);
+          return fs.writeFileAsync(fileScoreCosine, allResults);
         })
         .then(() => console.log('All done !'));
     },
 
     meanDependent() {
-      parseResults(`${scoreDependentPath}/all.txt`)
+      parseResults(fileScoreCosine)
         .then((scores) => this.set('results', computeMean(scores)));
     },
 
     meanMatchDependent() {
-      parseResults(`${scoreDependentPath}/all.txt`)
+      parseResults(fileScoreCosine)
         .then((scores) => this.set('results', computeMeanMatch(scores)));
     },
 
     percentMatchDependent() {
-      parseResults(`${scoreDependentPath}/all.txt`)
+      parseResults(fileScoreCosine)
         .then((scores) => this.set('results', percentMatch(scores)));
     }
   }
-
-})
-;
+});

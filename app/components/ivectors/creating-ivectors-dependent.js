@@ -71,6 +71,7 @@ const energy = function () {
       if (error !== null) {
         console.log(`exec error: ${error}`);
       }
+
       resolve();
     });
   });
@@ -81,7 +82,7 @@ const normalize = function () {
   let command = `${commandPathPRM}/NormFeat`;
   let options = [
     `--config ${extractorPath}/cfg/NormFeat.cfg`,
-    `--inputFeatureFilename ${extractorPath}/input.lst`,
+    `--inputFeatureFilename ${dependentPath}/input.lst`,
     `--featureFilesPath ${prmPath}/`,
     `--labelFilesPath ${lblPath}/`
   ];
@@ -95,6 +96,7 @@ const normalize = function () {
       if (error !== null) {
         console.log(`exec error: ${error}`);
       }
+
       resolve();
     });
   });
@@ -162,7 +164,7 @@ export default Ember.Component.extend({
 
     prepareIVectorsExtractor() {
       this.set('isExtractProcess', true);
-      fs.readFileAsync(`${extractorPath}/input.lst`)
+      fs.readFileAsync(`${dependentPath}/input.lst`)
         .then(data => {
           data = data.toString().split('\n');
           let ndx = '';
@@ -193,6 +195,7 @@ export default Ember.Component.extend({
           `--saveVectorFilesPath ${ivPath}/${cluster}/`,
           `--targetIdList ${dependentPath}/ivExtractor.ndx`
         ];
+
         let execute = `${command} ${options.join(' ')}`;
         executeIV.push(execAsync(execute));
       });
