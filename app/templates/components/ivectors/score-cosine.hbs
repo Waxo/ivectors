@@ -18,10 +18,14 @@
     <button class="ui button" {{action 'percentMatchDependent'}}>
       Percent Match
     </button>
+    <button class="ui button" {{action 'bestMatchesDependent'}}>
+      Best Matches
+    </button>
   </div>
 </div>
 
 <h2 class="ui dividing header">Results</h2>
+{{#unless bestMatches}}
 <div class="ui two column stackable grid container">
   {{#each-in results as |testVector res|}}
     <div class="ui column">
@@ -34,5 +38,20 @@
     </div>
   {{/each-in}}
 </div>
+{{/unless}}
+{{#if bestMatches}}
+  <div class="ui two column stackable grid container">
+    {{#each-in results as |testVector res|}}
+      <div class="ui column">
+        <h4 class="ui header">{{testVector}}</h4>
+        <ul>
+          {{#each-in res as |key value|}}
+            <li>{{value.[0]}} : {{value.[1]}}</li>
+          {{/each-in}}
+        </ul>
+      </div>
+    {{/each-in}}
+  </div>
+{{/if}}
 
 {{yield}}
