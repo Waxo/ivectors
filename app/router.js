@@ -14,6 +14,7 @@ Router.map(function() {
     this.route('score');
     this.route('learn-common-ubm');
     this.route('learn-dependent-ubm');
+    this.route('cleaner');
   });
 });
 
