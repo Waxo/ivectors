@@ -106,7 +106,7 @@ export default Ember.Component.extend({
         }
         this.set('isEnergyProcess', false);
         this.set('isEnergyDone', true);
-        this.send('normFeatures');
+        setTimeout(() => this.send('normFeatures'), 1000);
       });
     },
 

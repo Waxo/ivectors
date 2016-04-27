@@ -1,26 +1,33 @@
-<div class="ui horizontal divided list">
+<div class="ui list">
   <div class="item">
-    <button class="ui button" {{action 'scoreCosine'}}>Common</button>
-    <button class="ui button" {{action 'showMean'}}>Mean</button>
-    <button class="ui button" {{action 'showMeanMatch'}}>Mean Match</button>
-    <button class="ui button" {{action 'showPercentMatch'}}>
-      Percent Match
-    </button>
+    <div class="ui buttons basic">
+      <button class="ui button" {{action 'scoreCosine'}}>Common</button>
+      <button class="ui button" {{action 'mean'}}>Mean</button>
+      <button class="ui button" {{action 'meanMatch'}}>Mean Match</button>
+      <button class="ui button" {{action 'percentMatch'}}>
+        Percent Match
+      </button>
+      <button class="ui button" {{action 'bestMatches'}}>
+        Best Matches
+      </button>
+    </div>
   </div>
   <div class="item">
-    <button class="ui button" {{action 'scoreCosineDependent'}}>
-      Dependent
-    </button>
-    <button class="ui button" {{action 'meanDependent'}}>Mean</button>
-    <button class="ui button" {{action 'meanMatchDependent'}}>
-      Mean Match
-    </button>
-    <button class="ui button" {{action 'percentMatchDependent'}}>
-      Percent Match
-    </button>
-    <button class="ui button" {{action 'bestMatchesDependent'}}>
-      Best Matches
-    </button>
+    <div class="ui buttons basic">
+      <button class="ui button" {{action 'scoreCosineDependent'}}>
+        Dependent
+      </button>
+      <button class="ui button" {{action 'meanDependent'}}>Mean</button>
+      <button class="ui button" {{action 'meanMatchDependent'}}>
+        Mean Match
+      </button>
+      <button class="ui button" {{action 'percentMatchDependent'}}>
+        Percent Match
+      </button>
+      <button class="ui button" {{action 'bestMatchesDependent'}}>
+        Best Matches
+      </button>
+    </div>
   </div>
 </div>
 

@@ -4,6 +4,7 @@
 /app/ivectors/gmm
 /app/ivectors/mat
 /app/ivectors/iv
+/app/ivectors/all.lst
 /app/ivectors/Plda.ndx
 /app/ivectors/TrainModel.ndx
 /app/ivectors/matWCCN.matx
@@ -18,8 +19,14 @@
 /app/ivectors/1_1_Wav_to_ivectors/input
 /app/ivectors/1_1_Wav_to_ivectors/prm
 /app/ivectors/1_1_Wav_to_ivectors/ivExtractor.ndx
+/app/ivectors/2_1_PLDA_Norm/scores_Plda_Norm.txt
+/app/ivectors/2_1_PLDA_Norm/ivTest.ndx
 /app/ivectors/2_2_WCCN/scores_WCCN_Cosine.txt
 /app/ivectors/2_2_WCCN/ivTest.ndx
+/app/ivectors/2_4_SphNorm_PLDA/ivTest.ndx
+/app/ivectors/2_4_SphNorm_PLDA/scores_SphNorm_Plda.txt
+/app/ivectors/2_3_Mahalanobis/scores_EFR_Mahalanobis.txt
+/app/ivectors/2_3_Mahalanobis/ivTest.ndx
 # See http://help.github.com/ignore-files/ for more about ignoring files.
 
 # compiled output

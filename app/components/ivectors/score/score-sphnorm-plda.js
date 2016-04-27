@@ -7,15 +7,18 @@ import {
   percentMatch,
   bestMatches
 } from '../../../utils/maths-utils';
+import {createIVTest} from "../../../utils/scores";
 
 const BluebirdPromise = require('bluebird');
 const fs = BluebirdPromise.promisifyAll(require('fs-extra'));
 
 const ivectorsPath = `${process.cwd()}/app/ivectors`;
+const testIVectorsPath = `${ivectorsPath}/1_1_Wav_to_ivectors/iv/raw`;
 const contextPath = `${ivectorsPath}/2_4_SphNorm_PLDA`;
 const dependentPath = `${ivectorsPath}/dependent`;
 const scoreDependentPath = `${dependentPath}/input/scores/SphNorm_PLDA`;
 
+const fileScoreAll = `${contextPath}/scores_SphNorm_Plda.txt`;
 const fileScoreSphNorm = `${scoreDependentPath}/all_sphnorm.txt`;
 
 let inputClasses = [];
@@ -72,6 +75,53 @@ export default Ember.Component.extend({
   results: {},
   bestMatches: false,
   actions: {
+    scoreSphNorm() {
+      console.log('SphNorm Plda');
+      const command = `${ivectorsPath}/IvTest`;
+
+      let options = [
+        `--config ${contextPath}/cfg/ivTest_SphNorm_Plda.cfg`,
+        `--testVectorFilesPath ${ivectorsPath}/iv/raw/`,
+        `--loadVectorFilesPath ${ivectorsPath}/iv/raw/`,
+        `--matrixFilesPath ${ivectorsPath}/mat/`,
+        `--outputFilename ${fileScoreAll}`,
+        `--backgroundNdxFilename ${ivectorsPath}/Plda.ndx`,
+        `--targetIdList ${ivectorsPath}/TrainModel.ndx`,
+        `--ndxFilename ${contextPath}/ivTest.ndx`
+      ];
+
+      let execute = `${command} ${options.join(' ')}`;
+      
+      createIVTest(`${ivectorsPath}/iv/raw`, testIVectorsPath, contextPath)
+        .then(() => execAsync(execute))
+        .then(() => console.log('Score done !'));
+    },
+
+    mean() {
+      this.set('bestMatches', false);
+      parseResults(fileScoreAll)
+        .then(scores => this.set('results', computeMean(scores)));
+
+    },
+
+    meanMatch() {
+      this.set('bestMatches', false);
+      parseResults(fileScoreAll)
+        .then((scores) => this.set('results', computeMeanMatch(scores)));
+    },
+
+    percentMatch() {
+      this.set('bestMatches', false);
+      parseResults(fileScoreAll)
+        .then((scores) => this.set('results', percentMatch(scores)));
+    },
+
+    bestMatches() {
+      this.set('bestMatches', true);
+      parseResults(fileScoreAll)
+        .then((scores) => this.set('results', bestMatches(scores, 10)));
+    },
+
     scoreSphNormDependent() {
       console.log('SphNorm PLDA Dependent');
       prepareClasses()

@@ -1,5 +1,23 @@
-<div class="ui horizontal divided list">
+<div class="ui list">
   <div class="item">
+    <div class="ui buttons basic">
+      <button class="ui button" {{action 'scoreSphNorm'}}>
+        Common
+      </button>
+      <button class="ui button" {{action 'mean'}}>Mean</button>
+      <button class="ui button" {{action 'meanMatch'}}>
+        Mean Match
+      </button>
+      <button class="ui button" {{action 'percentMatch'}}>
+        Percent Match
+      </button>
+      <button class="ui button" {{action 'bestMatches'}}>
+        Best Matches
+      </button>
+    </div>
+  </div>
+  <div class="item">
+    <div class="ui buttons basic">
     <button class="ui button" {{action 'scoreSphNormDependent'}}>
       Dependent
     </button>
@@ -13,6 +31,7 @@
     <button class="ui button" {{action 'bestMatchesDependent'}}>
       Best Matches
     </button>
+      </div>
   </div>
 </div>
 

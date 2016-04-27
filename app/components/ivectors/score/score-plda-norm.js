@@ -7,16 +7,19 @@ import {
   percentMatch,
   bestMatches
 } from '../../../utils/maths-utils';
+import {createIVTest} from "../../../utils/scores";
 
 const BluebirdPromise = require('bluebird');
 const fs = BluebirdPromise.promisifyAll(require('fs-extra'));
 
 const ivectorsPath = `${process.cwd()}/app/ivectors`;
+const testIVectorsPath = `${ivectorsPath}/1_1_Wav_to_ivectors/iv/raw`;
 const contextPath = `${ivectorsPath}/2_1_PLDA_Norm`;
 const dependentPath = `${ivectorsPath}/dependent`;
 const scoreDependentPath = `${dependentPath}/input/scores/PLDA`;
 
-const fileScoreEFR = `${scoreDependentPath}/all_plda.txt`;
+const fileScoreAll = `${contextPath}/scores_Plda_Norm.txt`;
+const fileScorePLDA = `${scoreDependentPath}/all_plda.txt`;
 
 let inputClasses = [];
 
@@ -75,6 +78,30 @@ const prepareClasses = () => {
 const normalize = () => {
   return new BluebirdPromise(resolve => {
     console.log('Normalize');
+    const command = `${contextPath}/IvNorm`;
+    fs.mkdirsAsync(`${ivectorsPath}/iv/lengthNorm`)
+      .then(() => fs.readdirAsync(`${ivectorsPath}/iv/raw`))
+      .then(ivectors => fs.writeFileAsync(`${ivectorsPath}/all.lst`,
+        ivectors.join('\n').replace(/\.y/g, '')))
+      .then(() => {
+        let options = [
+          `--config ${contextPath}/cfg/ivNorm.cfg`,
+          `--saveVectorFilesPath ${ivectorsPath}/iv/lengthNorm/`,
+          `--loadVectorFilesPath ${ivectorsPath}/iv/raw/`,
+          `--matrixFilesPath ${ivectorsPath}/mat/`,
+          `--backgroundNdxFilename ${ivectorsPath}/Plda.ndx`,
+          `--inputVectorFilename ${ivectorsPath}/all.lst`
+        ];
+
+        let execute = `${command} ${options.join(' ')}`;
+        execAsync(execute, true).then(() => resolve());
+      });
+  });
+};
+
+const normalizeDependent = () => {
+  return new BluebirdPromise(resolve => {
+    console.log('Normalize');
     let normIV = [];
     const command = `${contextPath}/IvNorm`;
     inputClasses.forEach(cluster => {
@@ -103,6 +130,23 @@ const normalize = () => {
 const pldaTraining = () => {
   return new BluebirdPromise(resolve => {
     console.log('PLDA Training');
+    const command = `${contextPath}/PLDA`;
+    let options = [
+      `--config ${contextPath}/cfg/Plda.cfg`,
+      `--testVectorFilesPath ${ivectorsPath}/iv/lengthNorm/`,
+      `--loadVectorFilesPath ${ivectorsPath}/iv/lengthNorm/`,
+      `--matrixFilesPath ${ivectorsPath}/mat/`,
+      `--backgroundNdxFilename ${ivectorsPath}/Plda.ndx`
+    ];
+
+    let execute = `${command} ${options.join(' ')}`;
+    execAsync(execute).then(() => setTimeout(() => resolve(), 1000));
+  });
+};
+
+const pldaTrainingDependent = () => {
+  return new BluebirdPromise(resolve => {
+    console.log('PLDA Training');
     let trainPLDA = [];
     const command = `${contextPath}/PLDA`;
     inputClasses.forEach(cluster => {
@@ -118,7 +162,8 @@ const pldaTraining = () => {
       let execute = `${command} ${options.join(' ')}`;
       trainPLDA.push(execAsync(execute, true));
     });
-    BluebirdPromise.all(trainPLDA).then(() => resolve());
+    BluebirdPromise.all(trainPLDA)
+      .then(() => setTimeout(() => resolve(), 1000));
   });
 };
 
@@ -126,12 +171,61 @@ export default Ember.Component.extend({
   results: {},
   bestMatches: false,
   actions: {
+    scorePLDA() {
+      console.log('PLDA');
+
+      const command = `${ivectorsPath}/IvTest`;
+      let options = [
+        `--config ${contextPath}/cfg/ivTest_Plda.cfg`,
+        `--testVectorFilesPath ${ivectorsPath}/iv/raw/`,
+        `--loadVectorFilesPath ${ivectorsPath}/iv/raw/`,
+        `--matrixFilesPath ${ivectorsPath}/mat/`,
+        `--outputFilename ${fileScoreAll}`,
+        `--backgroundNdxFilename ${ivectorsPath}/Plda.ndx`,
+        `--targetIdList ${ivectorsPath}/TrainModel.ndx`,
+        `--ndxFilename ${contextPath}/ivTest.ndx`
+      ];
+
+      let execute = `${command} ${options.join(' ')}`;
+
+      createIVTest(`${ivectorsPath}/iv/raw`, testIVectorsPath, contextPath)
+        .then(() => normalize())
+        .then(() => pldaTraining())
+        .then(() => execAsync(execute, true))
+        .then(() => console.log('Score done !'));
+    },
+
+    mean() {
+      this.set('bestMatches', false);
+      parseResults(fileScoreAll)
+        .then(scores => this.set('results', computeMean(scores)));
+
+    },
+
+    meanMatch() {
+      this.set('bestMatches', false);
+      parseResults(fileScoreAll)
+        .then((scores) => this.set('results', computeMeanMatch(scores)));
+    },
+
+    percentMatch() {
+      this.set('bestMatches', false);
+      parseResults(fileScoreAll)
+        .then((scores) => this.set('results', percentMatch(scores)));
+    },
+
+    bestMatches() {
+      this.set('bestMatches', true);
+      parseResults(fileScoreAll)
+        .then((scores) => this.set('results', bestMatches(scores, 10)));
+    },
+
     scorePLDADependent() {
       console.log('EFR Dependent');
       prepareClasses()
         .then(() => cleanScoresDependent())
-        .then(() => normalize())
-        .then(() => pldaTraining())
+        .then(() => normalizeDependent())
+        .then(() => pldaTrainingDependent())
         .then(() => {
           const command = `${ivectorsPath}/IvTest`;
           let testIV = [];
@@ -169,32 +263,32 @@ export default Ember.Component.extend({
           readers.forEach(file => {
             allResults += file.toString();
           });
-          return fs.writeFileAsync(fileScoreEFR, allResults);
+          return fs.writeFileAsync(fileScorePLDA, allResults);
         })
         .then(() => console.log('All done !'));
     },
 
     meanDependent() {
       this.set('bestMatches', false);
-      parseResults(fileScoreEFR)
+      parseResults(fileScorePLDA)
         .then((scores) => this.set('results', computeMean(scores)));
     },
 
     meanMatchDependent() {
       this.set('bestMatches', false);
-      parseResults(fileScoreEFR)
+      parseResults(fileScorePLDA)
         .then((scores) => this.set('results', computeMeanMatch(scores)));
     },
 
     percentMatchDependent() {
       this.set('bestMatches', false);
-      parseResults(fileScoreEFR)
+      parseResults(fileScorePLDA)
         .then((scores) => this.set('results', percentMatch(scores)));
     },
 
     bestMatchesDependent() {
       this.set('bestMatches', true);
-      parseResults(fileScoreEFR)
+      parseResults(fileScorePLDA)
         .then((scores) => this.set('results', bestMatches(scores, 10)));
     }
   }
