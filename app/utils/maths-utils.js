@@ -1,3 +1,8 @@
+// const entropyCalculator = items => {
+//   return items.map(p => (isNaN(p) || p < 0) ? 0 : p * Math.log2(p))
+//     .reduce((a, b) => (a + b));
+// };
+
 const computeMean = scores => {
   let res = {};
   for (let ivTest in scores) {
@@ -17,6 +22,7 @@ const computeMean = scores => {
       }
     }
   }
+  console.log(res);
   return res;
 };
 
@@ -71,7 +77,6 @@ const percentMatch = scores => {
 
 const bestMatches = (scores, maxItem) => {
   let res = {};
-
   for (let ivTest in scores) {
     if (scores.hasOwnProperty(ivTest)) {
       res[ivTest] = {};
@@ -84,12 +89,10 @@ const bestMatches = (scores, maxItem) => {
         }
       }
       sortable.sort((a, b) => b[1] - a[1]);
-      for (let i = 0; i < sortable.length; i++) {
-        res[ivTest] = sortable.slice(0, maxItem);
-      }
+      console.log(sortable);
+      res[ivTest] = sortable.slice(0, maxItem);
     }
   }
-
   return res;
 };
 

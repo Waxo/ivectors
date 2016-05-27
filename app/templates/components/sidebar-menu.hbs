@@ -1,4 +1,5 @@
-{{#ui-sidebar class='vertical menu visible'}}
+  <div class="ui vertical sticky menu fixed top sidebar visible"
+       style="width: 250px !important; height: 1813px !important; margin-top: 0; left: 0;">
   <div class="item">
     {{#link-to 'index'}}arm-tools{{/link-to}}
   </div>
@@ -50,9 +51,10 @@
           {{/link-to}}
         </div>
       {{/ui-dropdown}}
+      {{#link-to "ivectors-leave-one-out" class="item"}}Leave one out{{/link-to}}
       {{#link-to "ivectors.cleaner" class="item"}}Cleaner{{/link-to}}
     </div>
   </div>
-{{/ui-sidebar}}
+</div>
 
 {{yield}}

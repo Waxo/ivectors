@@ -1,6 +1,6 @@
 import Ember from 'ember';
-import parseResults from '../../../utils/parser';
-import execAsync from '../../../utils/execAsync';
+import {parseResults} from '../../../utils/parser';
+import {execAsync} from '../../../utils/exec-async';
 import {
   computeMean,
   computeMeanMatch,

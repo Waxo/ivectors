@@ -1,7 +1,7 @@
 const BluebirdPromise = require('bluebird');
 const fs = BluebirdPromise.promisifyAll(require('fs'));
 
-export default function parseResults(path) {
+const parseResults = path => {
   return new BluebirdPromise(resolve => {
     fs.readFileAsync(path)
       .then(data => {
@@ -38,4 +38,6 @@ export default function parseResults(path) {
         resolve(parser);
       });
   });
-}
+};
+
+export {parseResults};

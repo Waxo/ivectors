@@ -22,6 +22,7 @@ Router.map(function() {
       this.route('plda-norm');
     });
   });
+  this.route('ivectors-leave-one-out');
 });
 
 export default Router;

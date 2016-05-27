@@ -1,11 +1,12 @@
 const exec = require('child_process').exec;
 const BluebirdPromise = require('bluebird');
 
-export default function execAsync(execute, stdoutON) {
-  return new BluebirdPromise(resolve => {
+const execAsync = (execute, stdoutON) => {
+  return new BluebirdPromise((resolve, reject) => {
     exec(execute, (error, stdout, stderr) => {
       if (stderr) {
         console.log(`stderr: ${stderr}`);
+        reject();
       }
       if (error !== null) {
         console.log(`exec error: ${error}`);
@@ -17,4 +18,6 @@ export default function execAsync(execute, stdoutON) {
       resolve();
     });
   });
-}
+};
+
+export {execAsync};

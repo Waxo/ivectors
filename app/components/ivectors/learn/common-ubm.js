@@ -104,6 +104,7 @@ export default Ember.Component.extend({
         if (error !== null) {
           console.log(`exec error: ${error}`);
         }
+        console.log(`stdout: ${stdout}`);
         this.set('isEnergyProcess', false);
         this.set('isEnergyDone', true);
         setTimeout(() => this.send('normFeatures'), 1000);
