@@ -4,38 +4,39 @@ const BluebirdPromise = require('bluebird');
 const fs = BluebirdPromise.promisifyAll(require('fs-extra'));
 
 const ivectorsPath = `${process.cwd()}/app/ivectors`;
-const pldaNorm = `${ivectorsPath}/2_1_PLDA_Norm`;
-const cosine = `${ivectorsPath}/2_2_WCCN`;
-const mahalanobis = `${ivectorsPath}/2_3_Mahalanobis`;
-const sphNorm = `${ivectorsPath}/2_4_SphNorm_PLDA`;
+const leaveOnePath = `${ivectorsPath}/3_LeaveOneOut`;
+const ndxPath = `${leaveOnePath}/ndx`;
+const exePath = `${leaveOnePath}/exe`;
+const matrixPath = `${leaveOnePath}/mat`;
+const iv = `${leaveOnePath}/iv`;
 
-const createIVTest = currentName => {
-  return fs.readdirAsync(`${ivectorsPath}/iv/raw/`)
+const createIVTest = (currentName, thread = '') => {
+  return fs.readdirAsync(`${iv}/${thread}/raw/`)
     .then(ivTrain => {
       const regExt = /\.y/g;
       currentName = currentName.replace('.lst', '');
       const classes =
         ivTrain.join(' ').replace(regExt, '').replace(`${currentName} `, '');
-      return fs.writeFileAsync(`${pldaNorm}/ivTest.ndx`,
+      return fs.writeFileAsync(`${ndxPath}/ivTest${thread}.ndx`,
         `${currentName} ${classes}`);
     });
 };
 
-const normalize = () => {
+const normalize = (thread = '') => {
   console.log('Normalize');
-  return fs.mkdirsAsync(`${ivectorsPath}/iv/lengthNorm`)
-    .then(() => fs.readdirAsync(`${ivectorsPath}/iv/raw`))
-    .then(ivectors => fs.writeFileAsync(`${ivectorsPath}/all.lst`,
+  return fs.mkdirsAsync(`${iv}/${thread}/lengthNorm`)
+    .then(() => fs.readdirAsync(`${iv}/${thread}/raw`))
+    .then(ivectors => fs.writeFileAsync(`${ndxPath}/all${thread}.lst`,
       ivectors.join('\n').replace(/\.y/g, '')))
     .then(() => {
-      const command = `${pldaNorm}/IvNorm`;
+      const command = `${exePath}/05_1_IvNorm`;
       const options = [
-        `--config ${pldaNorm}/cfg/ivNorm.cfg`,
-        `--saveVectorFilesPath ${ivectorsPath}/iv/lengthNorm/`,
-        `--loadVectorFilesPath ${ivectorsPath}/iv/raw/`,
-        `--matrixFilesPath ${ivectorsPath}/mat/`,
-        `--backgroundNdxFilename ${ivectorsPath}/Plda.ndx`,
-        `--inputVectorFilename ${ivectorsPath}/all.lst`
+        `--config ${leaveOnePath}/cfg/05_1_PLDA_ivNorm.cfg`,
+        `--saveVectorFilesPath ${iv}/${thread}/lengthNorm/`,
+        `--loadVectorFilesPath ${iv}/${thread}/raw/`,
+        `--matrixFilesPath ${matrixPath}/${thread}/`,
+        `--backgroundNdxFilename ${ndxPath}/Plda${thread}.ndx`,
+        `--inputVectorFilename ${ndxPath}/all${thread}.lst`
       ];
 
       let execute = `${command} ${options.join(' ')}`;
@@ -43,94 +44,94 @@ const normalize = () => {
     });
 };
 
-const pldaTraining = () => {
+const pldaTraining = (thread = '') => {
   console.log('PLDA Training');
-  const command = `${pldaNorm}/PLDA`;
+  const command = `${exePath}/05_2_PLDA`;
   const options = [
-    `--config ${pldaNorm}/cfg/Plda.cfg`,
-    `--testVectorFilesPath ${ivectorsPath}/iv/lengthNorm/`,
-    `--loadVectorFilesPath ${ivectorsPath}/iv/lengthNorm/`,
-    `--matrixFilesPath ${ivectorsPath}/mat/`,
-    `--backgroundNdxFilename ${ivectorsPath}/Plda.ndx`
+    `--config ${leaveOnePath}/cfg/05_2_PLDA_Plda.cfg`,
+    `--testVectorFilesPath ${iv}/${thread}/lengthNorm/`,
+    `--loadVectorFilesPath ${iv}/${thread}/lengthNorm/`,
+    `--matrixFilesPath ${matrixPath}/${thread}/`,
+    `--backgroundNdxFilename ${ndxPath}/Plda${thread}.ndx`
   ];
 
   let execute = `${command} ${options.join(' ')}`;
   return execAsync(execute);
 };
 
-const scorePLDANorm = currentName => {
+const scorePLDANorm = (currentName, thread = '') => {
   console.log('PLDA Norm');
   const outputName = `${currentName}.txt`;
-  const command = `${ivectorsPath}/IvTest`;
+  const command = `${exePath}/06_IvTest`;
   const options = [
-    `--config ${pldaNorm}/cfg/ivTest_Plda.cfg`,
-    `--testVectorFilesPath ${ivectorsPath}/iv/raw/`,
-    `--loadVectorFilesPath ${ivectorsPath}/iv/raw/`,
-    `--matrixFilesPath ${ivectorsPath}/mat/`,
+    `--config ${leaveOnePath}/cfg/05_3_PLDA_ivTest_Plda.cfg`,
+    `--testVectorFilesPath ${iv}/${thread}/lengthNorm/`,
+    `--loadVectorFilesPath ${iv}/${thread}/lengthNorm/`,
+    `--matrixFilesPath ${matrixPath}/${thread}/`,
     `--outputFilename ${ivectorsPath}/scores_PldaNorm/${outputName}`,
-    `--backgroundNdxFilename ${ivectorsPath}/Plda.ndx`,
-    `--targetIdList ${ivectorsPath}/TrainModel.ndx`,
-    `--ndxFilename ${pldaNorm}/ivTest.ndx`
+    `--backgroundNdxFilename ${ndxPath}/Plda${thread}.ndx`,
+    `--targetIdList ${ndxPath}/TrainModel${thread}.ndx`,
+    `--ndxFilename ${ndxPath}/ivTest${thread}.ndx`
   ];
 
   let execute = `${command} ${options.join(' ')}`;
 
-  return createIVTest(currentName)
+  return createIVTest(currentName, thread)
     .then(() => execAsync(execute));
 };
 
-const scoreCosine = currentName => {
+const scoreCosine = (currentName, thread = '') => {
   console.log('Cosine');
   const outputName = `${currentName}.txt`;
-  const command = `${ivectorsPath}/IvTest`;
+  const command = `${exePath}/06_IvTest`;
   let options = [
-    `--config ${cosine}/cfg/ivTest_WCCN_Cosine.cfg`,
-    `--testVectorFilesPath ${ivectorsPath}/iv/raw/`,
-    `--loadVectorFilesPath ${ivectorsPath}/iv/raw/`,
-    `--matrixFilesPath ${ivectorsPath}/mat/`,
+    `--config ${leaveOnePath}/cfg/06_cos_ivTest_WCCN_Cosine.cfg`,
+    `--testVectorFilesPath ${iv}/${thread}/raw/`,
+    `--loadVectorFilesPath ${iv}/${thread}/raw/`,
+    `--matrixFilesPath ${matrixPath}/${thread}/`,
     `--outputFilename ${ivectorsPath}/scores_wccn/${outputName}`,
-    `--backgroundNdxFilename ${ivectorsPath}/Plda.ndx`,
-    `--targetIdList ${ivectorsPath}/TrainModel.ndx`,
-    `--ndxFilename ${pldaNorm}/ivTest.ndx`
+    `--backgroundNdxFilename ${ndxPath}/Plda${thread}.ndx`,
+    `--targetIdList ${ndxPath}/TrainModel${thread}.ndx`,
+    `--ndxFilename ${ndxPath}/ivTest${thread}.ndx`
   ];
 
   let execute = `${command} ${options.join(' ')}`;
   return execAsync(execute);
 };
 
-const scoreEFR = currentName => {
+const scoreEFR = (currentName, thread ='') => {
   console.log('EFR');
   const outputName = `${currentName}.txt`;
-  const command = `${ivectorsPath}/IvTest`;
+  const command = `${exePath}/06_IvTest`;
 
   let options = [
-    `--config ${mahalanobis}/cfg/ivTest_EFR_Mahalanobis.cfg`,
-    `--testVectorFilesPath ${ivectorsPath}/iv/raw/`,
-    `--loadVectorFilesPath ${ivectorsPath}/iv/raw/`,
-    `--matrixFilesPath ${ivectorsPath}/mat/`,
+    `--config ${leaveOnePath}/cfg/07_EFR_ivTest_EFR_Mahalanobis.cfg`,
+    `--testVectorFilesPath ${iv}/${thread}/raw/`,
+    `--loadVectorFilesPath ${iv}/${thread}/raw/`,
+    `--matrixFilesPath ${matrixPath}/${thread}/`,
     `--outputFilename ${ivectorsPath}/scores_mahalanobis/${outputName}`,
-    `--backgroundNdxFilename ${ivectorsPath}/Plda.ndx`,
-    `--targetIdList ${ivectorsPath}/TrainModel.ndx`,
-    `--ndxFilename ${pldaNorm}/ivTest.ndx`
+    `--backgroundNdxFilename ${ndxPath}/Plda${thread}.ndx`,
+    `--targetIdList ${ndxPath}/TrainModel${thread}.ndx`,
+    `--ndxFilename ${ndxPath}/ivTest${thread}.ndx`
   ];
 
   let execute = `${command} ${options.join(' ')}`;
   return execAsync(execute);
 };
 
-const scoreSphNorm = currentName => {
+const scoreSphNorm = (currentName, thread = '') => {
   console.log('SphNorm Plda');
   const outputName = `${currentName}.txt`;
-  const command = `${ivectorsPath}/IvTest`;
+  const command = `${exePath}/06_IvTest`;
   let options = [
-    `--config ${sphNorm}/cfg/ivTest_SphNorm_Plda.cfg`,
-    `--testVectorFilesPath ${ivectorsPath}/iv/raw/`,
-    `--loadVectorFilesPath ${ivectorsPath}/iv/raw/`,
-    `--matrixFilesPath ${ivectorsPath}/mat/`,
+    `--config ${leaveOnePath}/cfg/08_sph_ivTest_SphNorm_Plda.cfg`,
+    `--testVectorFilesPath ${iv}/${thread}/raw/`,
+    `--loadVectorFilesPath ${iv}/${thread}/raw/`,
+    `--matrixFilesPath ${matrixPath}/${thread}/`,
     `--outputFilename ${ivectorsPath}/scores_sphNorm/${outputName}`,
-    `--backgroundNdxFilename ${ivectorsPath}/Plda.ndx`,
-    `--targetIdList ${ivectorsPath}/TrainModel.ndx`,
-    `--ndxFilename ${pldaNorm}/ivTest.ndx`
+    `--backgroundNdxFilename ${ndxPath}/Plda${thread}.ndx`,
+    `--targetIdList ${ndxPath}/TrainModel${thread}.ndx`,
+    `--ndxFilename ${ndxPath}/ivTest${thread}.ndx`
   ];
 
   let execute = `${command} ${options.join(' ')}`;

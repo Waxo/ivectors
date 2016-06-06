@@ -22,6 +22,7 @@ const ivectorsPath = `${process.cwd()}/app/ivectors`;
 const LSTPath = `${ivectorsPath}/lst`;
 
 const failed = [];
+const left = [];
 
 const createLST = () => {
   return fs.removeAsync(LSTPath)
@@ -38,7 +39,7 @@ const createLST = () => {
     });
 };
 
-const leaveOneProcess = files => {
+const leaveOneProcess = (files, thread = '') => {
   return new BluebirdPromise(resolve => {
     if (!files.length) {
       resolve();
@@ -46,25 +47,24 @@ const leaveOneProcess = files => {
       const save = files.length;
       const currentFile = files.shift();
       const iv = {};
-      leaveOneProcess(files)
-        .then(() => trainUBM(currentFile))
-        .then(() => trainTotalVariability(currentFile))
-        .then(() => prepareIVectorsExtractor(currentFile, iv))
-        .delay(50).then(() => extractIV())
-        .delay(50).then(() => normalize())
-        .delay(50).then(() => pldaTraining())
-        .delay(1000)
-        .then(() => scorePLDANorm(iv.name))
-        .then(() => scoreCosine(iv.name))
-        .then(() => scoreEFR(iv.name))
-        .then(() => scoreSphNorm(iv.name))
-        .delay(50)
+      leaveOneProcess(files, thread)
+        .then(() => trainUBM(currentFile, thread))
+        .then(() => trainTotalVariability(currentFile, thread))
+        .then(() => prepareIVectorsExtractor(currentFile, iv, thread))
+        .delay(50).then(() => extractIV(thread))
+        .delay(50).then(() => normalize(thread))
+        .delay(50).then(() => pldaTraining(thread))
+        .delay(1000).then(() => scorePLDANorm(iv.name, thread))
+        .delay(50).then(() => scoreCosine(iv.name, thread))
+        .delay(50).then(() => scoreEFR(iv.name, thread))
+        .delay(50).then(() => scoreSphNorm(iv.name, thread))
         .then(() => {
           console.log(`DONE : ${currentFile} ${save}`);
           resolve();
         })
-        .catch(() => {
+        .catch((err) => {
           console.log(`ERROR: ${currentFile}`);
+          console.log(`ERROR: ${err}`);
           failed.push(currentFile);
           resolve();
         });
@@ -72,26 +72,43 @@ const leaveOneProcess = files => {
   });
 };
 
-const leaveOneOutResolver = files => {
+const leaveOneOutResolver = (files, thread = '') => {
   return new BluebirdPromise(resolve => {
     files = files.concat(failed);
     failed.splice(0, failed.length);
+    left[thread || 0] = files.length;
     console.log(`Left : ${files.length}`);
     if (files.length === 0) {
       resolve();
     } else {
-      leaveOneProcess(files.splice(0, 10))
-        .delay(5000).then(() => leaveOneOutResolver(files))
+      leaveOneProcess(files.splice(0, 10), thread)
+        .delay(1000).then(() => leaveOneOutResolver(files, thread))
         .then(() => resolve());
     }
   });
 };
 
+const threadLeaveOneOut = files => {
+  const maxThreads = 8;
+  const arraysLength = Math.ceil(files.length / maxThreads);
+  let threadNum = 0;
+  const arrayThreads = [];
+  while (files.length) {
+    arrayThreads.push(
+      leaveOneOutResolver(files.splice(0, arraysLength), ++threadNum));
+  }
+  return BluebirdPromise.all(arrayThreads);
+};
+
+
 export default Ember.Component.extend({
   results: {},
+  length: 0,
   actions: {
     leaveOneOut() {
       console.time('Leave one out');
+      const interv = setInterval(
+        () => this.set('length', left.reduce((a, b) => a + b)), 30000);
       clearProject()
         .then(() => createFolders())
         .then(() => wavToPRM())
@@ -99,8 +116,10 @@ export default Ember.Component.extend({
         .delay(50).then(() => normFeatures())
         .delay(50).then(() => createLST())
         .delay(50).then(() => fs.readdirAsync(LSTPath))
-        .then(files => leaveOneOutResolver(files))
+        .then(files => threadLeaveOneOut(files))
         .then(() => {
+          clearInterval(interv);
+          this.set('length', 0);
           console.timeEnd('Leave one out');
           console.log(failed);
         });

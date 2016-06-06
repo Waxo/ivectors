@@ -4,17 +4,17 @@ const BluebirdPromise = require('bluebird');
 const fs = BluebirdPromise.promisifyAll(require('fs-extra'));
 
 const ivectorsPath = `${process.cwd()}/app/ivectors`;
-const extractIVPath = `${ivectorsPath}/0_3_Extract_Classes`;
-
+const leaveOnePath = `${ivectorsPath}/3_LeaveOneOut`;
 const prmPath = `${ivectorsPath}/prm`;
 const lblPath = `${ivectorsPath}/lbl`;
-const gmmPath = `${ivectorsPath}/gmm`;
-const matrixPath = `${ivectorsPath}/mat`;
-const iv = `${ivectorsPath}/iv`;
+const gmmPath = `${leaveOnePath}/gmm`;
+const matrixPath = `${leaveOnePath}/mat`;
+const iv = `${leaveOnePath}/iv/`;
+const ndxPath = `${leaveOnePath}/ndx`;
 
-const cleanIV = () => {
-  return fs.removeAsync(iv)
-    .then(() => fs.mkdirsAsync(`${iv}/raw`));
+const cleanIV = (thread = '') => {
+  return fs.removeAsync(`${iv}${thread}`)
+    .then(() => fs.mkdirsAsync(`${iv}${thread}/raw`));
 };
 
 const pad = function (num, size) {
@@ -25,7 +25,7 @@ const pad = function (num, size) {
   return s;
 };
 
-const prepareIVectorsExtractor = (currentName, newName) => {
+const prepareIVectorsExtractor = (currentName, newName, thread = '') => {
   console.log('Prepare IV');
   currentName = currentName.replace('.lst', '');
   return fs.readFileAsync(`${ivectorsPath}/data.lst`)
@@ -56,25 +56,25 @@ const prepareIVectorsExtractor = (currentName, newName) => {
           }
         }
       });
-      fs.writeFileSync(`${ivectorsPath}/Plda.ndx`, plda);
-      fs.writeFileSync(`${ivectorsPath}/TrainModel.ndx`, trainModel);
-      return fs.writeFileAsync(`${extractIVPath}/ivExtractor.ndx`, ndx);
+      fs.writeFileSync(`${ndxPath}/Plda${thread}.ndx`, plda);
+      fs.writeFileSync(`${ndxPath}/TrainModel${thread}.ndx`, trainModel);
+      return fs.writeFileAsync(`${ndxPath}/ivExtractor${thread}.ndx`, ndx);
     });
 };
 
-const extractIV = () => {
+const extractIV = (thread = '') => {
   console.log('Extract IVectors');
-  return cleanIV()
+  return cleanIV(thread)
     .then(() => {
-      let command = `${extractIVPath}/IvExtractor`;
+      let command = `${leaveOnePath}/exe/04_IvExtractor`;
       let options = [
-        `--config ${extractIVPath}/cfg/ivExtractor_fast.cfg`,
+        `--config ${leaveOnePath}/cfg/04_ivExtractor_fast.cfg`,
         `--featureFilesPath ${prmPath}/`,
         `--labelFilesPath ${lblPath}/`,
-        `--mixtureFilesPath ${gmmPath}/`,
-        `--matrixFilesPath ${matrixPath}/`,
-        `--saveVectorFilesPath ${iv}/raw/`,
-        `--targetIdList ${extractIVPath}/ivExtractor.ndx`
+        `--mixtureFilesPath ${gmmPath}/${thread}/`,
+        `--matrixFilesPath ${matrixPath}/${thread}/`,
+        `--saveVectorFilesPath ${iv}${thread}/raw/`,
+        `--targetIdList ${ndxPath}/ivExtractor${thread}.ndx`
       ];
 
       let execute = `${command} ${options.join(' ')}`;

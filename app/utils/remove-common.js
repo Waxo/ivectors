@@ -2,14 +2,16 @@ const BluebirdPromise = require('bluebird');
 const fs = BluebirdPromise.promisifyAll(require('fs-extra'));
 
 const ivectorsPath = `${process.cwd()}/app/ivectors`;
+const leaveOnePath = `${ivectorsPath}/3_LeaveOneOut`;
 
 const clearProject = () => {
   const clean = [
-    `${ivectorsPath}/gmm`,
-    `${ivectorsPath}/iv`,
     `${ivectorsPath}/prm`,
     `${ivectorsPath}/lbl`,
-    `${ivectorsPath}/mat`,
+    `${leaveOnePath}/ndx`,
+    `${leaveOnePath}/gmm`,
+    `${leaveOnePath}/mat`,
+    `${leaveOnePath}/iv`,
     `${ivectorsPath}/scores_PldaNorm`,
     `${ivectorsPath}/scores_wccn`,
     `${ivectorsPath}/scores_mahalanobis`,
@@ -26,11 +28,12 @@ const clearProject = () => {
 
 const createFolders = () => {
   const folders = [
-    `${ivectorsPath}/gmm`,
-    `${ivectorsPath}/iv`,
     `${ivectorsPath}/prm`,
     `${ivectorsPath}/lbl`,
-    `${ivectorsPath}/mat`,
+    `${leaveOnePath}/ndx`,
+    `${leaveOnePath}/gmm`,
+    `${leaveOnePath}/mat`,
+    `${leaveOnePath}/iv`,
     `${ivectorsPath}/scores_PldaNorm`,
     `${ivectorsPath}/scores_wccn`,
     `${ivectorsPath}/scores_mahalanobis`,

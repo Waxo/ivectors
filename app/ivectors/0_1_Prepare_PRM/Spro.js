@@ -6,14 +6,6 @@ const wavFileInfo = require('wav-file-info');
 const exec = require('child_process').exec;
 
 let SPro = Ember.Object.extend({
-  // constructor(path, input, output, label) {
-  //   this.path = path;
-  //   this.input = `${this.path}/${input}`;
-  //   this.output = `${this.path}/${output}`;
-  //   this.label = `${this.path}/${label}`;
-  //   this.init();
-  // },
-
   init() {
     let readFolders = [];
     this.clean()
@@ -86,7 +78,7 @@ let SPro = Ember.Object.extend({
       let name = this.retrieveName(file);
       let input = `${this.input}/${file}`;
       let output = `${this.output}/${name}.prm`;
-      let command = `${this.specificPath}/sfbcep`;
+      let command = `${this.specificPath}/00_sfbcep`;
       fs.appendFile(`${this.path}/data.lst`, name + '\n');
       exec(`${command} -F PCM16 -p 19 -e -D -A ${input} ${output}`);
       wavFileInfo.infoByFilename(input, (err, info) => {

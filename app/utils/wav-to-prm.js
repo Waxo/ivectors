@@ -4,7 +4,7 @@ import {execAsync} from "./exec-async";
 const BluebirdPromise = require('bluebird');
 
 const ivectorsPath = `${process.cwd()}/app/ivectors`;
-const wavToPRMPath = `${ivectorsPath}/0_1_Prepare_PRM`;
+const leaveOnePath = `${ivectorsPath}/3_LeaveOneOut`;
 const prmPath = `${ivectorsPath}/prm`;
 const lblPath = `${ivectorsPath}/lbl`;
 
@@ -14,8 +14,8 @@ const wavToPRM = () => {
   return new BluebirdPromise(resolve => {
     const spro = SPro.create({
       path: ivectorsPath,
-      specificPath: wavToPRMPath,
-      input: `${wavToPRMPath}/input`,
+      specificPath: `${leaveOnePath}/exe`,
+      input: `${leaveOnePath}/input`,
       output: prmPath,
       label: lblPath,
       isDone: false
@@ -31,11 +31,12 @@ const wavToPRM = () => {
 
 const normEnergy = () => {
   console.log('Norm Energy');
-  let command = `${wavToPRMPath}/NormFeat`;
+  let command = `${leaveOnePath}/exe/01_NormFeat`;
   let options = [
-    `--config ${wavToPRMPath}/cfg/NormFeat_energy.cfg`,
+    `--config ${leaveOnePath}/cfg/00_PRM_NormFeat_energy.cfg`,
     `--inputFeatureFilename ${ivectorsPath}/data.lst`,
-    `--featureFilesPath ${prmPath}/`
+    `--featureFilesPath ${prmPath}/`,
+    `--labelFilesPath ${lblPath}/`
   ];
 
   let execute = `${command} ${options.join(' ')}`;
@@ -44,9 +45,9 @@ const normEnergy = () => {
 
 const normFeatures = () => {
   console.log('Norm Features');
-  let command = `${wavToPRMPath}/NormFeat`;
+  let command = `${leaveOnePath}/exe/01_NormFeat`;
   let options = [
-    `--config ${wavToPRMPath}/cfg/NormFeat.cfg`,
+    `--config ${leaveOnePath}/cfg/01_PRM_NormFeat.cfg`,
     `--inputFeatureFilename ${ivectorsPath}/data.lst`,
     `--featureFilesPath ${prmPath}/`,
     `--labelFilesPath ${lblPath}/`

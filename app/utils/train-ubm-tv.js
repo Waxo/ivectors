@@ -6,30 +6,31 @@ const fs = BluebirdPromise.promisifyAll(require('fs-extra'));
 const ivectorsPath = `${process.cwd()}/app/ivectors`;
 const prmPath = `${ivectorsPath}/prm`;
 const lblPath = `${ivectorsPath}/lbl`;
-const gmmPath = `${ivectorsPath}/gmm`;
-const UBMPath = `${ivectorsPath}/0_2_UBM_TotalVariability`;
-const matrixPath = `${ivectorsPath}/mat`;
+const leaveOnePath = `${ivectorsPath}/3_LeaveOneOut`;
+const gmmPath = `${leaveOnePath}/gmm`;
+const matrixPath = `${leaveOnePath}/mat`;
+const ndxPath = `${leaveOnePath}/ndx`;
 
-const cleanGMM = () => {
-  return fs.removeAsync(gmmPath)
-    .then(() => fs.mkdirAsync(gmmPath));
+const cleanGMM = (thread = '') => {
+  return fs.removeAsync(`${gmmPath}/${thread}`)
+    .then(() => fs.mkdirAsync(`${gmmPath}/${thread}`));
 };
 
-const cleanTV = () => {
-  return fs.removeAsync(matrixPath)
-    .then(() => fs.mkdirAsync(matrixPath));
+const cleanTV = (thread = '') => {
+  return fs.removeAsync(`${matrixPath}/${thread}`)
+    .then(() => fs.mkdirAsync(`${matrixPath}/${thread}`));
 };
 
-const trainUBM = inputFile => {
-  console.log(`Train UBM ${inputFile}`);
-  return cleanGMM().then(() => {
-    let command = `${UBMPath}/TrainWorld`;
+const trainUBM = (inputFile, thread = '') => {
+  console.log(`Train UBM ${inputFile} Thread : ${thread}`);
+  return cleanGMM(thread).then(() => {
+    let command = `${leaveOnePath}/exe/02_TrainWorld`;
     let options = [
-      `--config ${UBMPath}/cfg/TrainWorld.cfg`,
+      `--config ${leaveOnePath}/cfg/02_UBM_TrainWorld.cfg`,
       `--inputFeatureFilename ${ivectorsPath}/lst/${inputFile}`,
       `--featureFilesPath ${prmPath}/`,
       `--labelFilesPath ${lblPath}`,
-      `--mixtureFilesPath ${gmmPath}/`
+      `--mixtureFilesPath ${gmmPath}/${thread}/`
     ];
 
     let execute = `${command} ${options.join(' ')}`;
@@ -37,24 +38,28 @@ const trainUBM = inputFile => {
   });
 };
 
-const trainTotalVariability = inputFile => {
+const trainTotalVariability = (inputFile, thread = '') => {
   console.log(`Train TV`);
-  fs.createReadStream(`${ivectorsPath}/lst/${inputFile}`)
-    .pipe(fs.createWriteStream(`${UBMPath}/totalvariability.ndx`));
-  return cleanTV().then(() => {
-    let command = `${UBMPath}/TotalVariability`;
-    let options = [
-      `--config ${UBMPath}/cfg/TotalVariability_fast.cfg`,
-      `--featureFilesPath ${prmPath}/`,
-      `--labelFilesPath ${lblPath}/`,
-      `--mixtureFilesPath ${gmmPath}/`,
-      `--matrixFilesPath ${ivectorsPath}/mat/`,
-      `--ndxFilename ${UBMPath}/totalvariability.ndx`
-    ];
+  return fs.removeAsync(`${ndxPath}/totalvariability${thread}.ndx`)
+    .then(() => {
+      fs.createReadStream(`${ivectorsPath}/lst/${inputFile}`)
+        .pipe(fs.createWriteStream(`${ndxPath}/totalvariability${thread}.ndx`));
+      return cleanTV(thread);
+    })
+    .then(() => {
+      let command = `${leaveOnePath}/exe/03_TotalVariability`;
+      let options = [
+        `--config ${leaveOnePath}/cfg/03_TV_TotalVariability_fast.cfg`,
+        `--featureFilesPath ${prmPath}/`,
+        `--labelFilesPath ${lblPath}/`,
+        `--mixtureFilesPath ${gmmPath}/${thread}/`,
+        `--matrixFilesPath ${matrixPath}/${thread}/`,
+        `--ndxFilename ${ndxPath}/totalvariability${thread}.ndx`
+      ];
 
-    let execute = `${command} ${options.join(' ')}`;
-    return execAsync(execute);
-  });
+      let execute = `${command} ${options.join(' ')}`;
+      return execAsync(execute);
+    });
 };
 
 export {trainUBM, trainTotalVariability};
