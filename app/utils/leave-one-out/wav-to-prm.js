@@ -1,5 +1,5 @@
-import SPro from '../ivectors/0_1_Prepare_PRM/Spro';
-import {execAsync} from "./exec-async";
+import SPro from '../../ivectors/0_1_Prepare_PRM/Spro';
+import {execAsync} from "../exec-async";
 
 const BluebirdPromise = require('bluebird');
 
@@ -15,7 +15,7 @@ const wavToPRM = () => {
     const spro = SPro.create({
       path: ivectorsPath,
       specificPath: `${leaveOnePath}/exe`,
-      input: `${leaveOnePath}/input`,
+      input: `${leaveOnePath}/0_input`,
       output: prmPath,
       label: lblPath,
       isDone: false

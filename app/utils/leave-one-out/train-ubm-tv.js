@@ -1,4 +1,4 @@
-import {execAsync} from "./exec-async";
+import {execAsync} from "../exec-async";
 
 const BluebirdPromise = require('bluebird');
 const fs = BluebirdPromise.promisifyAll(require('fs-extra'));

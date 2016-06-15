@@ -1,4 +1,4 @@
-import {execAsync} from "./exec-async";
+import {execAsync} from "../exec-async";
 
 const BluebirdPromise = require('bluebird');
 const fs = BluebirdPromise.promisifyAll(require('fs-extra'));
@@ -99,7 +99,7 @@ const scoreCosine = (currentName, thread = '') => {
   return execAsync(execute);
 };
 
-const scoreEFR = (currentName, thread ='') => {
+const scoreEFR = (currentName, thread = '') => {
   console.log('EFR');
   const outputName = `${currentName}.txt`;
   const command = `${exePath}/06_IvTest`;

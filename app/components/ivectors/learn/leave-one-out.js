@@ -1,8 +1,21 @@
 import Ember from "ember";
-import {wavToPRM, normEnergy, normFeatures} from "../../../utils/wav-to-prm";
-import {clearProject, createFolders} from "../../../utils/remove-common";
-import {trainUBM, trainTotalVariability} from "../../../utils/train-ubm-tv";
-import {prepareIVectorsExtractor, extractIV} from "../../../utils/extract-iv";
+import {
+  wavToPRM,
+  normEnergy,
+  normFeatures
+} from "../../../utils/leave-one-out/wav-to-prm";
+import {
+  clearProject,
+  createFolders
+} from "../../../utils/leave-one-out/remove-common";
+import {
+  trainUBM,
+  trainTotalVariability
+} from "../../../utils/leave-one-out/train-ubm-tv";
+import {
+  prepareIVectorsExtractor,
+  extractIV
+} from "../../../utils/leave-one-out/extract-iv";
 import {
   normalize,
   pldaTraining,
@@ -10,10 +23,11 @@ import {
   scoreCosine,
   scoreEFR,
   scoreSphNorm
-} from "../../../utils/scoring-method-leave-one";
+} from "../../../utils/leave-one-out/scoring-method-leave-one";
 import {parseResults} from "../../../utils/parser";
 import {computeMean} from "../../../utils/maths-utils";
-import {countMean} from "../../../utils/leave-one-out";
+import {countMean} from "../../../utils/leave-one-out/leave-one-out";
+import {createLST} from "../../../utils/leave-one-out/create-lst";
 
 const BluebirdPromise = require('bluebird');
 const fs = BluebirdPromise.promisifyAll(require('fs-extra'));
@@ -23,21 +37,6 @@ const LSTPath = `${ivectorsPath}/lst`;
 
 const failed = [];
 const left = [];
-
-const createLST = () => {
-  return fs.removeAsync(LSTPath)
-    .finally(() => fs.mkdirAsync(LSTPath))
-    .then(() => fs.readFileAsync(`${ivectorsPath}/data.lst`))
-    .then(data => {
-      const fileList = data.toString().split('\n');
-      return BluebirdPromise.map(fileList, file => {
-        if (file) {
-          return fs.writeFileAsync(`${LSTPath}/${file.split('/')[1]}.lst`,
-            data.toString().replace(`${file}\n`, ''));
-        }
-      });
-    });
-};
 
 const leaveOneProcess = (files, thread = '') => {
   return new BluebirdPromise(resolve => {
@@ -77,7 +76,6 @@ const leaveOneOutResolver = (files, thread = '') => {
     files = files.concat(failed);
     failed.splice(0, failed.length);
     left[thread || 0] = files.length;
-    console.log(`Left : ${files.length}`);
     if (files.length === 0) {
       resolve();
     } else {
@@ -121,8 +119,23 @@ export default Ember.Component.extend({
           clearInterval(interv);
           this.set('length', 0);
           console.timeEnd('Leave one out');
-          console.log(failed);
+          // console.log(failed);
         });
+    },
+    leaveOneOutDep() {
+      console.time('Leave one out dependent');
+      const interv = setInterval(
+        () => this.set('length', left.reduce((a, b) => a + b)), 30000);
+      clearProject()
+        .then(() => wavToPRM())
+        .delay(50).then(() => normEnergy())
+        .delay(50).then(() => normFeatures())
+      // .delay(50).then(() => createLSTDependent());
+
+
+      clearInterval(interv);
+      this.set('length', 0);
+      console.timeEnd('Leave one out dependent');
     },
     scoreLeaveOneOut() {
       const res = {};

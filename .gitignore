@@ -34,7 +34,7 @@
 /app/ivectors/2_4_SphNorm_PLDA/scores_SphNorm_Plda.txt
 /app/ivectors/2_3_Mahalanobis/scores_EFR_Mahalanobis.txt
 /app/ivectors/2_3_Mahalanobis/ivTest.ndx
-/app/ivectors/3_LeaveOneOut/input/
+/app/ivectors/3_LeaveOneOut/0_input/
 /app/ivectors/3_LeaveOneOut/ndx/
 /app/ivectors/3_LeaveOneOut/gmm/
 /app/ivectors/3_LeaveOneOut/iv/
