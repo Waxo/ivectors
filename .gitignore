@@ -39,6 +39,8 @@
 /app/ivectors/3_LeaveOneOut/gmm/
 /app/ivectors/3_LeaveOneOut/iv/
 /app/ivectors/3_LeaveOneOut/mat/
+/app/ivectors/3_LeaveOneOut/common/
+/app/ivectors/3_LeaveOneOut/threads/
 # See http://help.github.com/ignore-files/ for more about ignoring files.
 
 # compiled output

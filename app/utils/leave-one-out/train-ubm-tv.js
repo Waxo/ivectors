@@ -62,4 +62,33 @@ const trainTotalVariability = (inputFile, thread = '') => {
     });
 };
 
-export {trainUBM, trainTotalVariability};
+const createUBM = thread => {
+  const threadPath = `${leaveOnePath}/threads/${thread}`;
+  const ubm = [
+    `${leaveOnePath}/exe/02_TrainWorld`,
+    `--config ${leaveOnePath}/cfg/02_UBM_TrainWorld.cfg`,
+    `--inputFeatureFilename ${threadPath}/ubm.lst`,
+    `--featureFilesPath ${threadPath}/prm/`,
+    `--labelFilesPath ${threadPath}/lbl/`,
+    `--mixtureFilesPath ${threadPath}/gmm/`
+  ];
+
+  return execAsync(ubm.join(' '));
+};
+
+const createTV = thread => {
+  const threadPath = `${leaveOnePath}/threads/${thread}`;
+  const tv = [
+    `${leaveOnePath}/exe/03_TotalVariability`,
+    `--config ${leaveOnePath}/cfg/03_TV_TotalVariability_fast.cfg`,
+    `--featureFilesPath ${threadPath}/prm/`,
+    `--labelFilesPath ${threadPath}/lbl/`,
+    `--mixtureFilesPath ${threadPath}/gmm/`,
+    `--matrixFilesPath ${threadPath}/mat/`,
+    `--ndxFilename ${threadPath}/tv.ndx`
+  ];
+
+  return execAsync(tv.join(' '));
+};
+
+export {trainUBM, trainTotalVariability, createUBM, createTV};

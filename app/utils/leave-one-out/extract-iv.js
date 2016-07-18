@@ -2,6 +2,7 @@ import {execAsync} from "../exec-async";
 
 const BluebirdPromise = require('bluebird');
 const fs = BluebirdPromise.promisifyAll(require('fs-extra'));
+const wavFileInfo = require("wav-file-info");
 
 const ivectorsPath = `${process.cwd()}/app/ivectors`;
 const leaveOnePath = `${ivectorsPath}/3_LeaveOneOut`;
@@ -82,4 +83,73 @@ const extractIV = (thread = '') => {
     });
 };
 
-export {prepareIVectorsExtractor, extractIV};
+const ivectorExtractor = (thread, list) => {
+  const threadPath = `${leaveOnePath}/threads/${thread}`;
+
+  const ivExtractor = [
+    `${leaveOnePath}/exe/04_IvExtractor`,
+    `--config ${leaveOnePath}/cfg/04_ivExtractor_fast.cfg`,
+    `--featureFilesPath ${threadPath}/prm/`,
+    `--labelFilesPath ${threadPath}/lbl/`,
+    `--mixtureFilesPath ${threadPath}/gmm/`,
+    `--matrixFilesPath ${threadPath}/mat/`,
+    `--saveVectorFilesPath ${threadPath}/iv/raw/`,
+    `--targetIdList ${threadPath}/${list}`
+  ];
+
+  return execAsync(ivExtractor.join(' '));
+};
+
+const createTest = (file, thread) => {
+  const threadPath = `${leaveOnePath}/threads/${thread}`;
+
+  const prm = [
+    `${leaveOnePath}/exe/00_sfbcep`,
+    '-F PCM16 -p 19 -e -D -A',
+    `${leaveOnePath}/0_input/${file[0]}/${file[1]}`,
+    `${threadPath}/test/prm/${file[1].replace('wav', 'prm')}`
+  ];
+
+  const enerNorm = [
+    `${leaveOnePath}/exe/01_NormFeat`,
+    `--config ${leaveOnePath}/cfg/00_PRM_NormFeat_energy.cfg`,
+    `--inputFeatureFilename ${threadPath}/test/data.lst`,
+    `--featureFilesPath ${threadPath}/test/prm/`,
+    `--labelFilesPath ${threadPath}/test/lbl/`
+  ];
+
+  const featNorm = [
+    `${leaveOnePath}/exe/01_NormFeat`,
+    `--config ${leaveOnePath}/cfg/01_PRM_NormFeat.cfg`,
+    `--inputFeatureFilename ${threadPath}/test/data.lst`,
+    `--featureFilesPath ${threadPath}/test/prm/`,
+    `--labelFilesPath ${threadPath}/test/lbl/`
+  ];
+
+  const ivExtractor = [
+    `${leaveOnePath}/exe/04_IvExtractor`,
+    `--config ${leaveOnePath}/cfg/04_ivExtractor_fast.cfg`,
+    `--featureFilesPath ${threadPath}/test/prm/`,
+    `--labelFilesPath ${threadPath}/test/lbl/`,
+    `--mixtureFilesPath ${threadPath}/gmm/`,
+    `--matrixFilesPath ${threadPath}/mat/`,
+    `--saveVectorFilesPath ${threadPath}/iv/raw/`,
+    `--targetIdList ${threadPath}/test/ivExtractor.ndx`
+  ];
+
+  return new BluebirdPromise(resolve => {
+    wavFileInfo.infoByFilename(`${leaveOnePath}/0_input/${file[0]}/${file[1]}`,
+      (err, info) => {
+        let line = `0 ${info.duration} sound`;
+        fs.writeFileAsync(
+          `${threadPath}/test/lbl/${file[1].replace('wav', 'lbl')}`, line)
+          .then(() => resolve());
+      });
+  })
+    .then(() => execAsync(prm.join(' ')))
+    .delay(50).then(() => execAsync(enerNorm.join(' ')))
+    .delay(50).then(() => execAsync(featNorm.join(' ')))
+    .delay(50).then(() => execAsync(ivExtractor.join(' ')));
+};
+
+export {prepareIVectorsExtractor, extractIV, ivectorExtractor, createTest};

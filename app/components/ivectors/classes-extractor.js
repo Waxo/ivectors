@@ -1,4 +1,6 @@
 import Ember from 'ember';
+import {pad} from '../../utils/pad';
+
 const exec = require('child_process').exec;
 const PromiseB = require('bluebird');
 const fs = PromiseB.promisifyAll(require('fs'));
@@ -19,14 +21,6 @@ const cleanAndRegenerateGMM = function () {
       .then(() => fs.mkdirAsync(`${iv}/raw`))
       .finally(() => resolve());
   });
-};
-
-const pad = function (num, size) {
-  let s = num + '';
-  while (s.length < size) {
-    s = '0' + s;
-  }
-  return s;
 };
 
 export default Ember.Component.extend({

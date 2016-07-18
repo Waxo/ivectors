@@ -12,6 +12,7 @@ const clearProject = () => {
     `${leaveOnePath}/gmm`,
     `${leaveOnePath}/mat`,
     `${leaveOnePath}/iv`,
+    `${leaveOnePath}/common`,
     `${ivectorsPath}/scores_PldaNorm`,
     `${ivectorsPath}/scores_wccn`,
     `${ivectorsPath}/scores_mahalanobis`,
@@ -34,13 +35,44 @@ const createFolders = () => {
     `${leaveOnePath}/gmm`,
     `${leaveOnePath}/mat`,
     `${leaveOnePath}/iv`,
+    `${leaveOnePath}/common/lst`,
+    `${leaveOnePath}/common/ndx`,
     `${ivectorsPath}/scores_PldaNorm`,
     `${ivectorsPath}/scores_wccn`,
     `${ivectorsPath}/scores_mahalanobis`,
     `${ivectorsPath}/scores_sphNorm`
   ];
 
-  return BluebirdPromise.map(folders, folder => fs.mkdirAsync(folder));
+  return BluebirdPromise.map(folders, folder => fs.mkdirsAsync(folder));
 };
 
-export {clearProject, createFolders};
+const clearProject2 = () => {
+  const clean = [
+    `${leaveOnePath}/common`,
+    `${leaveOnePath}/threads`,
+    `${ivectorsPath}/scores_PldaNorm`,
+    `${ivectorsPath}/scores_wccn`,
+    `${ivectorsPath}/scores_mahalanobis`,
+    `${ivectorsPath}/scores_sphNorm`
+  ];
+
+  return BluebirdPromise.map(clean, item => fs.removeAsync(item));
+};
+
+const createFolders2 = () => {
+  const folders = [
+    `${leaveOnePath}/common/clusters`,
+    `${leaveOnePath}/common/wav`,
+    `${leaveOnePath}/common/prm`,
+    `${leaveOnePath}/common/lbl`,
+    `${leaveOnePath}/threads`,
+    `${ivectorsPath}/scores_PldaNorm`,
+    `${ivectorsPath}/scores_wccn`,
+    `${ivectorsPath}/scores_mahalanobis`,
+    `${ivectorsPath}/scores_sphNorm`
+  ];
+
+  return BluebirdPromise.map(folders, folder => fs.mkdirsAsync(folder));
+};
+
+export {clearProject, createFolders, clearProject2, createFolders2};
