@@ -3,7 +3,7 @@ const BluebirdPromise = require('bluebird');
 
 const execAsync = (execute, stdoutON, stderrDisabled) => {
   return new BluebirdPromise((resolve, reject) => {
-    exec(execute, (error, stdout, stderr) => {
+    exec(execute, {maxBuffer: 1024 * 1000}, (error, stdout, stderr) => {
       if (stderr) {
         console.log(`stderr: ${stderr}`);
         if (!stderrDisabled) {

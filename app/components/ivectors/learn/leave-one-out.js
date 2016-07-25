@@ -125,7 +125,7 @@ const threadLeaveOneOut = files => {
   return BluebirdPromise.all(arrayThreads);
 };
 
-const processConcat = (files, thread, normalize = false, dependent = false) => {
+const processConcat = (files, thread, normalize = false) => {
   return new BluebirdPromise(resolve => {
     if (!files.length) {
       resolve();
@@ -168,7 +168,7 @@ const resolverConcat = (files, thread, normalize = false) => {
     if (!files.length) {
       resolve();
     } else {
-      processConcat(files.splice(0, 1), thread, normalize)
+      processConcat(files.splice(0, 5), thread, normalize)
         .delay(1000)
         .then(() => resolverConcat(files, thread, normalize))
         .then(() => resolve());
