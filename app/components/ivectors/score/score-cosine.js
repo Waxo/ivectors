@@ -1,6 +1,14 @@
 import Ember from 'ember';
-import parseResults from '../../utils/parser';
-import execAsync from '../../utils/execAsync';
+import parseResults from '../../../utils/parser';
+import execAsync from '../../../utils/exec-async';
+import {
+  computeMean,
+  computeMeanMatch,
+  percentMatch,
+  bestMatches
+} from '../../../utils/maths-utils';
+import {createIVTest} from "../../../utils/scores";
+
 const exec = require('child_process').exec;
 const BluebirdPromise = require('bluebird');
 const fs = BluebirdPromise.promisifyAll(require('fs-extra'));
@@ -12,39 +20,10 @@ const contextPath = `${ivectorsPath}/2_2_WCCN`;
 const matrixPath = `${ivectorsPath}/mat`;
 const scoreDependentPath = `${dependentPath}/input/scores/WCCN_cos`;
 
+const fileScoreAll = `${contextPath}/scores_WCCN_Cosine.txt`;
 const fileScoreCosine = `${scoreDependentPath}/all_cos.txt`;
 
 let inputClasses = '';
-
-const createIVTest = () => {
-  let classes = '';
-  let ndx = '';
-  const regExt = /\.y/g;
-  return new BluebirdPromise(resolve => {
-    fs.readdirAsync(`${ivectorsPath}/iv/raw`)
-      .then((ivTrain) => {
-        classes = ivTrain.join(' ').replace(regExt, '');
-        return fs.readdirAsync(testIVectorsPath);
-      })
-      .then(files => {
-        files.forEach(file => {
-          file = file.replace('.y', '');
-          ndx += `${file} ${classes}` + '\n';
-        });
-        return fs.writeFileAsync(`${contextPath}/ivTest.ndx`, ndx);
-      })
-      .then(() => fs.readdirAsync(testIVectorsPath))
-      .then((files) => {
-        let copyFiles = [];
-        files.forEach((file) => {
-          copyFiles.push(fs.copyAsync(`${testIVectorsPath}/${file}`,
-            `${ivectorsPath}/iv/raw/${file}`));
-        });
-        return BluebirdPromise.all(copyFiles);
-      })
-      .then(() => resolve());
-  });
-};
 
 const prepareClasses = () => {
   const regExt = /\.y/g;
@@ -94,101 +73,6 @@ const cleanScoresDependent = () => {
   });
 };
 
-const computeMean = scores => {
-  let res = {};
-  for (let ivTest in scores) {
-    if (scores.hasOwnProperty(ivTest)) {
-      res[ivTest] = {};
-      let sortable = [];
-      for (let cluster in scores[ivTest]) {
-        if (scores[ivTest].hasOwnProperty(cluster)) {
-          sortable.push([cluster,
-            scores[ivTest][cluster].scores.reduce((a, b) => a + b) /
-            scores[ivTest][cluster].scores.length]);
-        }
-      }
-      sortable.sort((a, b) => b[1] - a[1]);
-      for (let i = 0; i < sortable.length; i++) {
-        res[ivTest][sortable[i][0]] = sortable[i][1];
-      }
-    }
-  }
-  return res;
-};
-
-const computeMeanMatch = scores => {
-  let res = {};
-  for (let ivTest in scores) {
-    if (scores.hasOwnProperty(ivTest)) {
-      res[ivTest] = {};
-      let sortable = [];
-      for (let cluster in scores[ivTest]) {
-        if (scores[ivTest].hasOwnProperty(cluster)) {
-          let numerator = 0;
-          for (let i = 0; i < scores[ivTest][cluster].numberOfMatches;
-               i++) {
-            numerator += scores[ivTest][cluster].scores[i];
-          }
-          sortable.push([cluster,
-            numerator / scores[ivTest][cluster].numberOfMatches]);
-        }
-      }
-      sortable.sort((a, b) => b[1] - a[1]);
-      for (let i = 0; i < sortable.length; i++) {
-        res[ivTest][sortable[i][0]] = sortable[i][1];
-      }
-    }
-  }
-  return res;
-};
-
-const percentMatch = scores => {
-  let res = {};
-  for (let ivTest in scores) {
-    if (scores.hasOwnProperty(ivTest)) {
-      res[ivTest] = {};
-      let sortable = [];
-      for (let cluster in scores[ivTest]) {
-        if (scores[ivTest].hasOwnProperty(cluster)) {
-          sortable.push([cluster,
-            (scores[ivTest][cluster].numberOfMatches /
-            scores[ivTest][cluster].scores.length) * 100]);
-        }
-      }
-      sortable.sort((a, b) => b[1] - a[1]);
-      for (let i = 0; i < sortable.length; i++) {
-        res[ivTest][sortable[i][0]] =
-          Math.floor(sortable[i][1] * 100) / 100 + ' %';
-      }
-    }
-  }
-  return res;
-};
-
-const bestMatches = (scores, maxItem) => {
-  let res = {};
-
-  for (let ivTest in scores) {
-    if (scores.hasOwnProperty(ivTest)) {
-      res[ivTest] = {};
-      let sortable = [];
-      for (let cluster in scores[ivTest]) {
-        if (scores[ivTest].hasOwnProperty(cluster)) {
-          for (let i = 0; i < scores[ivTest][cluster].scores.length; i++) {
-            sortable.push([cluster, scores[ivTest][cluster].scores[i]]);
-          }
-        }
-      }
-      sortable.sort((a, b) => b[1] - a[1]);
-      for (let i = 0; i < sortable.length; i++) {
-        res[ivTest] = sortable.slice(0, maxItem);
-      }
-    }
-  }
-
-  return res;
-};
-
 export default Ember.Component.extend({
   results: {},
   bestMatches: false,
@@ -201,7 +85,7 @@ export default Ember.Component.extend({
         `--testVectorFilesPath ${ivectorsPath}/iv/raw/`,
         `--loadVectorFilesPath ${ivectorsPath}/iv/raw/`,
         `--matrixFilesPath ${matrixPath}`,
-        `--outputFilename ${contextPath}/scores_WCCN_Cosine.txt`,
+        `--outputFilename ${fileScoreAll}`,
         `--backgroundNdxFilename ${ivectorsPath}/Plda.ndx`,
         `--targetIdList ${ivectorsPath}/TrainModel.ndx`,
         `--ndxFilename ${contextPath}/ivTest.ndx`
@@ -209,40 +93,48 @@ export default Ember.Component.extend({
 
       let execute = `${command} ${options.join(' ')}`;
 
-      createIVTest().then(() => {
-        exec(execute, (error, stdout, stderr) => {
-          if (stderr) {
-            console.log(`stderr: ${stderr}`);
-          }
-          if (error !== null) {
-            console.log(`exec error: ${error}`);
-          }
-          console.log(`stdout: ${stdout}`);
-          // this.sendAction('ShowScore');
+      createIVTest(`${ivectorsPath}/iv/raw`, testIVectorsPath, contextPath)
+        .then(() => {
+          exec(execute, (error, stdout, stderr) => {
+            if (stderr) {
+              console.log(`stderr: ${stderr}`);
+            }
+            if (error !== null) {
+              console.log(`exec error: ${error}`);
+            }
+            console.log(`stdout: ${stdout}`);
+            // this.sendAction('ShowScore');
+          });
         });
-      });
     },
 
-    showMean() {
+    mean() {
       this.set('bestMatches', false);
-      parseResults(`${contextPath}/scores_WCCN_Cosine.txt`)
+      parseResults(fileScoreAll)
         .then(scores => this.set('results', computeMean(scores)));
 
     },
 
-    showMeanMatch() {
+    meanMatch() {
       this.set('bestMatches', false);
-      parseResults(`${contextPath}/scores_WCCN_Cosine.txt`)
+      parseResults(fileScoreAll)
         .then((scores) => this.set('results', computeMeanMatch(scores)));
     },
 
-    showPercentMatch() {
+    percentMatch() {
       this.set('bestMatches', false);
-      parseResults(`${contextPath}/scores_WCCN_Cosine.txt`)
+      parseResults(fileScoreAll)
         .then((scores) => this.set('results', percentMatch(scores)));
     },
 
+    bestMatches() {
+      this.set('bestMatches', true);
+      parseResults(fileScoreAll)
+        .then((scores) => this.set('results', bestMatches(scores, 10)));
+    },
+
     scoreCosineDependent() {
+      console.log('Cosine Dependent');
       prepareClasses()
         .then(() => cleanScoresDependent())
         .then(() => {

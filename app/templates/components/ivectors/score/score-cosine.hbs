@@ -1,0 +1,64 @@
+<div class="ui list">
+  <div class="item">
+    <div class="ui buttons basic">
+      <button class="ui button" {{action 'scoreCosine'}}>Common</button>
+      <button class="ui button" {{action 'mean'}}>Mean</button>
+      <button class="ui button" {{action 'meanMatch'}}>Mean Match</button>
+      <button class="ui button" {{action 'percentMatch'}}>
+        Percent Match
+      </button>
+      <button class="ui button" {{action 'bestMatches'}}>
+        Best Matches
+      </button>
+    </div>
+  </div>
+  <div class="item">
+    <div class="ui buttons basic">
+      <button class="ui button" {{action 'scoreCosineDependent'}}>
+        Dependent
+      </button>
+      <button class="ui button" {{action 'meanDependent'}}>Mean</button>
+      <button class="ui button" {{action 'meanMatchDependent'}}>
+        Mean Match
+      </button>
+      <button class="ui button" {{action 'percentMatchDependent'}}>
+        Percent Match
+      </button>
+      <button class="ui button" {{action 'bestMatchesDependent'}}>
+        Best Matches
+      </button>
+    </div>
+  </div>
+</div>
+
+<h2 class="ui dividing header">Results</h2>
+{{#unless bestMatches}}
+  <div class="ui two column stackable grid container">
+    {{#each-in results as |testVector res|}}
+      <div class="ui column">
+        <h4 class="ui header">{{testVector}}</h4>
+        <ul>
+          {{#each-in res as |key value|}}
+            <li>{{key}} : {{value}}</li>
+          {{/each-in}}
+        </ul>
+      </div>
+    {{/each-in}}
+  </div>
+{{/unless}}
+{{#if bestMatches}}
+  <div class="ui two column stackable grid container">
+    {{#each-in results as |testVector res|}}
+      <div class="ui column">
+        <h4 class="ui header">{{testVector}}</h4>
+        <ul>
+          {{#each-in res as |key value|}}
+            <li>{{value.[0]}} : {{value.[1]}}</li>
+          {{/each-in}}
+        </ul>
+      </div>
+    {{/each-in}}
+  </div>
+{{/if}}
+
+{{yield}}

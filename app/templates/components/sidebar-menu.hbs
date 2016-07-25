@@ -1,4 +1,5 @@
-{{#ui-sidebar class='vertical menu visible'}}
+  <div class="ui vertical sticky menu fixed top sidebar visible"
+       style="width: 250px !important; height: 1813px !important; margin-top: 0; left: 0;">
   <div class="item">
     {{#link-to 'index'}}arm-tools{{/link-to}}
   </div>
@@ -36,12 +37,24 @@
           {{#link-to 'ivectors.wav-to-ivectors' class='item'}}
             Wav test prepare
           {{/link-to}}
-          {{#link-to 'ivectors.score' class='item'}}Score WCCN{{/link-to}}
+          {{#link-to 'ivectors.score.cosine' class='item'}}
+            Score WCCN
+          {{/link-to}}
+          {{#link-to 'ivectors.score.efr' class='item'}}
+            Score EFR Mahalanobis
+          {{/link-to}}
+          {{#link-to 'ivectors.score.sphnorm' class='item'}}
+            Score SphNorm PLDA
+          {{/link-to}}
+          {{#link-to 'ivectors.score.plda-norm' class='item'}}
+            Score PLDA Norm
+          {{/link-to}}
         </div>
       {{/ui-dropdown}}
+      {{#link-to "ivectors-leave-one-out" class="item"}}Leave one out{{/link-to}}
       {{#link-to "ivectors.cleaner" class="item"}}Cleaner{{/link-to}}
     </div>
   </div>
-{{/ui-sidebar}}
+</div>
 
 {{yield}}

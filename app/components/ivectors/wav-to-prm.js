@@ -20,7 +20,7 @@ export default Ember.Component.extend({
       console.log('Prepare');
       this.set('isPrepareProcess', true);
 
-      var spro = SPro.create({
+      const spro = SPro.create({
         path: ivectorsPath,
         specificPath: contextPath,
         input: `${contextPath}/input`,

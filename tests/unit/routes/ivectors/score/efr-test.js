@@ -1,6 +1,6 @@
 import { moduleFor, test } from 'ember-qunit';
 
-moduleFor('route:ivectors/score', 'Unit | Route | ivectors/score', {
+moduleFor('route:ivectors/score/efr', 'Unit | Route | ivectors/score/efr', {
   // Specify the other units that are required for this test.
   // needs: ['controller:foo']
 });

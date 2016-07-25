@@ -11,11 +11,18 @@ Router.map(function() {
     this.route('ubm-tv');
     this.route('extract-classes');
     this.route('wav-to-ivectors');
-    this.route('score');
     this.route('learn-common-ubm');
     this.route('learn-dependent-ubm');
     this.route('cleaner');
+
+    this.route('score', function() {
+      this.route('cosine');
+      this.route('efr');
+      this.route('sphnorm');
+      this.route('plda-norm');
+    });
   });
+  this.route('ivectors-leave-one-out');
 });
 
 export default Router;
