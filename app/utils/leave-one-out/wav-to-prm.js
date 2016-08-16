@@ -1,5 +1,6 @@
 import SPro from '../../ivectors/0_1_Prepare_PRM/Spro';
 import {execAsync} from "../exec-async";
+import {logger} from "../logger";
 
 const BluebirdPromise = require('bluebird');
 const fs = BluebirdPromise.promisifyAll(require('fs-extra'));
@@ -12,6 +13,7 @@ const prmPath = `${ivectorsPath}/prm`;
 const lblPath = `${ivectorsPath}/lbl`;
 
 const wavToPRMConcat = () => {
+  logger.log('debug', 'wavToPRMConcat');
   const clusters = [];
   return fs.readdirAsync(`${leaveOnePath}/0_input`)
     .then(dirs =>
@@ -112,23 +114,49 @@ const createFiles = (file, thread) => {
       '\n' + buffer.toString()));
 };
 
-const normPRM = thread => {
+const createDepFiles = (file, thread) => {
+  logger.log('silly', 'createDepFiles');
   const threadPath = `${leaveOnePath}/threads/${thread}`;
 
+  let depCluster = [];
+  return fs.readFileAsync(`${threadPath}/lst/${file[0]}.lst`)
+    .then(buffer => {
+      buffer = buffer.toString().split('\n');
+      buffer.splice(buffer.indexOf(file[2]), 1);
+      depCluster = buffer;
+      return fs.writeFileAsync(`${threadPath}/lst/${file[0]}.lst`,
+        depCluster.join('\n'));
+    })
+    .then(() => fs.writeFileAsync(`${threadPath}/ndx/${file[0]}.ndx`,
+      depCluster.join('\n')))
+    .then(() => fs.writeFileAsync(`${threadPath}/ndx/ivEx-${file[0]}.ndx`,
+      `${file[0]} ${depCluster.join(' ')}`))
+    .then(() => fs.writeFileAsync(`${threadPath}/ndx/Plda-${file[0]}.ndx`,
+      `${depCluster.join(' ')}`))
+    .then(() => fs.readdirAsync(`${threadPath}/ivTest`))
+    .then(dirRead => BluebirdPromise.map(dirRead,
+      ivTestFile => fs.readFileAsync(`${threadPath}/ivTest/${ivTestFile}`)
+        .then(
+          fileRead => fs.writeFileAsync(`${threadPath}/ivTest/${ivTestFile}`,
+            fileRead.toString().replace('<replace>', file[2])))));
+};
+
+const normPRM = () => {
+  logger.log('debug', 'normPRM');
   const enerNorm = [
     `${leaveOnePath}/exe/01_NormFeat`,
     `--config ${leaveOnePath}/cfg/00_PRM_NormFeat_energy.cfg`,
-    `--inputFeatureFilename ${threadPath}/data.lst`,
-    `--featureFilesPath ${threadPath}/prm/`,
-    `--labelFilesPath ${threadPath}/lbl/`
+    `--inputFeatureFilename ${commonPath}/data.lst`,
+    `--featureFilesPath ${commonPath}/prm/`,
+    `--labelFilesPath ${commonPath}/lbl/`
   ];
 
   const featNorm = [
     `${leaveOnePath}/exe/01_NormFeat`,
     `--config ${leaveOnePath}/cfg/01_PRM_NormFeat.cfg`,
-    `--inputFeatureFilename ${threadPath}/data.lst`,
-    `--featureFilesPath ${threadPath}/prm/`,
-    `--labelFilesPath ${threadPath}/lbl/`
+    `--inputFeatureFilename ${commonPath}/data.lst`,
+    `--featureFilesPath ${commonPath}/prm/`,
+    `--labelFilesPath ${commonPath}/lbl/`
   ];
 
   return execAsync(enerNorm.join(' '))
@@ -136,7 +164,7 @@ const normPRM = thread => {
 };
 
 const wavToPRM = (input, output = prmPath, label = lblPath) => {
-  console.log('wav to prm');
+  logger.log('debug', 'wavToPRM');
 
   return new BluebirdPromise(resolve => {
     const spro = SPro.create({
@@ -157,7 +185,7 @@ const wavToPRM = (input, output = prmPath, label = lblPath) => {
 };
 
 const normEnergy = () => {
-  console.log('Norm Energy');
+  logger.log('debug', 'Norm Energy');
   let command = `${leaveOnePath}/exe/01_NormFeat`;
   let options = [
     `--config ${leaveOnePath}/cfg/00_PRM_NormFeat_energy.cfg`,
@@ -171,7 +199,7 @@ const normEnergy = () => {
 };
 
 const normFeatures = () => {
-  console.log('Norm Features');
+  logger.log('debug', 'Norm Features');
   let command = `${leaveOnePath}/exe/01_NormFeat`;
   let options = [
     `--config ${leaveOnePath}/cfg/01_PRM_NormFeat.cfg`,
@@ -188,6 +216,7 @@ export {
   wavToPRMConcat,
   copyCommon,
   createFiles,
+  createDepFiles,
   normPRM,
   wavToPRM,
   normEnergy,

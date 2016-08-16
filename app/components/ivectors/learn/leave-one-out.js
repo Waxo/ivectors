@@ -1,4 +1,4 @@
-import Ember from "ember";
+import Ember from 'ember';
 import {
   wavToPRM,
   normEnergy,
@@ -6,25 +6,31 @@ import {
   wavToPRMConcat,
   copyCommon,
   createFiles,
-  normPRM
-} from "../../../utils/leave-one-out/wav-to-prm";
+  normPRM,
+  createDepFiles
+} from '../../../utils/leave-one-out/wav-to-prm';
 import {
   clearProject,
   createFolders,
   clearProject2,
-  createFolders2
-} from "../../../utils/leave-one-out/remove-common";
+  createFolders2,
+  createCommonLST
+} from '../../../utils/leave-one-out/remove-common';
 import {
   trainUBM,
   trainTotalVariability,
   createUBM,
-  createTV
-} from "../../../utils/leave-one-out/train-ubm-tv";
+  createTV,
+  createCommonUBMTV,
+  learnDepUBMTV
+} from '../../../utils/leave-one-out/train-ubm-tv';
 import {
   prepareIVectorsExtractor,
   extractIV,
-  ivectorExtractor
-} from "../../../utils/leave-one-out/extract-iv";
+  ivectorExtractor,
+  extractCommonIV,
+  extractDepIV
+} from '../../../utils/leave-one-out/extract-iv';
 import {
   normalize,
   pldaTraining,
@@ -39,17 +45,20 @@ import {
   createSph,
   scorePLDA,
   scoreMahalanobis,
-  scoreSph
-} from "../../../utils/leave-one-out/scoring-method-leave-one";
-import {parseResults} from "../../../utils/parser";
-import {computeMean} from "../../../utils/maths-utils";
-import {countMean} from "../../../utils/leave-one-out/leave-one-out";
+  scoreSph,
+  normalizeDepPLDA,
+  scoreDepPLDA
+} from '../../../utils/leave-one-out/scoring-method-leave-one';
+import {parseResults} from '../../../utils/parser';
+import {computeMean} from '../../../utils/maths-utils';
 import {
-  createLST,
-  createDependentLST,
-  createDependentNDX
-} from "../../../utils/leave-one-out/create-lst";
-import {pad} from "../../../utils/pad";
+  countMean,
+  createConfuseMat,
+  csvConfuseMat
+} from '../../../utils/leave-one-out/leave-one-out';
+import {createLST} from '../../../utils/leave-one-out/create-lst';
+import {pad} from '../../../utils/pad';
+import {logger} from '../../../utils/logger';
 
 const BluebirdPromise = require('bluebird');
 const fs = BluebirdPromise.promisifyAll(require('fs-extra'));
@@ -60,7 +69,6 @@ const LSTPath = `${ivectorsPath}/lst`;
 
 const failed = [];
 const left = [];
-let depClasses = '';
 
 const leaveOneProcess = (files, thread = '') => {
   return new BluebirdPromise(resolve => {
@@ -126,6 +134,7 @@ const threadLeaveOneOut = files => {
 };
 
 const processConcat = (files, thread, normalize = false) => {
+  logger.log('silly', 'processConcat');
   return new BluebirdPromise(resolve => {
     if (!files.length) {
       resolve();
@@ -133,9 +142,8 @@ const processConcat = (files, thread, normalize = false) => {
       const current = files.shift();
       return copyCommon(current, thread)
         .then(() => createFiles(current, thread))
-        .delay(50).then(() => normPRM(thread))
-        .delay(50).then(() => createUBM(thread))
-        .delay(50).then(() => createTV(thread))
+        .delay(50).then(() => createUBM(thread, 'ubm.lst'))
+        .delay(50).then(() => createTV(thread, 'tv.ndx'))
         .delay(50).then(() => ivectorExtractor(thread, 'ivExtractorMat.ndx'))
         .delay(50).then(() => ivectorExtractor(thread, 'ivExtractor.ndx'))
         .delay(50).then(() => normalizePLDA(thread))
@@ -147,11 +155,11 @@ const processConcat = (files, thread, normalize = false) => {
         .then(() => scoreMahalanobis(current, thread, normalize))
         .then(() => scoreSph(current, thread, normalize))
         .then(() => {
-          console.log(`DONE : ${current}`);
+          logger.log('info', `DONE: ${current}`);
         })
         .catch((err) => {
-          console.log(`ERROR: ${current}`);
-          console.log(`ERROR: ${err}`);
+          logger.log('warn', `Re-queued: ${current} `);
+          logger.log('warn', `${err}`);
           failed.push(current);
         })
         .finally(() => processConcat(files, thread, normalize))
@@ -160,7 +168,37 @@ const processConcat = (files, thread, normalize = false) => {
   });
 };
 
-const resolverConcat = (files, thread, normalize = false) => {
+const processDependentConcat = (files, thread, normalize = false) => {
+  logger.log('silly', `processDependentConcat`);
+  return new BluebirdPromise(resolve => {
+    if (!files.length) {
+      resolve();
+    } else {
+      const current = files.shift();
+      logger.verbose(current.join(', '));
+      return copyCommon(current, thread)
+        .then(() => createDepFiles(current, thread))
+        .then(() => learnDepUBMTV(current, thread))
+        .then(() => extractDepIV(current, thread))
+        .then(() => normalizeDepPLDA(thread))
+        .then(() => scoreDepPLDA(current, thread))
+        .then(() => {
+          logger.log('info', `DONE: ${current}`);
+        })
+        .catch((err) => {
+          logger.log('warn', `Re-queued: ${current} `);
+          logger.log('warn', `${err}`);
+          failed.push(current);
+        })
+        .finally(() => processDependentConcat(files, thread, normalize))
+        .then(() => resolve());
+    }
+  });
+};
+
+const resolverConcat = (files, thread, normalize = false,
+  dependent = false) => {
+  logger.log('silly', 'resolverConcat');
   return new BluebirdPromise(resolve => {
     files = files.concat(failed);
     failed.splice(0, failed.length);
@@ -168,15 +206,25 @@ const resolverConcat = (files, thread, normalize = false) => {
     if (!files.length) {
       resolve();
     } else {
-      processConcat(files.splice(0, 5), thread, normalize)
-        .delay(1000)
-        .then(() => resolverConcat(files, thread, normalize))
-        .then(() => resolve());
+      if (!dependent) {
+        processConcat(files.splice(0, 5), thread, normalize)
+          .then(() => {
+            return resolverConcat(files, thread, normalize);
+          })
+          .then(() => resolve());
+      } else {
+        processDependentConcat(files.splice(0, 5), thread, normalize)
+          .then(() => {
+            return resolverConcat(files, thread, normalize, dependent);
+          })
+          .then(() => resolve());
+      }
     }
   });
 };
 
-const launchThreads = files => {
+const launchThreads = (files, dependent = false) => {
+  logger.log('debug', 'launchThreads');
   const maxThreads = 8;
   const normalize = false;
   const arraysLength = Math.ceil(files.length / maxThreads);
@@ -184,12 +232,14 @@ const launchThreads = files => {
   const arrayThreads = [];
   while (files.length) {
     arrayThreads.push(
-      resolverConcat(files.splice(0, arraysLength), ++threadNum, normalize));
+      resolverConcat(files.splice(0, arraysLength), ++threadNum, normalize,
+        dependent));
   }
   return new BluebirdPromise.all(arrayThreads);
 };
 
-const threadConcat = () => {
+const threadConcat = (dependent = false) => {
+  logger.log('debug', 'threadConcat');
   let clusters = [];
   const process = [];
   return fs.readdirAsync(`${leaveOnePath}/0_input`)
@@ -205,10 +255,9 @@ const threadConcat = () => {
             [clusters[idx], file, `${clusters[idx]}-${pad(ndx, 5)}`]);
         });
       });
-      return launchThreads(process);
+      return launchThreads(process, dependent);
     });
 };
-
 
 export default Ember.Component.extend({
   results: {},
@@ -232,39 +281,44 @@ export default Ember.Component.extend({
           console.timeEnd('Leave one out');
         });
     },
-    leaveOneOutDependent() {
-      console.time('Leave one out dependent');
-      const interv = setInterval(
-        () => this.set('length', left.reduce((a, b) => a + b)), 30000);
-      clearProject()
-        .then(() => createFolders())
-        // .then(() => wavToPRM(`${leaveOnePath}/0_input`))
-        // .delay(50).then(() => normEnergy())
-        // .delay(50).then(() => normFeatures())
-        .delay(50).then(() => createDependentLST())
-        .delay(50)
-        .then(inputClasses => {
-          depClasses = inputClasses;
-          createDependentNDX(depClasses);
-        })
-        .then(() => {
-          clearInterval(interv);
-          this.set('length', 0);
-          console.timeEnd('Leave one out dependent');
-        });
-    },
     leaveOneOutConcat() {
+      logger.log('info', 'leaveOneOutConcat');
       console.time('Leave one out concat');
       const interv = setInterval(
         () => this.set('length', left.reduce((a, b) => a + b)), 30000);
       clearProject2()
         .then(() => createFolders2())
         .then(() => wavToPRMConcat())
-        .delay(3000).then(() => threadConcat())
+        .delay(10000).then(() => normPRM())
+        .then(() => threadConcat())
         .then(() => {
           clearInterval(interv);
           this.set('length', 0);
+          logger.log('info', 'leaveOneOutConcat');
           console.timeEnd('Leave one out concat');
+        });
+    },
+    leaveOneOutDependentCat() {
+      logger.log('info', 'leaveOneOutDependentCat');
+      console.time('Leave one out dependent concat');
+      const interv = setInterval(() => {
+        if (left.length !== 0) {
+          this.set('length', left.reduce((a, b) => a + b));
+        }
+      }, 30000);
+      clearProject2()
+        .then(() => createFolders2())
+        .then(() => wavToPRMConcat())
+        .delay(10000).then(() => normPRM())
+        .then(() => createCommonLST())
+        .then(() => createCommonUBMTV())
+        .then(() => extractCommonIV())
+        .delay(10000).then(() => threadConcat(true))
+        .then(() => {
+          clearInterval(interv);
+          this.set('length', 0);
+          logger.log('info', 'Done: leaveOneOutDependentCat');
+          console.timeEnd('Leave one out dependent concat');
         });
     },
     scoreLeaveOneOut() {
@@ -289,6 +343,7 @@ export default Ember.Component.extend({
         .then(files => BluebirdPromise.map(files,
           file => parseResults(`${ivectorsPath}/save_scores/${file}`)))
         .then(scores => {
+          console.log(scores);
           scores.forEach(score => {
             for (const key in score) {
               if (score.hasOwnProperty(key)) {
@@ -296,8 +351,18 @@ export default Ember.Component.extend({
               }
             }
           });
+          console.log(res);
           this.set('results', countMean(res));
         });
+    },
+    confuseMatrix() {
+      logger.log('silly', 'confuseMatrix');
+      fs.readdirAsync(`${ivectorsPath}/save_scores`)
+        .then(files => BluebirdPromise.map(files,
+          file => parseResults(`${ivectorsPath}/save_scores/${file}`)))
+        .then(scores => createConfuseMat(scores))
+        .then(confuseMat => csvConfuseMat(confuseMat, this.get('csvName')))
+        .then(() => logger.log('info', 'confuseMatrix Created'));
     }
   }
 });

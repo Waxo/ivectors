@@ -1,4 +1,5 @@
 import {execAsync} from "../exec-async";
+import {logger} from "../logger";
 
 const BluebirdPromise = require('bluebird');
 const fs = BluebirdPromise.promisifyAll(require('fs-extra'));
@@ -6,6 +7,7 @@ const wavFileInfo = require("wav-file-info");
 
 const ivectorsPath = `${process.cwd()}/app/ivectors`;
 const leaveOnePath = `${ivectorsPath}/3_LeaveOneOut`;
+const commonPath = `${leaveOnePath}/common`;
 const prmPath = `${ivectorsPath}/prm`;
 const lblPath = `${ivectorsPath}/lbl`;
 const gmmPath = `${leaveOnePath}/gmm`;
@@ -57,9 +59,10 @@ const prepareIVectorsExtractor = (currentName, newName, thread = '') => {
           }
         }
       });
-      fs.writeFileSync(`${ndxPath}/Plda${thread}.ndx`, plda);
-      fs.writeFileSync(`${ndxPath}/TrainModel${thread}.ndx`, trainModel);
-      return fs.writeFileAsync(`${ndxPath}/ivExtractor${thread}.ndx`, ndx);
+      return fs.writeFileAsync(`${ndxPath}/ivExtractor${thread}.ndx`, ndx)
+        .then(() => fs.writeFileAsync(`${ndxPath}/Plda${thread}.ndx`, plda))
+        .then(() => fs.writeFileAsync(`${ndxPath}/TrainModel${thread}.ndx`,
+          trainModel));
     });
 };
 
@@ -83,18 +86,20 @@ const extractIV = (thread = '') => {
     });
 };
 
-const ivectorExtractor = (thread, list) => {
-  const threadPath = `${leaveOnePath}/threads/${thread}`;
+const ivectorExtractor = (thread, ndxFile, cluster = '') => {
+  logger.log('silly', 'ivectorExtractor');
+  const threadPath = (thread !== 'common') ?
+    `${leaveOnePath}/threads/${thread}` : `${commonPath}`;
 
   const ivExtractor = [
     `${leaveOnePath}/exe/04_IvExtractor`,
     `--config ${leaveOnePath}/cfg/04_ivExtractor_fast.cfg`,
     `--featureFilesPath ${threadPath}/prm/`,
     `--labelFilesPath ${threadPath}/lbl/`,
-    `--mixtureFilesPath ${threadPath}/gmm/`,
-    `--matrixFilesPath ${threadPath}/mat/`,
-    `--saveVectorFilesPath ${threadPath}/iv/raw/`,
-    `--targetIdList ${threadPath}/${list}`
+    `--mixtureFilesPath ${threadPath}/gmm/${cluster}`,
+    `--matrixFilesPath ${threadPath}/mat/${cluster}`,
+    `--saveVectorFilesPath ${threadPath}/iv/raw/${cluster}`,
+    `--targetIdList ${threadPath}/${ndxFile}`
   ];
 
   return execAsync(ivExtractor.join(' '));
@@ -152,4 +157,65 @@ const createTest = (file, thread) => {
     .delay(50).then(() => execAsync(ivExtractor.join(' ')));
 };
 
-export {prepareIVectorsExtractor, extractIV, ivectorExtractor, createTest};
+const extractCommonIV = () => {
+  logger.log('debug', 'extractCommonIV');
+  let clusters = [];
+  return fs.readdirAsync(`${commonPath}/lst`)
+    .then(files => {
+      clusters = files.map(a => a.replace('.lst', ''));
+      return BluebirdPromise.map(files,
+        file => fs.readFileAsync(`${commonPath}/lst/${file}`));
+    })
+    .then(readFiles => {
+      return BluebirdPromise.map(readFiles, (buffer, idx) => {
+        buffer = buffer.toString().split('\n');
+        return fs.writeFileAsync(
+          `${commonPath}/ndx/ivExMat-${clusters[idx]}.ndx`,
+          buffer.map(a => `${a} ${a}`).join('\n'))
+          .then(() => fs.writeFileAsync(
+            `${commonPath}/ndx/ivEx-${clusters[idx]}.ndx`,
+            `${clusters[idx]} ${buffer.join(' ')}`))
+          .then(() => fs.writeFileAsync(
+            `${commonPath}/ivTest/ivTestMat-${clusters[idx]}.ndx`,
+            `<replace> ${buffer.join(' ')}`))
+          .then(() => fs.writeFileAsync(
+            `${commonPath}/ivTest/ivTest-${clusters[idx]}.ndx`,
+            `<replace> ${clusters[idx]}`))
+          .then(() => fs.writeFileAsync(
+            `${commonPath}/ndx/Plda-${clusters[idx]}.ndx`, buffer.join(' ')));
+      });
+    })
+    .then(() => BluebirdPromise.map(clusters, cluster =>
+      fs.mkdirsAsync(`${commonPath}/iv/raw/${cluster}`)
+        .then(() => fs.mkdirsAsync(`${commonPath}/iv/raw/${cluster}`))
+        .then(() => ivectorExtractor('common',
+          `ndx/ivExMat-${cluster}.ndx`, `${cluster}/`))
+        .then(() => ivectorExtractor('common',
+          `ndx/ivEx-${cluster}.ndx`, `${cluster}/`)))
+    );
+};
+
+const extractDepIV = (file, thread) => {
+  logger.log('silly', 'extractDepIV');
+  const threadPath = `${leaveOnePath}/threads/${thread}`;
+  return fs.removeAsync(`${threadPath}/iv/raw/${file[0]}`)
+    .then(() => fs.mkdirsAsync(`${threadPath}/iv/raw/${file[0]}`))
+    .then(
+      () => ivectorExtractor(thread, `ndx/ivEx-${file[0]}.ndx`, `${file[0]}/`))
+    .then(() => ivectorExtractor(thread, `ndx/ivExMat-${file[0]}.ndx`,
+      `${file[0]}/`))
+    .then(() => fs.writeFileAsync(`${threadPath}/ivExGlob.ndx`,
+      `${file[2]} ${file[2]}` + '\n'))
+    .then(() => fs.readdirAsync(`${threadPath}/gmm`))
+    .then(clusters => BluebirdPromise.map(clusters,
+      cluster => ivectorExtractor(thread, 'ivExGlob.ndx', `${cluster}/`)));
+};
+
+export {
+  prepareIVectorsExtractor,
+  extractIV,
+  ivectorExtractor,
+  extractCommonIV,
+  createTest,
+  extractDepIV
+};

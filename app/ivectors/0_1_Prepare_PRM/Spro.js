@@ -75,12 +75,23 @@ let SPro = Ember.Object.extend({
 
   writeDataAndLbl() {
     this.files.forEach(file => {
-      let name = this.retrieveName(file);
-      let input = `${this.input}/${file}`;
-      let output = `${this.output}/${name}.prm`;
-      let command = `${this.specificPath}/00_sfbcep`;
+      const name = this.retrieveName(file);
+      const input = `${this.input}/${file}`;
       fs.appendFile(`${this.path}/data.lst`, name + '\n');
-      exec(`${command} -F PCM16 -p 19 -e -D -A ${input} ${output}`);
+
+      const spro = [
+        `${this.specificPath}/00_sfbcep`,
+        `--format=PCM16`, // -F PMC16
+        `--sample-rate=16000`, // wasn't here but seems to change nothing
+        `--num-ceps=19`, // -p 19
+        `--energy`, // -e
+        `--delta`, // -D
+        `--acceleration`, // -A
+        input,
+        `${this.output}/${name}.prm`
+      ];
+
+      exec(spro.join(' '));
       wavFileInfo.infoByFilename(input, (err, info) => {
         let line = `0 ${info.duration} sound`;
         fs.writeFile(`${this.label}/${name}.lbl`, line, () => {
