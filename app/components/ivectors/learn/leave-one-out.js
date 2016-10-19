@@ -39,12 +39,8 @@ import {
   scoreEFR,
   scoreSphNorm,
   normalizePLDA,
-  createWCCN,
-  scoreCosCat,
-  createEFR,
   createSph,
   scorePLDA,
-  scoreMahalanobis,
   scoreSph,
   normalizeDepPLDA,
   scoreDepPLDA
@@ -147,12 +143,8 @@ const processConcat = (files, thread, normalize = false) => {
         .delay(50).then(() => ivectorExtractor(thread, 'ivExtractorMat.ndx'))
         .delay(50).then(() => ivectorExtractor(thread, 'ivExtractor.ndx'))
         .delay(50).then(() => normalizePLDA(thread))
-        .delay(50).then(() => createWCCN(current, thread, normalize))
-        .delay(50).then(() => createEFR(current, thread, normalize))
         .delay(50).then(() => createSph(current, thread, normalize))
         .delay(50).then(() => scorePLDA(current, thread))
-        .then(() => scoreCosCat(current, thread, normalize))
-        .then(() => scoreMahalanobis(current, thread, normalize))
         .then(() => scoreSph(current, thread, normalize))
         .then(() => {
           logger.log('info', `DONE: ${current}`);
@@ -225,7 +217,7 @@ const resolverConcat = (files, thread, normalize = false,
 
 const launchThreads = (files, dependent = false) => {
   logger.log('debug', 'launchThreads');
-  const maxThreads = 8;
+  const maxThreads = 1;
   const normalize = false;
   const arraysLength = Math.ceil(files.length / maxThreads);
   let threadNum = 0;
@@ -262,6 +254,7 @@ const threadConcat = (dependent = false) => {
 export default Ember.Component.extend({
   results: {},
   length: 0,
+  prmInput: true,
   actions: {
     leaveOneOut() {
       console.time('Leave one out');
@@ -288,13 +281,13 @@ export default Ember.Component.extend({
         () => this.set('length', left.reduce((a, b) => a + b)), 30000);
       clearProject2()
         .then(() => createFolders2())
-        .then(() => wavToPRMConcat())
+        .then(() => wavToPRMConcat(this.get('prmInput')))
         .delay(10000).then(() => normPRM())
         .then(() => threadConcat())
         .then(() => {
           clearInterval(interv);
           this.set('length', 0);
-          logger.log('info', 'leaveOneOutConcat');
+          logger.log('info', 'Done : leaveOneOutConcat');
           console.timeEnd('Leave one out concat');
         });
     },

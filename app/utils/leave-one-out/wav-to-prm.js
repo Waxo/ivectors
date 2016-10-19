@@ -12,7 +12,7 @@ const commonPath = `${leaveOnePath}/common`;
 const prmPath = `${ivectorsPath}/prm`;
 const lblPath = `${ivectorsPath}/lbl`;
 
-const wavToPRMConcat = () => {
+const wavToPRMConcat = (prmInput = false) => {
   logger.log('debug', 'wavToPRMConcat');
   const clusters = [];
   return fs.readdirAsync(`${leaveOnePath}/0_input`)
@@ -20,6 +20,11 @@ const wavToPRMConcat = () => {
       BluebirdPromise.map(dirs,
         dir => {
           clusters.push([dir, []]);
+          if (prmInput) {
+            return fs.copyAsync(`${leaveOnePath}/1_prmInput/${dir}/`,
+              `${commonPath}/prm/`)
+              .then(() => fs.readdirAsync(`${leaveOnePath}/0_input/${dir}`));
+          }
           return fs.readdirAsync(`${leaveOnePath}/0_input/${dir}`);
         }))
     .then(filesInDirs => {
@@ -28,15 +33,22 @@ const wavToPRMConcat = () => {
       });
       return BluebirdPromise.map(clusters,
         cluster => BluebirdPromise.map(cluster[1], file => {
-          const command = [
-            `${leaveOnePath}/exe/00_sfbcep`,
-            '-F PCM16 -p 19 -e -D -A',
-            `${leaveOnePath}/0_input/${cluster[0]}/${file}`,
-            `${commonPath}/prm/${file.replace('wav', 'prm')}`
-          ];
-          return execAsync(command.join(' '))
-            .then(() => wavFileInfo.infoByFilenameAsync(
-              `${leaveOnePath}/0_input/${cluster[0]}/${file}`))
+          if (!prmInput) {
+            const command = [
+              `${leaveOnePath}/exe/00_sfbcep`,
+              '-F PCM16 -p 19 -e -D -A -l 8 -d 4',
+              `${leaveOnePath}/0_input/${cluster[0]}/${file}`,
+              `${commonPath}/prm/${file.replace('wav', 'prm')}`
+            ];
+            return execAsync(command.join(' '))
+              .then(() => wavFileInfo.infoByFilenameAsync(
+                `${leaveOnePath}/0_input/${cluster[0]}/${file}`))
+              .then(info => fs.writeFileAsync(
+                `${commonPath}/lbl/${file.replace('wav', 'lbl')}`,
+                `0 ${info.duration} sound`));
+          }
+          return wavFileInfo.infoByFilenameAsync(
+            `${leaveOnePath}/0_input/${cluster[0]}/${file}`)
             .then(info => fs.writeFileAsync(
               `${commonPath}/lbl/${file.replace('wav', 'lbl')}`,
               `0 ${info.duration} sound`));
@@ -143,13 +155,6 @@ const createDepFiles = (file, thread) => {
 
 const normPRM = () => {
   logger.log('debug', 'normPRM');
-  const enerNorm = [
-    `${leaveOnePath}/exe/01_NormFeat`,
-    `--config ${leaveOnePath}/cfg/00_PRM_NormFeat_energy.cfg`,
-    `--inputFeatureFilename ${commonPath}/data.lst`,
-    `--featureFilesPath ${commonPath}/prm/`,
-    `--labelFilesPath ${commonPath}/lbl/`
-  ];
 
   const featNorm = [
     `${leaveOnePath}/exe/01_NormFeat`,
@@ -159,8 +164,7 @@ const normPRM = () => {
     `--labelFilesPath ${commonPath}/lbl/`
   ];
 
-  return execAsync(enerNorm.join(' '))
-    .then(() => execAsync(featNorm.join(' ')));
+  return execAsync(featNorm.join(' '));
 };
 
 const wavToPRM = (input, output = prmPath, label = lblPath) => {

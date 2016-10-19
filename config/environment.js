@@ -4,7 +4,7 @@ module.exports = function(environment) {
   const ENV = {
     modulePrefix: 'ivectors',
     environment: environment,
-    baseURL: '/',
+    rootURL: '/',
     locationType: process.env.EMBER_CLI_ELECTRON ? 'hash' : 'auto',
     EmberENV: {
       FEATURES: {
@@ -30,7 +30,6 @@ module.exports = function(environment) {
 
   if (environment === 'test') {
     // Testem prefers this...
-    ENV.baseURL = '/';
     ENV.locationType = 'none';
 
     // keep test console output quieter

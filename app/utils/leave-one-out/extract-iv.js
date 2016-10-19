@@ -1,5 +1,6 @@
 import {execAsync} from "../exec-async";
 import {logger} from "../logger";
+import {pad} from '../pad';
 
 const BluebirdPromise = require('bluebird');
 const fs = BluebirdPromise.promisifyAll(require('fs-extra'));
@@ -18,14 +19,6 @@ const ndxPath = `${leaveOnePath}/ndx`;
 const cleanIV = (thread = '') => {
   return fs.removeAsync(`${iv}${thread}`)
     .then(() => fs.mkdirsAsync(`${iv}${thread}/raw`));
-};
-
-const pad = function (num, size) {
-  let s = num + '';
-  while (s.length < size) {
-    s = '0' + s;
-  }
-  return s;
 };
 
 const prepareIVectorsExtractor = (currentName, newName, thread = '') => {

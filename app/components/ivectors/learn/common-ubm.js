@@ -89,7 +89,7 @@ export default Ember.Component.extend({
     normEnergy() {
       console.log('Norm Energy');
       this.set('isEnergyProcess', true);
-      let command = `${preparePath}/NormFeat`;
+      let command = `${preparePath}/01_NormFeat`;
       let options = [
         `--config ${preparePath}/cfg/NormFeat_energy.cfg`,
         `--inputFeatureFilename ${ivectorsPath}/data.lst`,
@@ -114,7 +114,7 @@ export default Ember.Component.extend({
     normFeatures() {
       console.log('Norm Features');
       this.set('isFeaturesProcess', true);
-      let command = `${preparePath}/NormFeat`;
+      let command = `${preparePath}/01_NormFeat`;
       let options = [
         `--config ${preparePath}/cfg/NormFeat.cfg`,
         `--inputFeatureFilename ${ivectorsPath}/data.lst`,
@@ -142,7 +142,7 @@ export default Ember.Component.extend({
         this.set('isUBMProcess', true);
         let command = `${UBMPath}/TrainWorld`;
         let options = [
-          `--config ${UBMPath}/cfg/TrainWorld.cfg`,
+          `--config ${UBMPath}/cfg/02_TrainWorld.cfg`,
           `--inputFeatureFilename ${ivectorsPath}/data.lst`,
           `--featureFilesPath ${prmPath}/`,
           `--labelFilesPath ${lblPath}`,
@@ -170,7 +170,7 @@ export default Ember.Component.extend({
         .pipe(fs.createWriteStream(`${UBMPath}/totalvariability.ndx`));
       cleanAndRegenerateTV().then(() => {
         this.set('isTVProcess', true);
-        let command = `${UBMPath}/TotalVariability`;
+        let command = `${UBMPath}/03_TotalVariability`;
         let options = [
           `--config ${UBMPath}/cfg/TotalVariability_fast.cfg`,
           `--featureFilesPath ${prmPath}/`,
@@ -237,7 +237,7 @@ export default Ember.Component.extend({
       console.log('Extract IV');
       cleanAndRegenerateIV().then(() => {
         this.set('isExtractProcess', true);
-        let command = `${extractIVPath}/IvExtractor`;
+        let command = `${extractIVPath}/04_IvExtractor`;
         let options = [
           `--config ${extractIVPath}/cfg/ivExtractor_fast.cfg`,
           `--featureFilesPath ${prmPath}/`,

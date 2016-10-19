@@ -91,6 +91,7 @@ const normalize = (thread = '') => {
 };
 
 const normalizePLDA = thread => {
+  logger.log('silly', 'normalizePLDA');
   const threadPath = `${leaveOnePath}/threads/${thread}`;
   return fs.readdirAsync(`${threadPath}/iv/raw`)
     .then(ivectors => fs.writeFileAsync(`${threadPath}/all.lst`,
@@ -147,6 +148,7 @@ const scorePLDANorm = (currentName, thread = '') => {
 };
 
 const scorePLDA = (name, thread) => {
+  logger.log('silly', 'scorePLDA');
   const threadPath = `${leaveOnePath}/threads/${thread}`;
   const trainPLDA = [
     `${exePath}/05_2_PLDA`,
@@ -221,6 +223,7 @@ const scoreSphNorm = (currentName, thread = '') => {
 };
 
 const createWCCN = (name, thread, norm = false) => {
+  logger.log('silly', 'createWCCN');
   return scoring(name, thread, '06_cos_ivTest_WCCN_Cosine.cfg',
     false, 'ivTestMat.ndx', norm);
 };
@@ -241,11 +244,13 @@ const scoreMahalanobis = (name, thread, norm = false) => {
 };
 
 const createSph = (name, thread, norm = false) => {
+  logger.log('silly', 'createSph');
   return scoring(name, thread, '08_sph_ivTest_SphNorm_Plda.cfg',
     false, 'ivTestMat.ndx', norm);
 };
 
 const scoreSph = (name, thread, norm = false) => {
+  logger.log('silly', 'scoreSph');
   return scoring(name, thread, '08_sph_ivTest_SphNorm_Plda_no_load.cfg',
     'scores_sphNorm', 'ivTest.ndx', norm);
 };
