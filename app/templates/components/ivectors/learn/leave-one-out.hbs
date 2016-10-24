@@ -1,9 +1,28 @@
-<div class="ui button" {{action 'leaveOneOut'}}>Go !</div>
-<div class="ui button" {{action 'leaveOneOutDependent'}}>Dependent !</div>
-<div class="ui button" {{action 'leaveOneOutConcat'}}>Concat !</div>
-<div class="ui button" {{action 'scoreLeaveOneOut'}}>Scores</div>
-<div class="ui button" {{action 'countLeaveOneOut'}}>Count</div>
-&nbsp;&nbsp;Left : {{length}}
+{{!--<div class="ui horizontal segments">--}}
+<div class="ui fluid stackable two column grid">
+  <div class="column">
+    <div class="ui button" {{action 'leaveOneOut'}}>Leave one out !</div>
+  </div>
+  <div class="column">
+    <div class="ui button" {{action 'leaveOneOutConcat'}}>Concat !</div>
+    {{ui-checkbox class="toggle" label="Prm Input" checked=prmInput}}
+  </div>
+  {{!--<div class="ui button" {{action 'leaveOneOutDependentCat'}}>Dependent !</div>--}}
+  {{!--</div>--}}
+  <div class="column">
+    <div class="ui button" {{action 'scoreLeaveOneOut'}}>Scores</div>
+    <div class="ui button" {{action 'countLeaveOneOut'}}>Count</div>
+  </div>
+  <div class="column">
+    <div class="ui button" {{action 'confuseMatrix'}}>Confuse Matrix</div>
+    <div class="ui mini input">
+      {{input value=csvName placeholder="csvName"}}
+    </div>
+  </div>
+  <div class="column">
+    Left : {{length}}
+  </div>
+</div>
 
 <h2 class="ui dividing header">Results</h2>
 <div class="ui two column stackable grid container">

@@ -35,6 +35,7 @@
 /app/ivectors/2_3_Mahalanobis/scores_EFR_Mahalanobis.txt
 /app/ivectors/2_3_Mahalanobis/ivTest.ndx
 /app/ivectors/3_LeaveOneOut/0_input/
+/app/ivectors/3_LeaveOneOut/1_prmInput/
 /app/ivectors/3_LeaveOneOut/ndx/
 /app/ivectors/3_LeaveOneOut/gmm/
 /app/ivectors/3_LeaveOneOut/iv/

@@ -1,3 +1,10 @@
+import {logger} from '../logger';
+
+const BluebirdPromise = require('bluebird');
+const fs = BluebirdPromise.promisifyAll(require('fs-extra'));
+
+const ivectorsPath = `${process.cwd()}/app/ivectors`;
+
 const computePercent = res => {
   for (const cluster in res) {
     if (res.hasOwnProperty(cluster)) {
@@ -117,4 +124,101 @@ const countMeanMatch = scores => {
   return res;
 };
 
-export {countMean, countMeanAVG, countMeanMatch};
+const _retrieveClusters = scores => {
+  logger.log('silly', 'retrieveClusters');
+  const clusters = [];
+  for (const score in scores[0]) {
+    if (scores[0].hasOwnProperty(score)) {
+      for (const cluster in scores[0][score]) {
+        if (scores[0][score].hasOwnProperty(cluster)) {
+          clusters.push(cluster);
+        }
+      }
+    }
+  }
+
+  return clusters.sort();
+};
+
+const _createResMatrix = clusters => {
+  const res = {};
+  for (const i of clusters) {
+    res[i] = {samples: 0, matrix: {}};
+    for (const j of clusters) {
+      res[i].matrix[j] = 0;
+    }
+  }
+
+  return res;
+};
+
+const _reformatScores = scores => {
+  const reformated = {};
+  scores.forEach(score => {
+    for (const key in score) {
+      if (score.hasOwnProperty(key)) {
+        reformated[key] = score[key];
+      }
+    }
+  });
+
+  return reformated;
+};
+
+const createConfuseMat = scores => {
+  logger.log('silly', 'createConfuseMat');
+  const clusters = _retrieveClusters(scores);
+  const res = _createResMatrix(clusters);
+
+  scores = _reformatScores(scores);
+
+  for (const ivTest in scores) {
+    if (scores.hasOwnProperty(ivTest)) {
+      const expectedCluster = ivTest.split('-')[0];
+      let sortable = [];
+      for (const cluster in scores[ivTest]) {
+        if (scores[ivTest].hasOwnProperty(cluster)) {
+          sortable.push([cluster, scores[ivTest][cluster].scores[0]]);
+        }
+      }
+      sortable.sort((a, b) => b[1] - a[1]);
+      res[expectedCluster].samples++;
+      res[expectedCluster].matrix[sortable[0][0]]++;
+    }
+  }
+  return res;
+};
+
+const csvConfuseMat = (confuseMat, outputName = '') => {
+  logger.log('silly', 'csvConfuseMat');
+  console.log(confuseMat);
+  let writeBuffer = ',nbSamples';
+  for (const cluster in confuseMat) {
+    if (confuseMat.hasOwnProperty(cluster)) {
+      writeBuffer += `,${cluster}`;
+    }
+  }
+
+  for (const cluster in confuseMat) {
+    if (confuseMat.hasOwnProperty(cluster)) {
+      writeBuffer += '\n' + `${cluster},${confuseMat[cluster].samples}`;
+      for (const testCluster in confuseMat[cluster].matrix) {
+        if (confuseMat[cluster].matrix.hasOwnProperty(testCluster)) {
+          writeBuffer += `,${confuseMat[cluster].matrix[testCluster]}`;
+        }
+      }
+    }
+  }
+
+  return fs.writeFileAsync(
+    `${ivectorsPath}/save_scores/0_${outputName || 'confuseMat'}.csv`,
+    writeBuffer);
+};
+
+export {
+  countMean,
+  countMeanAVG,
+  countMeanMatch,
+  createConfuseMat,
+  csvConfuseMat
+};
