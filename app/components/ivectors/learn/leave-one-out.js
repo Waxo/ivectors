@@ -217,7 +217,7 @@ const resolverConcat = (files, thread, normalize = false,
 
 const launchThreads = (files, dependent = false) => {
   logger.log('debug', 'launchThreads');
-  const maxThreads = 1;
+  const maxThreads = 8;
   const normalize = false;
   const arraysLength = Math.ceil(files.length / maxThreads);
   let threadNum = 0;
