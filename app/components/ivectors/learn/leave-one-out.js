@@ -281,7 +281,7 @@ export default Ember.Component.extend({
         () => this.set('length', left.reduce((a, b) => a + b)), 30000);
       clearProject2()
         .then(() => createFolders2())
-        .then(() => wavToPRMConcat(this.get('prmInput')))
+        .then(() => wavToPRMConcat(this.get('prmInput'), '0_input'))
         .delay(10000).then(() => normPRM())
         .then(() => threadConcat())
         .then(() => {
@@ -301,9 +301,9 @@ export default Ember.Component.extend({
       }, 30000);
       clearProject2()
         .then(() => createFolders2())
-        .then(() => wavToPRMConcat())
+        .then(() => wavToPRMConcat(false, '0_input'))
         .delay(10000).then(() => normPRM())
-        .then(() => createCommonLST())
+        .then(() => createCommonLST('0_input'))
         .then(() => createCommonUBMTV())
         .then(() => extractCommonIV())
         .delay(10000).then(() => threadConcat(true))

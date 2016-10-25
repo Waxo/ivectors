@@ -78,7 +78,7 @@ const createUBM = (thread, lstFile, cluster = '') => {
     `--mixtureFilesPath ${threadPath}/gmm/${cluster}`
   ];
 
-  return execAsync(ubm.join(' '), true);
+  return execAsync(ubm.join(' '));
 };
 
 const createTV = (thread, ndxFile, cluster = '') => {

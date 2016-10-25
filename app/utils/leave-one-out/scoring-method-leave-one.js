@@ -147,7 +147,7 @@ const scorePLDANorm = (currentName, thread = '') => {
     .then(() => execAsync(execute));
 };
 
-const scorePLDA = (name, thread) => {
+const scorePLDA = (name, thread, output = 'scores_PldaNorm') => {
   logger.log('silly', 'scorePLDA');
   const threadPath = `${leaveOnePath}/threads/${thread}`;
   const trainPLDA = [
@@ -161,7 +161,7 @@ const scorePLDA = (name, thread) => {
 
   return execAsync(trainPLDA.join(' '))
     .delay(1000).then(() => scoring(name, thread, '05_3_PLDA_ivTest_Plda.cfg',
-      'scores_PldaNorm', 'ivTest.ndx', true));
+      output, 'ivTest.ndx', true));
 };
 
 const scoreCosine = (currentName, thread = '') => {
@@ -249,10 +249,10 @@ const createSph = (name, thread, norm = false) => {
     false, 'ivTestMat.ndx', norm);
 };
 
-const scoreSph = (name, thread, norm = false) => {
+const scoreSph = (name, thread, norm = false, output = 'scores_sphNorm') => {
   logger.log('silly', 'scoreSph');
   return scoring(name, thread, '08_sph_ivTest_SphNorm_Plda_no_load.cfg',
-    'scores_sphNorm', 'ivTest.ndx', norm);
+    output, 'ivTest.ndx', norm);
 };
 
 const processNormDepPLDA = (thread, lstFile, ndxFile, cluster = '') => {

@@ -106,3 +106,7 @@ atlassian-ide-plugin.xml
 com_crashlytics_export_strings.xml
 crashlytics.properties
 crashlytics-build.properties
+/app/ivectors/3_LeaveOneOut/2_secondPass/
+/app/ivectors/3_LeaveOneOut/3_secondPassPRM/
+/app/ivectors/scores_p2_PldaNorm/
+/app/ivectors/scores_p2_sphNorm/

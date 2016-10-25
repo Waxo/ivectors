@@ -85,14 +85,46 @@ const createFolders2 = () => {
   return BluebirdPromise.map(folders, folder => fs.mkdirsAsync(folder));
 };
 
-const createCommonLST = () => {
-  logger.log('debug', 'createCommonDependent');
+const clearProject3 = () => {
+  const clean = [
+    `${commonPath}`,
+    `${leaveOnePath}/threads`,
+    `${ivectorsPath}/scores_p2_PldaNorm`,
+    `${ivectorsPath}/scores_p2_sphNorm`
+  ];
+
+  return BluebirdPromise.map(clean, item => fs.removeAsync(item));
+};
+
+const createFolders3 = () => {
+  const folders = [
+    `${commonPath}/clusters`,
+    `${commonPath}/wav`,
+    `${commonPath}/prm`,
+    `${commonPath}/lbl`,
+    `${commonPath}/gmm`,
+    `${commonPath}/mat`,
+    `${commonPath}/lst`,
+    `${commonPath}/iv/raw`,
+    `${commonPath}/iv/lengthNorm`,
+    `${commonPath}/ivTest`,
+    `${commonPath}/scores`,
+    `${leaveOnePath}/threads`,
+    `${ivectorsPath}/scores_p2_PldaNorm`,
+    `${ivectorsPath}/scores_p2_sphNorm`
+  ];
+
+  return BluebirdPromise.map(folders, folder => fs.mkdirsAsync(folder));
+};
+
+const createCommonLST = (inputDirName = '0_input') => {
+  logger.log('debug', 'createCommonLST');
   let clusters = [];
-  return fs.readdirAsync(`${leaveOnePath}/0_input`)
+  return fs.readdirAsync(`${leaveOnePath}/${inputDirName}`)
     .then(dirs => {
       clusters = dirs;
       return BluebirdPromise.map(dirs,
-        dir => fs.readdirAsync(`${leaveOnePath}/0_input/${dir}`));
+        dir => fs.readdirAsync(`${leaveOnePath}/${inputDirName}/${dir}`));
     })
     .then(dirContent => BluebirdPromise.map(dirContent,
       (cluster, idx) => fs.writeFileAsync(
@@ -101,11 +133,12 @@ const createCommonLST = () => {
 };
 
 
-
 export {
   clearProject,
   createFolders,
   clearProject2,
   createFolders2,
+  clearProject3,
+  createFolders3,
   createCommonLST
 };

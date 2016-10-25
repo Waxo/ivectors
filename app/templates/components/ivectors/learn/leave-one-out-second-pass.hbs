@@ -1,0 +1,18 @@
+<div class="ui fluid stackable two column grid">
+  <div class="row">
+    <div class="column">
+      <div class="ui action input">
+        {{input value=regroupingName placeholder="Regrouping name"}}
+        <div class="ui button" {{action 'leaveOneOut'}}>Leave one out !</div>
+      </div>
+      {{ui-checkbox class="toggle" label="Prm Input" checked=prmInput}}
+    </div>
+  </div>
+  <div class="row">
+    <div class="column">
+      Left : {{length}}
+    </div>
+  </div>
+</div>
+
+{{yield}}

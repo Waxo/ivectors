@@ -12,20 +12,22 @@ const commonPath = `${leaveOnePath}/common`;
 const prmPath = `${ivectorsPath}/prm`;
 const lblPath = `${ivectorsPath}/lbl`;
 
-const wavToPRMConcat = (prmInput = false) => {
+const wavToPRMConcat = (prmInput = false, inputDirName = '0_input',
+  prmInputDir = '1_prmInput') => {
   logger.log('debug', 'wavToPRMConcat');
   const clusters = [];
-  return fs.readdirAsync(`${leaveOnePath}/0_input`)
+  return fs.readdirAsync(`${leaveOnePath}/${inputDirName}`)
     .then(dirs =>
       BluebirdPromise.map(dirs,
         dir => {
           clusters.push([dir, []]);
           if (prmInput) {
-            return fs.copyAsync(`${leaveOnePath}/1_prmInput/${dir}/`,
+            return fs.copyAsync(`${leaveOnePath}/${prmInputDir}/${dir}/`,
               `${commonPath}/prm/`)
-              .then(() => fs.readdirAsync(`${leaveOnePath}/0_input/${dir}`));
+              .then(() => fs.readdirAsync(
+                `${leaveOnePath}/${inputDirName}/${dir}`));
           }
-          return fs.readdirAsync(`${leaveOnePath}/0_input/${dir}`);
+          return fs.readdirAsync(`${leaveOnePath}/${inputDirName}/${dir}`);
         }))
     .then(filesInDirs => {
       filesInDirs.forEach((fileList, idx) => {
@@ -37,18 +39,18 @@ const wavToPRMConcat = (prmInput = false) => {
             const command = [
               `${leaveOnePath}/exe/00_sfbcep`,
               '-F PCM16 -p 19 -e -D -A -l 8 -d 4',
-              `${leaveOnePath}/0_input/${cluster[0]}/${file}`,
+              `${leaveOnePath}/${inputDirName}/${cluster[0]}/${file}`,
               `${commonPath}/prm/${file.replace('wav', 'prm')}`
             ];
             return execAsync(command.join(' '))
               .then(() => wavFileInfo.infoByFilenameAsync(
-                `${leaveOnePath}/0_input/${cluster[0]}/${file}`))
+                `${leaveOnePath}/${inputDirName}/${cluster[0]}/${file}`))
               .then(info => fs.writeFileAsync(
                 `${commonPath}/lbl/${file.replace('wav', 'lbl')}`,
                 `0 ${info.duration} sound`));
           }
           return wavFileInfo.infoByFilenameAsync(
-            `${leaveOnePath}/0_input/${cluster[0]}/${file}`)
+            `${leaveOnePath}/${inputDirName}/${cluster[0]}/${file}`)
             .then(info => fs.writeFileAsync(
               `${commonPath}/lbl/${file.replace('wav', 'lbl')}`,
               `0 ${info.duration} sound`));

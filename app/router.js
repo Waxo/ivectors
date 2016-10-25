@@ -24,6 +24,7 @@ Router.map(function() {
     });
   });
   this.route('ivectors-leave-one-out');
+  this.route('ivectors-leave-one-out-second-pass');
 });
 
 export default Router;
