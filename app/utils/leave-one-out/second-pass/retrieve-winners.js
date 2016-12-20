@@ -3,7 +3,7 @@ import {parseResults} from '../../parser';
 const BluebirdPromise = require('bluebird');
 const fs = BluebirdPromise.promisifyAll(require('fs-extra'));
 
-const ivectorsPath = `${process.cwd()}/app/ivectors`;
+const ivectorsPath = `${process.cwd()}/ivectors`;
 const pldaScores = `${ivectorsPath}/scores_PldaNorm`;
 const sphScores = `${ivectorsPath}/scores_sphNorm`;
 const baseInputPath = `${ivectorsPath}/3_LeaveOneOut/0_input`;

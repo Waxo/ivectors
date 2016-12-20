@@ -1,5 +1,5 @@
 import Ember from 'ember';
-import SPro from '../../ivectors/0_1_Prepare_PRM/Spro';
+import SPro from 'ivectors/ivectors/0_1_Prepare_PRM/Spro';
 const exec = require('child_process').exec;
 
 const ivectorsPath = `${process.cwd()}/app/ivectors`;

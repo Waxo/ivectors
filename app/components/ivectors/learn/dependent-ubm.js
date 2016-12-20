@@ -1,5 +1,5 @@
 import Ember from 'ember';
-import SPro from '../../../ivectors/0_1_Prepare_PRM/Spro';
+import SPro from 'ivectors/ivectors/0_1_Prepare_PRM/Spro';
 const exec = require('child_process').exec;
 const BluebirdPromise = require('bluebird');
 const fs = BluebirdPromise.promisifyAll(require('fs-extra'));
@@ -116,7 +116,7 @@ export default Ember.Component.extend({
       console.log('Prepare');
       this.set('isPrepareProcess', true);
 
-      var spro = SPro.create({
+      const spro = SPro.create({
         path: ivectorsPath,
         specificPath: preparePath,
         input: `${preparePath}/input`,

@@ -1,4 +1,4 @@
-import SPro from '../../ivectors/0_1_Prepare_PRM/Spro';
+// import SPro from "ivectors/ivectors/0_1_Prepare_PRM/Spro";
 import {execAsync} from "../exec-async";
 import {logger} from "../logger";
 
@@ -6,7 +6,7 @@ const BluebirdPromise = require('bluebird');
 const fs = BluebirdPromise.promisifyAll(require('fs-extra'));
 const wavFileInfo = BluebirdPromise.promisifyAll(require('wav-file-info'));
 
-const ivectorsPath = `${process.cwd()}/app/ivectors`;
+const ivectorsPath = `${process.cwd()}/ivectors`;
 const leaveOnePath = `${ivectorsPath}/3_LeaveOneOut`;
 const commonPath = `${leaveOnePath}/common`;
 const prmPath = `${ivectorsPath}/prm`;
@@ -172,21 +172,22 @@ const normPRM = () => {
 const wavToPRM = (input, output = prmPath, label = lblPath) => {
   logger.log('debug', 'wavToPRM');
 
-  return new BluebirdPromise(resolve => {
-    const spro = SPro.create({
-      path: ivectorsPath,
-      specificPath: `${leaveOnePath}/exe`,
-      input,
-      output,
-      label,
-      isDone: false
-    });
-
-    spro.addObserver('isDone', () => {
-      if (spro.get('isDone')) {
-        resolve();
-      }
-    });
+  return new BluebirdPromise((resolve, reject) => {
+    reject(`This method is not currently available ${label}`);
+    // const spro = SPro.create({
+    //   path: ivectorsPath,
+    //   specificPath: `${leaveOnePath}/exe`,
+    //   input,
+    //   output,
+    //   label,
+    //   isDone: false
+    // });
+    //
+    // spro.addObserver('isDone', () => {
+    //   if (spro.get('isDone')) {
+    //     resolve();
+    //   }
+    // });
   });
 };
 

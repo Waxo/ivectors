@@ -59,7 +59,7 @@ import {logger} from '../../../utils/logger';
 const BluebirdPromise = require('bluebird');
 const fs = BluebirdPromise.promisifyAll(require('fs-extra'));
 
-const ivectorsPath = `${process.cwd()}/app/ivectors`;
+const ivectorsPath = `${process.cwd()}/ivectors`;
 const leaveOnePath = `${ivectorsPath}/3_LeaveOneOut`;
 const LSTPath = `${ivectorsPath}/lst`;
 
@@ -109,7 +109,6 @@ const leaveOneOutResolver = (files, thread = '') => {
     } else {
       leaveOneProcess(files.splice(0, 5), thread)
         .delay(1000).then(() => {
-        files.splice(0, files.length);
         leaveOneOutResolver(files, thread);
       })
         .then(() => resolve());
@@ -118,7 +117,7 @@ const leaveOneOutResolver = (files, thread = '') => {
 };
 
 const threadLeaveOneOut = files => {
-  const maxThreads = 1;
+  const maxThreads = 8;
   const arraysLength = Math.ceil(files.length / maxThreads);
   let threadNum = 0;
   const arrayThreads = [];
@@ -217,6 +216,7 @@ const resolverConcat = (files, thread, normalize = false,
 
 const launchThreads = (files, dependent = false) => {
   logger.log('debug', 'launchThreads');
+
   const maxThreads = 8;
   const normalize = false;
   const arraysLength = Math.ceil(files.length / maxThreads);

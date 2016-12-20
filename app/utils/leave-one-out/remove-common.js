@@ -3,7 +3,7 @@ import {logger} from "../logger";
 const BluebirdPromise = require('bluebird');
 const fs = BluebirdPromise.promisifyAll(require('fs-extra'));
 
-const ivectorsPath = `${process.cwd()}/app/ivectors`;
+const ivectorsPath = `${process.cwd()}/ivectors`;
 const leaveOnePath = `${ivectorsPath}/3_LeaveOneOut`;
 const commonPath = `${leaveOnePath}/common`;
 

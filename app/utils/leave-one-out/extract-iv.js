@@ -6,7 +6,7 @@ const BluebirdPromise = require('bluebird');
 const fs = BluebirdPromise.promisifyAll(require('fs-extra'));
 const wavFileInfo = require("wav-file-info");
 
-const ivectorsPath = `${process.cwd()}/app/ivectors`;
+const ivectorsPath = `${process.cwd()}/ivectors`;
 const leaveOnePath = `${ivectorsPath}/3_LeaveOneOut`;
 const commonPath = `${leaveOnePath}/common`;
 const prmPath = `${ivectorsPath}/prm`;

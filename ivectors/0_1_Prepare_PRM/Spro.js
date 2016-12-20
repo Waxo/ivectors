@@ -5,7 +5,7 @@ const rimraf = PromiseB.promisify(require('rimraf'));
 const wavFileInfo = require('wav-file-info');
 const exec = require('child_process').exec;
 
-let SPro = Ember.Object.extend({
+const SPro = Ember.Object.extend({
   init() {
     let readFolders = [];
     this.clean()
@@ -103,5 +103,3 @@ let SPro = Ember.Object.extend({
 });
 
 export default SPro;
-
-// var a = new SPro('input', 'output', 'lbl');
