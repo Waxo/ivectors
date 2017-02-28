@@ -7,7 +7,7 @@ const {
   arrayToRaw
 } = require('sound-parameters-extractor');
 
-const extractLabel = (path, file, labelPath) => {
+const extractLabel_ = (path, file, labelPath) => {
   return fs.ensureDirAsync(labelPath)
     .then(() => wavFileInfo.infoByFilenameAsync(path))
     .then(info => fs.writeFileAsync(`${labelPath}/${file}.lbl`,
@@ -40,8 +40,7 @@ const parametrizeSound = (path, layer) => {
         (vector, index) => vector.concat(delta[index],
           deltaDelta[index]));
       return arrayToRaw(vector, `${file}.prm`, `${layer.paths.prm}/`)
-        .then(() => extractLabel(path, file, layer.paths.lbl));
-      // .then(() => process.send('tick'));
+        .then(() => extractLabel_(path, file, layer.paths.lbl));
     });
 };
 

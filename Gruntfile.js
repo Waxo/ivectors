@@ -20,6 +20,13 @@ module.exports = grunt => {
         options: {
           spawn: false
         }
+      },
+      noSpawn: {
+        files: ['ivectors.js', 'app/**/*.js', 'test/**/*.js'],
+        tasks: ['xo', 'exec:test'],
+        options: {
+          spawn: false
+        }
       }
     },
     xo: {
@@ -27,7 +34,8 @@ module.exports = grunt => {
     }
   });
 
-  grunt.registerTask('default', 'start');
+  grunt.registerTask('default', 'no-spawn');
+  grunt.registerTask('no-spawn', ['xo', 'exec:test', 'watch:noSpawn']);
   grunt.registerTask(
     'start', ['xo', 'exec:test', 'spawnProcess:ivectors', 'watch:ivectors']);
 };

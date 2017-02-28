@@ -45,7 +45,7 @@ describe('app/learn/parametrize-sound.js', () => {
             ((env.firstLayer.useRER) ? 1 : 0)) * 3;
           return BluebirdPromise.all([
             execAsync([
-              './bin-test/ReadFeatFile',
+              `${process.cwd()}/bin-test/ReadFeatFile`,
               `--featureFilesPath ${env.firstLayer.paths.prm}/`,
               '--loadFeatureFileExtension .prm',
               '--loadFeatureFileFormat RAW',
@@ -54,7 +54,7 @@ describe('app/learn/parametrize-sound.js', () => {
               '--featureFlags 100000'
             ].join(' ')),
             execAsync([
-              './bin-test/ReadFeatFile',
+              `${process.cwd()}/bin-test/ReadFeatFile`,
               `--featureFilesPath ${env.firstLayer.paths.prm}/`,
               '--loadFeatureFileExtension .prm',
               '--loadFeatureFileFormat RAW',

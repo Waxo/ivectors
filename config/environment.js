@@ -54,7 +54,8 @@ const firstLayer = layerRootPath => {
     input: `${layerRootPath}/l${wbName}/input`,
     test: `${layerRootPath}/l${wbName}/test`,
     prm: `${layerRootPath}/l${wbName}/prm`,
-    lbl: `${layerRootPath}/l${wbName}/lbl`
+    lbl: `${layerRootPath}/l${wbName}/lbl`,
+    files: `${layerRootPath}/l${wbName}/files`,
   };
 
   const cfg = {
@@ -107,7 +108,8 @@ const humanLayer = layerRootPath => {
     ivLenNorm: `${iv_}/iv/lengthNorm`,
     input: `${layerRootPath}/l${wbName}/input`,
     prm: `${layerRootPath}/l${wbName}/prm`,
-    lbl: `${layerRootPath}/l${wbName}/lbl`
+    lbl: `${layerRootPath}/l${wbName}/lbl`,
+    files: `${layerRootPath}/l${wbName}/files`
   };
 
   const cfg = {
