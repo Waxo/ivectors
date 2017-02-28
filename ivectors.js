@@ -1,3 +1,6 @@
-// const {createFolds} = require('./app/utils/ten-fold-preparer');
-//
-// createFolds(require('./config/environment').firstLayer);
+const {
+  parametrizeSound
+} = require('./app/learn/parametrize-sound');
+const env = require('./config/environment');
+
+parametrizeSound('./input/Breathing/Breathing-00000.wav', env.firstLayer);

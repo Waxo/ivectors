@@ -87,7 +87,8 @@ describe('app/utils/ten-fold-preparer.js', () => {
           files.map(a => a.length).reduce((a, b) => a + b));
     });
 
-    it('should create folds', () => {
+    it('should create folds', function () {
+      this.timeout(0);
       return createFolds(layer)
         .then(() => fs.readdirAsync(`${layer.paths.input}/f0`))
         .then(dirs => BluebirdPromise.map(dirs,

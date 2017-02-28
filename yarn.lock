@@ -105,7 +105,11 @@ balanced-match@^0.4.1:
   version "0.4.2"
   resolved "https://registry.yarnpkg.com/balanced-match/-/balanced-match-0.4.2.tgz#cb3f3e3c732dc0f01ee70b403f302e61d7709838"
 
-bluebird@^3.4.7:
+bit-twiddle@~1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/bit-twiddle/-/bit-twiddle-1.0.2.tgz#0c6c1fabe2b23d17173d9a61b7b7093eb9e1769e"
+
+bluebird@^3.4.6, bluebird@^3.4.7:
   version "3.4.7"
   resolved "https://registry.yarnpkg.com/bluebird/-/bluebird-3.4.7.tgz#f72d760be09b7f76d08ed8fae98b289a8d05fab3"
 
@@ -256,6 +260,12 @@ commander@2.9.0:
   dependencies:
     graceful-readlink ">= 1.0.0"
 
+commander@~2.7.1:
+  version "2.7.1"
+  resolved "https://registry.yarnpkg.com/commander/-/commander-2.7.1.tgz#5d419a2bbed2c32ee3e4dca9bb45ab83ecc3065a"
+  dependencies:
+    graceful-readlink ">= 1.0.0"
+
 concat-map@0.0.1:
   version "0.0.1"
   resolved "https://registry.yarnpkg.com/concat-map/-/concat-map-0.0.1.tgz#d8a96bd77fd68df7793a73036a3ba0d5405d477b"
@@ -346,6 +356,10 @@ dateformat@~1.0.12:
   dependencies:
     get-stdin "^4.0.1"
     meow "^3.3.0"
+
+dct@^0.0.3:
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/dct/-/dct-0.0.3.tgz#19390a834388a1d3a1373f9edfe50622074849d3"
 
 debug@2.2.0, debug@^2.1.1, debug@^2.2.0, debug@~2.2.0:
   version "2.2.0"
@@ -710,6 +724,13 @@ faye-websocket@~0.10.0:
   resolved "https://registry.yarnpkg.com/faye-websocket/-/faye-websocket-0.10.0.tgz#4e492f8d04dfb6f89003507f6edbf2d501e7c6f4"
   dependencies:
     websocket-driver ">=0.5.1"
+
+fft-js@^0.0.11:
+  version "0.0.11"
+  resolved "https://registry.yarnpkg.com/fft-js/-/fft-js-0.0.11.tgz#34e35c36508815aa1b86f340a0e7ac85b8ca6bd5"
+  dependencies:
+    bit-twiddle "~1.0.2"
+    commander "~2.7.1"
 
 figures@^1.0.0, figures@^1.3.5:
   version "1.7.0"
@@ -1539,6 +1560,10 @@ node-status-codes@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/node-status-codes/-/node-status-codes-1.0.0.tgz#5ae5541d024645d32a58fcddc9ceecea7ae3ac2f"
 
+node-wav@^0.0.2:
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/node-wav/-/node-wav-0.0.2.tgz#89cb63cf8cd66ec8ab455f5ba4864e5fcb4605e8"
+
 nopt@~3.0.6:
   version "3.0.6"
   resolved "https://registry.yarnpkg.com/nopt/-/nopt-3.0.6.tgz#c6465dbf08abcd4db359317f79ac68a646b28ff9"
@@ -1986,6 +2011,16 @@ sort-keys@^1.1.1:
   dependencies:
     is-plain-obj "^1.0.0"
 
+sound-parameters-extractor@^1.3.1:
+  version "1.3.1"
+  resolved "https://registry.yarnpkg.com/sound-parameters-extractor/-/sound-parameters-extractor-1.3.1.tgz#4625f49d84ffbe3cb60c1bebd7f3c5a68253b815"
+  dependencies:
+    bluebird "^3.4.6"
+    dct "^0.0.3"
+    fft-js "^0.0.11"
+    fs-extra "^2.0.0"
+    node-wav "^0.0.2"
+
 spdx-correct@~1.0.0:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/spdx-correct/-/spdx-correct-1.0.2.tgz#4b3073d933ff51f3912f03ac5519498a4150db40"
@@ -2213,6 +2248,10 @@ validate-npm-package-license@^3.0.1:
   dependencies:
     spdx-correct "~1.0.0"
     spdx-expression-parse "~1.0.0"
+
+wav-file-info@^0.0.7:
+  version "0.0.7"
+  resolved "https://registry.yarnpkg.com/wav-file-info/-/wav-file-info-0.0.7.tgz#ab9611f1afac5052c84514fad924557f37cd33fe"
 
 websocket-driver@>=0.5.1:
   version "0.6.5"

@@ -47,14 +47,14 @@ const firstLayer = layerRootPath => {
 
   const paths = {
     lRoot: iv_,
-    prm: `${iv_}/prm`,
-    lbl: `${iv_}/lbl`,
     gmm: `${iv_}/gmm`,
     mat: `${iv_}/mat`,
     ivRaw: `${iv_}/iv/raw`,
     ivLenNorm: `${iv_}/iv/lengthNorm`,
     input: `${layerRootPath}/l${wbName}/input`,
-    test: `${layerRootPath}/l${wbName}/test`
+    test: `${layerRootPath}/l${wbName}/test`,
+    prm: `${layerRootPath}/l${wbName}/prm`,
+    lbl: `${layerRootPath}/l${wbName}/lbl`
   };
 
   const cfg = {
@@ -101,13 +101,13 @@ const humanLayer = layerRootPath => {
 
   const paths = {
     lRoot: iv_,
-    prm: `${iv_}/prm`,
-    lbl: `${iv_}/lbl`,
     gmm: `${iv_}/gmm`,
     mat: `${iv_}/mat`,
     ivRaw: `${iv_}/iv/raw`,
     ivLenNorm: `${iv_}/iv/lengthNorm`,
-    input: `${layerRootPath}/l${wbName}/input`
+    input: `${layerRootPath}/l${wbName}/input`,
+    prm: `${layerRootPath}/l${wbName}/prm`,
+    lbl: `${layerRootPath}/l${wbName}/lbl`
   };
 
   const cfg = {

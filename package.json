@@ -23,12 +23,13 @@
     },
     "ignores": [
       "Gruntfile.js",
-      "test/*"
+      "test/**"
     ]
   },
   "nyc": {
     "exclude": [
       "app/utils/logger.js",
+      "app/utils/exec-async.js",
       "config/environment.js"
     ]
   },
@@ -40,6 +41,8 @@
     "global": "^4.3.1",
     "mocha": "^3.2.0",
     "moment": "^2.17.1",
+    "sound-parameters-extractor": "^1.3.1",
+    "wav-file-info": "^0.0.7",
     "winston": "^2.3.1"
   },
   "devDependencies": {
