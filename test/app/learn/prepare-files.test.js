@@ -1,14 +1,16 @@
+/* eslint-disable max-nested-callbacks */
 const BluebirdPromise = require('bluebird');
 const fs = BluebirdPromise.promisifyAll(require('fs-extra'));
 const env = require('../../../config/environment');
 const {
   writeDataLST,
   writeTvNDX,
-  writeIvExtractorNDX
+  writeIvExtractorNDX,
+  writeIvExtractorMatNDX
 } = require('../../../app/learn/prepare-files');
 require('chai').should();
 
-describe.only('app/learn/prepare-files.js', () => {
+describe('app/learn/prepare-files.js', () => {
   describe('#writeDataLST', () => {
     let numberOfFiles = 0;
 
@@ -19,7 +21,7 @@ describe.only('app/learn/prepare-files.js', () => {
           dir => fs.readdirAsync(`${foldRead}/${dir}`)))
         .then(lists => {
           numberOfFiles = lists.map(l => l.length).reduce((a, b) => a + b);
-        })
+        });
     });
 
     it('should have the same number of lines as input files', () => {
@@ -30,7 +32,7 @@ describe.only('app/learn/prepare-files.js', () => {
           const numberLines = read.toString().split('\n')
             .filter(line => line !== '').length;
           numberLines.should.be.equal(numberOfFiles);
-        })
+        });
     });
   });
 
@@ -48,14 +50,55 @@ describe.only('app/learn/prepare-files.js', () => {
   });
 
   describe('#writeIvExtractorNDX', () => {
+    before(() => writeIvExtractorNDX(env.firstLayer));
+
     it('should have the same number of clusters', () => {
-      return writeIvExtractorNDX(env.firstLayer)
-        .then(() => BluebirdPromise.all([
-          fs.readFileAsync(`${env.firstLayer.paths.files}/f0/ivExtractor.ndx`),
-          fs.readdirAsync(`${env.firstLayer.paths.input}/f0`)
-        ]))
+      return BluebirdPromise.all([
+        fs.readFileAsync(`${env.firstLayer.paths.files}/f0/ivExtractor.ndx`),
+        fs.readdirAsync(`${env.firstLayer.paths.input}/f0`)
+      ])
         .then(([ivExtractor, dir]) => {
           ivExtractor.toString().split('\n').length.should.be.equal(dir.length);
+        });
+    });
+
+    it('should not have the .wav in ivExtractor.ndx', () => {
+      return fs.readFileAsync(
+        `${env.firstLayer.paths.files}/f0/ivExtractor.ndx`)
+        .then(read => {
+          read.toString().should.not.have.string('.wav');
+        });
+    });
+  });
+
+  describe('#writeIvExtractorMatNDX', () => {
+    let numberOfFiles = 0;
+
+    before(() => {
+      const foldRead = `${env.firstLayer.paths.input}/f0`;
+      return fs.readdirAsync(foldRead)
+        .then(dirs => BluebirdPromise.map(dirs,
+          dir => fs.readdirAsync(`${foldRead}/${dir}`)))
+        .then(lists => {
+          numberOfFiles = lists.map(l => l.length).reduce((a, b) => a + b);
+          return writeIvExtractorMatNDX(env.firstLayer);
+        });
+    });
+
+    it('should have the same number of files', () => {
+      return fs.readFileAsync(
+        `${env.firstLayer.paths.files}/f0/ivExtractorMat.ndx`)
+        .then(ivExtractorMat => {
+          ivExtractorMat.toString().split('\n').length.should.be
+            .equal(numberOfFiles);
+        });
+    });
+
+    it('should not have the .wav in ivExtractorMat.ndx', () => {
+      return fs.readFileAsync(
+        `${env.firstLayer.paths.files}/f0/ivExtractorMat.ndx`)
+        .then(read => {
+          read.toString().should.not.have.string('.wav');
         });
     });
   });

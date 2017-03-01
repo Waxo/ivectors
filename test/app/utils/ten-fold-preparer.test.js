@@ -1,3 +1,4 @@
+/* eslint-disable max-nested-callbacks */
 require('chai').should();
 const BluebirdPromise = require('bluebird');
 const fs = BluebirdPromise.promisifyAll(require('fs-extra'));
@@ -24,7 +25,7 @@ describe('app/utils/ten-fold-preparer.js', () => {
         .then(dirs => {
           dirs.should.be.deep.equal(env.firstLayer.clusters);
           return BluebirdPromise.map(dirs,
-            dir => fs.readdirAsync(`${env.inputPath}/${dir}`))
+            dir => fs.readdirAsync(`${env.inputPath}/${dir}`));
         })
         .then(filesInDirs => {
           countClustersFiles =
@@ -83,8 +84,9 @@ describe('app/utils/ten-fold-preparer.js', () => {
         aggregate => clusters.push(...aggregate[1]));
       return BluebirdPromise.map(clusters,
         cluster => fs.readdirAsync(`${env.inputPath}/${cluster}`))
-        .then(files => totalFiles =
-          files.map(a => a.length).reduce((a, b) => a + b));
+        .then(files => {
+          totalFiles = files.map(a => a.length).reduce((a, b) => a + b);
+        });
     });
 
     it('should create folds', function () {

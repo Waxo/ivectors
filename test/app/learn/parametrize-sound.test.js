@@ -20,13 +20,14 @@ describe('app/learn/parametrize-sound.js', () => {
         })
         .then(files => {
           fileName = files[0].replace('.wav', '');
-          fileToRead += `/${files[0]}`
+          fileToRead += `/${files[0]}`;
         });
     });
 
     beforeEach(() => {
-      return fs.removeAsync(env.firstLayer.prm)
-        .catch(err => {});
+      return fs.removeAsync(env.firstLayer.paths.prm)
+        .then(() => fs.removeAsync(env.firstLayer.paths.lbl))
+        .catch(() => {});
     });
 
     it('should parametrize the given sound', () => {
