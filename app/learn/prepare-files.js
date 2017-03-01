@@ -16,6 +16,47 @@ const foldDataLST_ = (layer, fold) => {
     });
 };
 
+const foldIvExtractorNDX_ = (layer, fold) => {
+  const foldInputPath = `${layer.paths.input}/f${fold}`;
+  const clusters = [];
+
+  return fs.readdirAsync(foldInputPath)
+    .then(dirs => {
+      clusters.push(...dirs);
+      return BluebirdPromise.map(dirs,
+        dir => fs.readdirAsync(`${foldInputPath}/${dir}`));
+    })
+    .then(filesLists => {
+      const buffWrite = [];
+      filesLists.forEach((list, index) => {
+        buffWrite.push(`${clusters[index]} ${list.join(' ')}`);
+      });
+      return fs.writeFileAsync(`${layer.paths.files}/f${fold}/ivExtractor.ndx`,
+        buffWrite.join('\n').replace(/\.wav/g, ''));
+    });
+};
+
+const foldIvExtractorMatNDX_ = (layer, fold) => {
+  const foldInputPath = `${layer.paths.input}/f${fold}`;
+  const clusters = [];
+
+  return fs.readdirAsync(foldInputPath)
+    .then(dirs => {
+      clusters.push(...dirs);
+      return BluebirdPromise.map(dirs,
+        dir => fs.readdirAsync(`${foldInputPath}/${dir}`));
+    })
+    .then(filesLists => {
+      const buffWrite = [];
+      filesLists.forEach(list => {
+        buffWrite.push(list.map(element => `${element} ${element}`).join('\n'));
+      });
+      return fs.writeFileAsync(
+        `${layer.paths.files}/f${fold}/ivExtractorMat.ndx`,
+        buffWrite.join('\n').replace(/\.wav/g, ''));
+    });
+};
+
 const writeDataLST = layer => {
   const foldsPromises = [];
   for (let i = 0; i < 10; i++) {
@@ -34,26 +75,6 @@ const writeTvNDX = layer => {
   return BluebirdPromise.all(foldPromises);
 };
 
-const foldIvExtractorNDX_ = (layer, fold) => {
-  const foldInputPath = `${layer.paths.input}/f${fold}`;
-  const clusters = [];
-
-  return fs.readdirAsync(foldInputPath)
-    .then(dirs => {
-      clusters.push(...dirs);
-      return BluebirdPromise.map(dirs,
-        dir => fs.readdirAsync(`${foldInputPath}/${dir}`));
-    })
-    .then(filesLists => {
-      const buffWrite = [];
-      filesLists.forEach((list, index) => {
-        buffWrite.push(`${clusters[index]} ${list.join(' ')}`);
-      });
-      return fs.writeFileAsync(`${layer.paths.files}/f${fold}/ivExtractor.ndx`,
-        buffWrite.join('\n'));
-    });
-};
-
 const writeIvExtractorNDX = layer => {
   const foldsPromises = [];
   for (let i = 0; i < 10; i++) {
@@ -62,4 +83,17 @@ const writeIvExtractorNDX = layer => {
   return BluebirdPromise.all(foldsPromises);
 };
 
-module.exports = {writeDataLST, writeTvNDX, writeIvExtractorNDX};
+const writeIvExtractorMatNDX = layer => {
+  const foldsPromises = [];
+  for (let i = 0; i < 10; i++) {
+    foldsPromises.push(foldIvExtractorMatNDX_(layer, i));
+  }
+  return BluebirdPromise.all(foldsPromises);
+};
+
+module.exports = {
+  writeDataLST,
+  writeTvNDX,
+  writeIvExtractorNDX,
+  writeIvExtractorMatNDX
+};

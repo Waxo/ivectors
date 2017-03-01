@@ -8,7 +8,7 @@ const {
 } = require('../../../app/learn/parametrize-clusters');
 const env = require('../../../config/environment');
 
-describe.skip('app/learn/parametrize-clusters.js', () => {
+describe('app/learn/parametrize-clusters.js', () => {
   describe('#retrieveFiles', () => {
     let countInputFilesLayer1 = 0;
     before(() => {
@@ -27,7 +27,7 @@ describe.skip('app/learn/parametrize-clusters.js', () => {
     });
   });
 
-  describe('#parametrizeClusters', () => {
+  describe.skip('#parametrizeClusters', () => {
     const inputFilesLayer1 = [];
     const inputFilesLayer2 = [];
     before(() => {

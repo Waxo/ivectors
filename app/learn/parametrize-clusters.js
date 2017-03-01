@@ -54,6 +54,7 @@ const parametrizeClusters = (files, layer) => {
               child.send({type: 'data', file: arrayFiles.pop(), layer});
             }
             break;
+            /* istanbul ignore next */
           default:
             logger.log('error', `Master: Message not recognized : ${msg.type}`);
             break;

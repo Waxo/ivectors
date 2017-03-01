@@ -22,15 +22,15 @@
       ]
     },
     "ignores": [
-      "Gruntfile.js",
-      "test/**"
+      "Gruntfile.js"
     ]
   },
   "nyc": {
     "exclude": [
       "app/utils/logger.js",
       "app/utils/exec-async.js",
-      "config/environment.js"
+      "config/environment.js",
+      "test/**/*.js"
     ]
   },
   "dependencies": {

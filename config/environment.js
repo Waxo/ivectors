@@ -55,7 +55,7 @@ const firstLayer = layerRootPath => {
     test: `${layerRootPath}/l${wbName}/test`,
     prm: `${layerRootPath}/l${wbName}/prm`,
     lbl: `${layerRootPath}/l${wbName}/lbl`,
-    files: `${layerRootPath}/l${wbName}/files`,
+    files: `${layerRootPath}/l${wbName}/files`
   };
 
   const cfg = {

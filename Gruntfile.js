@@ -30,7 +30,7 @@ module.exports = grunt => {
       }
     },
     xo: {
-      target: ['ivectors.js', 'app/**/*.js']
+      target: ['ivectors.js', 'app/**/*.js', 'test/**/*.js']
     }
   });
 

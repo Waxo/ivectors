@@ -13,6 +13,7 @@ const threadManager = () => {
       case 'terminate':
         process.exit();
         break;
+      /* istanbul ignore next */
       default:
         logger.log('error', `Child: Message not recognized : ${msg.type}`);
         process.exit();
