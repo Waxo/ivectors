@@ -1,5 +1,3 @@
-const logger = require('./logger');
-
 const getMultiplier_ = number => {
   let multiplier = '1';
   multiplier += `${number}`.replace(/[0-9]/g, '0');
@@ -7,7 +5,6 @@ const getMultiplier_ = number => {
 };
 
 const splitter = (arr, nbSplit) => {
-  logger.log('silly', `splitter`);
   const splits = [];
   const arrWork = [...arr];
   const nbElements = arrWork.length;

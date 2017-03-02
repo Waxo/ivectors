@@ -5,13 +5,18 @@ const {
   parametrizeSound
 } = require('../../../app/learn/parametrize-sound');
 const execAsync = require('../../../app/utils/exec-async');
+const {
+  firstLayer,
+  secondLayers,
+  inputPath
+} = require('../../../config/environment');
 
-const env = require('../../../config/environment');
+const humanLayer = secondLayers[0];
 
 describe('app/learn/parametrize-sound.js', () => {
   describe('#parametrizeSound', () => {
     let fileToRead =
-      `${env.inputPath}/${env.firstLayer.aggregateClusters[0][1][1]}`;
+      `${inputPath}/${firstLayer.aggregateClusters[0][1][1]}`;
     let fileName = '';
     before(() => {
       return fs.readdirAsync(fileToRead)
@@ -23,32 +28,32 @@ describe('app/learn/parametrize-sound.js', () => {
 
     beforeEach(() => {
       return BluebirdPromise.all([
-        fs.removeAsync(env.firstLayer.paths.prm),
-        fs.removeAsync(env.firstLayer.paths.lbl),
-        fs.removeAsync(env.secondLayers[0].paths.prm),
-        fs.removeAsync(env.secondLayers[0].paths.lbl)
+        fs.removeAsync(firstLayer.paths.prm),
+        fs.removeAsync(firstLayer.paths.lbl),
+        fs.removeAsync(humanLayer.paths.prm),
+        fs.removeAsync(humanLayer.paths.lbl)
       ])
         .catch(() => {});
     });
 
     it('should parametrize the given sound without RER', () => {
-      return parametrizeSound(fileToRead, env.firstLayer)
+      return parametrizeSound(fileToRead, firstLayer)
         .then(() => BluebirdPromise.all(
           [
-            fs.readdirAsync(env.firstLayer.paths.prm),
-            fs.readdirAsync(env.firstLayer.paths.lbl)
+            fs.readdirAsync(firstLayer.paths.prm),
+            fs.readdirAsync(firstLayer.paths.lbl)
           ]))
         .then(([prmFiles, lblFiles]) => {
           prmFiles.length.should.be.equal(1);
           lblFiles.length.should.be.equal(1);
           prmFiles[0].should.have.string(fileName);
           lblFiles[0].should.have.string(fileName);
-          const vectorSize = (env.firstLayer.mfccSize + 3 +
-            ((env.firstLayer.useRER) ? 1 : 0)) * 3;
+          const vectorSize = (firstLayer.mfccSize + 3 +
+            ((firstLayer.useRER) ? 1 : 0)) * 3;
           return BluebirdPromise.all([
             execAsync([
               `${process.cwd()}/bin-test/ReadFeatFile`,
-              `--featureFilesPath ${env.firstLayer.paths.prm}/`,
+              `--featureFilesPath ${firstLayer.paths.prm}/`,
               '--loadFeatureFileExtension .prm',
               '--loadFeatureFileFormat RAW',
               `--inputFeatureFileName ${fileName}`,
@@ -57,7 +62,7 @@ describe('app/learn/parametrize-sound.js', () => {
             ].join(' ')),
             execAsync([
               `${process.cwd()}/bin-test/ReadFeatFile`,
-              `--featureFilesPath ${env.firstLayer.paths.prm}/`,
+              `--featureFilesPath ${firstLayer.paths.prm}/`,
               '--loadFeatureFileExtension .prm',
               '--loadFeatureFileFormat RAW',
               `--inputFeatureFileName ${fileName}`,
@@ -73,23 +78,23 @@ describe('app/learn/parametrize-sound.js', () => {
     });
 
     it('should parametrize the given sound with RER', () => {
-      return parametrizeSound(fileToRead, env.secondLayers[0])
+      return parametrizeSound(fileToRead, humanLayer)
         .then(() => BluebirdPromise.all(
           [
-            fs.readdirAsync(env.secondLayers[0].paths.prm),
-            fs.readdirAsync(env.secondLayers[0].paths.lbl)
+            fs.readdirAsync(humanLayer.paths.prm),
+            fs.readdirAsync(humanLayer.paths.lbl)
           ]))
         .then(([prmFiles, lblFiles]) => {
           prmFiles.length.should.be.equal(1);
           lblFiles.length.should.be.equal(1);
           prmFiles[0].should.have.string(fileName);
           lblFiles[0].should.have.string(fileName);
-          const vectorSize = (env.secondLayers[0].mfccSize + 3 +
-            ((env.secondLayers[0].useRER) ? 1 : 0)) * 3;
+          const vectorSize = (humanLayer.mfccSize + 3 +
+            ((humanLayer.useRER) ? 1 : 0)) * 3;
           return BluebirdPromise.all([
             execAsync([
               `${process.cwd()}/bin-test/ReadFeatFile`,
-              `--featureFilesPath ${env.secondLayers[0].paths.prm}/`,
+              `--featureFilesPath ${humanLayer.paths.prm}/`,
               '--loadFeatureFileExtension .prm',
               '--loadFeatureFileFormat RAW',
               `--inputFeatureFileName ${fileName}`,
@@ -98,7 +103,7 @@ describe('app/learn/parametrize-sound.js', () => {
             ].join(' ')),
             execAsync([
               `${process.cwd()}/bin-test/ReadFeatFile`,
-              `--featureFilesPath ${env.secondLayers[0].paths.prm}/`,
+              `--featureFilesPath ${humanLayer.paths.prm}/`,
               '--loadFeatureFileExtension .prm',
               '--loadFeatureFileFormat RAW',
               `--inputFeatureFileName ${fileName}`,

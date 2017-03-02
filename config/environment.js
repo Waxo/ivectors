@@ -1,33 +1,21 @@
 const root_ = process.cwd();
 const ivCfg_ = `${root_}/cfg-ivectors`;
 
-const workbench_ = wbName => {
-  const baseRoot = `${root_}/tmp`;
-  const scoresRoot = `${baseRoot}/scores`;
-  const paths = {
-    detected: `${root_}/DetectedWav`,
-    input: `${baseRoot}/${wbName}`,
-    lRoot: `${baseRoot}/${wbName}`,
-    lbl: `${baseRoot}/${wbName}`,
-    prm: `${baseRoot}/${wbName}`,
-    scoresRoot,
-    scores: {
-      sph: `${scoresRoot}/sph${wbName}`,
-      plda: `${scoresRoot}/plda${wbName}`
-    }
-  };
-
+const workbenchCreator = (layer, fold) => {
   const cfg = {
     sph: `${ivCfg_}/08_sph_ivTest_SphNorm_Plda_no_load.cfg`,
     plda: `${ivCfg_}/05_3_PLDA_ivTest_Plda.cfg`
   };
 
-  return {paths, cfg, baseRoot};
+  return {
+    cfg,
+    ubm: `${layer.paths.lRoot}/f${fold}/work/mat`
+  };
 };
 
 const firstLayer = layerRootPath => {
   const wbName = 'First';
-  const iv_ = `${layerRootPath}/l${wbName}/iv`;
+  const lRoot = `${layerRootPath}/l${wbName}`;
   const clusters = ['Dishes', 'DoorClapping', 'DoorOpening',
     'ElectricalShaver', 'GlassBreaking', 'HairDryer', 'HandClapping', 'Keys',
     'Paper', 'Water'];
@@ -46,16 +34,12 @@ const firstLayer = layerRootPath => {
   };
 
   const paths = {
-    lRoot: iv_,
-    gmm: `${iv_}/gmm`,
-    mat: `${iv_}/mat`,
-    ivRaw: `${iv_}/iv/raw`,
-    ivLenNorm: `${iv_}/iv/lengthNorm`,
-    input: `${layerRootPath}/l${wbName}/input`,
-    test: `${layerRootPath}/l${wbName}/test`,
-    prm: `${layerRootPath}/l${wbName}/prm`,
-    lbl: `${layerRootPath}/l${wbName}/lbl`,
-    files: `${layerRootPath}/l${wbName}/files`
+    lRoot,
+    input: `${lRoot}/input`,
+    test: `${lRoot}/test`,
+    prm: `${lRoot}/prm`,
+    lbl: `${lRoot}/lbl`,
+    files: `${lRoot}/files`
   };
 
   const cfg = {
@@ -69,15 +53,12 @@ const firstLayer = layerRootPath => {
     plda: `${ivCfg_}/05_2_PLDA_Plda.cfg`
   };
 
-  const workbench = workbench_(wbName);
-
   return {
     paths,
     cfg,
     wbName,
     clusters,
     aggregateClusters,
-    workbench,
     mfccSize,
     cfgMFCC
   };
@@ -85,7 +66,7 @@ const firstLayer = layerRootPath => {
 
 const humanLayer = layerRootPath => {
   const wbName = 'Human';
-  const iv_ = `${layerRootPath}/l${wbName}/iv`;
+  const lRoot = `${layerRootPath}/l${wbName}`;
   const clusters = ['Breathing', 'Cough', 'FemaleCry', 'FemaleScream', 'Laugh',
     'MaleScream', 'Sneeze', 'Yawn'];
 
@@ -101,15 +82,15 @@ const humanLayer = layerRootPath => {
   };
 
   const paths = {
-    lRoot: iv_,
-    gmm: `${iv_}/gmm`,
-    mat: `${iv_}/mat`,
-    ivRaw: `${iv_}/iv/raw`,
-    ivLenNorm: `${iv_}/iv/lengthNorm`,
-    input: `${layerRootPath}/l${wbName}/input`,
-    prm: `${layerRootPath}/l${wbName}/prm`,
-    lbl: `${layerRootPath}/l${wbName}/lbl`,
-    files: `${layerRootPath}/l${wbName}/files`
+    lRoot,
+    gmm: `${lRoot}/gmm`,
+    mat: `${lRoot}/mat`,
+    ivRaw: `${lRoot}/iv/raw`,
+    ivLenNorm: `${lRoot}/iv/lengthNorm`,
+    input: `${lRoot}/input`,
+    prm: `${lRoot}/prm`,
+    lbl: `${lRoot}/lbl`,
+    files: `${lRoot}/files`
   };
 
   const cfg = {
@@ -123,9 +104,7 @@ const humanLayer = layerRootPath => {
     plda: `${ivCfg_}/05_2_PLDA_Plda.cfg`
   };
 
-  const workbench = workbench_(wbName);
-
-  return {paths, cfg, clusters, wbName, mfccSize, cfgMFCC, workbench, useRER};
+  return {paths, cfg, clusters, wbName, mfccSize, cfgMFCC, useRER};
 };
 
 const loadEnvironment = () => {
@@ -139,6 +118,7 @@ const loadEnvironment = () => {
     layersRootPath,
     firstLayer: firstLayer(layersRootPath),
     secondLayers: [humanLayer(layersRootPath)],
+    workbenchCreator,
     bin: {
       normPRM: `${bin_}/01_NormFeat`,
       ubm: `${bin_}/02_TrainWorld`,

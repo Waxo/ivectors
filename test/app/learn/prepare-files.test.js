@@ -1,7 +1,7 @@
 /* eslint-disable max-nested-callbacks */
 const BluebirdPromise = require('bluebird');
 const fs = BluebirdPromise.promisifyAll(require('fs-extra'));
-const env = require('../../../config/environment');
+const {firstLayer} = require('../../../config/environment');
 const {
   writeDataLST,
   writeTvNDX,
@@ -14,12 +14,12 @@ const {
 } = require('../../../app/learn/prepare-files');
 require('chai').should();
 
-describe.only('app/learn/prepare-files.js', () => {
+describe('app/learn/prepare-files.js', () => {
   describe('#writeDataLST', () => {
     let numberOfFiles = 0;
 
     before(() => {
-      const foldRead = `${env.firstLayer.paths.input}/f0`;
+      const foldRead = `${firstLayer.paths.input}/f0`;
       return fs.readdirAsync(foldRead)
         .then(dirs => BluebirdPromise.map(dirs,
           dir => fs.readdirAsync(`${foldRead}/${dir}`)))
@@ -29,9 +29,9 @@ describe.only('app/learn/prepare-files.js', () => {
     });
 
     it('should have the same number of lines as input files', () => {
-      return writeDataLST(env.firstLayer)
+      return writeDataLST(firstLayer)
         .then(
-          () => fs.readFileAsync(`${env.firstLayer.paths.files}/f0/data.lst`))
+          () => fs.readFileAsync(`${firstLayer.paths.files}/f0/data.lst`))
         .then(read => {
           const numberLines = read.toString().split('\n')
             .filter(line => line !== '').length;
@@ -42,10 +42,10 @@ describe.only('app/learn/prepare-files.js', () => {
 
   describe('#writeTvNDX', () => {
     it('should have the same content as data.lst', () => {
-      return writeTvNDX(env.firstLayer)
+      return writeTvNDX(firstLayer)
         .then(() => BluebirdPromise.all([
-          fs.readFileAsync(`${env.firstLayer.paths.files}/f0/data.lst`),
-          fs.readFileAsync(`${env.firstLayer.paths.files}/f0/tv.ndx`)
+          fs.readFileAsync(`${firstLayer.paths.files}/f0/data.lst`),
+          fs.readFileAsync(`${firstLayer.paths.files}/f0/tv.ndx`)
         ]))
         .then(([data, tv]) => {
           data.toString().should.be.equal(tv.toString());
@@ -54,12 +54,12 @@ describe.only('app/learn/prepare-files.js', () => {
   });
 
   describe('#writeIvExtractorNDX', () => {
-    before(() => writeIvExtractorNDX(env.firstLayer));
+    before(() => writeIvExtractorNDX(firstLayer));
 
     it('should have the same number of clusters', () => {
       return BluebirdPromise.all([
-        fs.readFileAsync(`${env.firstLayer.paths.files}/f0/ivExtractor.ndx`),
-        fs.readdirAsync(`${env.firstLayer.paths.input}/f0`)
+        fs.readFileAsync(`${firstLayer.paths.files}/f0/ivExtractor.ndx`),
+        fs.readdirAsync(`${firstLayer.paths.input}/f0`)
       ])
         .then(([ivExtractor, dir]) => {
           ivExtractor.toString().split('\n').length.should.be.equal(dir.length);
@@ -68,7 +68,7 @@ describe.only('app/learn/prepare-files.js', () => {
 
     it('should not have the .wav in ivExtractor.ndx', () => {
       return fs.readFileAsync(
-        `${env.firstLayer.paths.files}/f0/ivExtractor.ndx`)
+        `${firstLayer.paths.files}/f0/ivExtractor.ndx`)
         .then(read => {
           read.toString().should.not.have.string('.wav');
         });
@@ -79,19 +79,19 @@ describe.only('app/learn/prepare-files.js', () => {
     let numberOfFiles = 0;
 
     before(() => {
-      const foldRead = `${env.firstLayer.paths.input}/f0`;
+      const foldRead = `${firstLayer.paths.input}/f0`;
       return fs.readdirAsync(foldRead)
         .then(dirs => BluebirdPromise.map(dirs,
           dir => fs.readdirAsync(`${foldRead}/${dir}`)))
         .then(lists => {
           numberOfFiles = lists.map(l => l.length).reduce((a, b) => a + b);
-          return writeIvExtractorMatNDX(env.firstLayer);
+          return writeIvExtractorMatNDX(firstLayer);
         });
     });
 
     it('should have the same number of files', () => {
       return fs.readFileAsync(
-        `${env.firstLayer.paths.files}/f0/ivExtractorMat.ndx`)
+        `${firstLayer.paths.files}/f0/ivExtractorMat.ndx`)
         .then(ivExtractorMat => {
           ivExtractorMat.toString().split('\n').length.should.be
             .equal(numberOfFiles);
@@ -100,7 +100,7 @@ describe.only('app/learn/prepare-files.js', () => {
 
     it('should not have the .wav in ivExtractorMat.ndx', () => {
       return fs.readFileAsync(
-        `${env.firstLayer.paths.files}/f0/ivExtractorMat.ndx`)
+        `${firstLayer.paths.files}/f0/ivExtractorMat.ndx`)
         .then(read => {
           read.toString().should.not.have.string('.wav');
         });
@@ -109,19 +109,19 @@ describe.only('app/learn/prepare-files.js', () => {
 
   describe('#writeTrainModelNDX', () => {
     before(() => BluebirdPromise.all([
-      writeIvExtractorNDX(env.firstLayer),
-      writeIvExtractorMatNDX(env.firstLayer)
+      writeIvExtractorNDX(firstLayer),
+      writeIvExtractorMatNDX(firstLayer)
     ]));
 
     it('should have the content of ivExtractorMat.ndx and ivExtractor.ndx',
       () => {
-        return writeTrainModelNDX(env.firstLayer)
+        return writeTrainModelNDX(firstLayer)
           .then(() => BluebirdPromise.all([
-            fs.readFileAsync(`${env.firstLayer.paths.files}/f0/TrainModel.ndx`),
+            fs.readFileAsync(`${firstLayer.paths.files}/f0/TrainModel.ndx`),
             fs.readFileAsync(
-              `${env.firstLayer.paths.files}/f0/ivExtractor.ndx`),
+              `${firstLayer.paths.files}/f0/ivExtractor.ndx`),
             fs.readFileAsync(
-              `${env.firstLayer.paths.files}/f0/ivExtractorMat.ndx`)
+              `${firstLayer.paths.files}/f0/ivExtractorMat.ndx`)
           ]))
           .then(([trainModel, ivExtractor, ivExtractorMat]) => {
             trainModel.toString().should.have.string(ivExtractor.toString());
@@ -131,12 +131,12 @@ describe.only('app/learn/prepare-files.js', () => {
   });
 
   describe('#writeIvTestNDX', () => {
-    before(() => writeIvTestNDX(env.firstLayer));
+    before(() => writeIvTestNDX(firstLayer));
 
     it('should have the same number as input clusters', () => {
       return BluebirdPromise.all([
-        fs.readFileAsync(`${env.firstLayer.paths.files}/f0/ivTest.ndx`),
-        fs.readdirAsync(`${env.firstLayer.paths.input}/f0`)
+        fs.readFileAsync(`${firstLayer.paths.files}/f0/ivTest.ndx`),
+        fs.readdirAsync(`${firstLayer.paths.input}/f0`)
       ])
         .then(([fileRead, inputDirs]) => {
           fileRead.toString().split(' ').length.should.be
@@ -148,10 +148,10 @@ describe.only('app/learn/prepare-files.js', () => {
   describe('#writeCreateIvTestMatNDX', () => {
     let countFiles = 0;
     before(() => {
-      return writeCreateIvTestMatNDX(env.firstLayer)
-        .then(() => fs.readdirAsync(`${env.firstLayer.paths.input}/f0`))
+      return writeCreateIvTestMatNDX(firstLayer)
+        .then(() => fs.readdirAsync(`${firstLayer.paths.input}/f0`))
         .then(dirs => BluebirdPromise.map(dirs,
-          dir => fs.readdirAsync(`${env.firstLayer.paths.input}/f0/${dir}`)))
+          dir => fs.readdirAsync(`${firstLayer.paths.input}/f0/${dir}`)))
         .then(filesLists => {
           countFiles =
             filesLists.map(filesList => filesList.length)
@@ -160,7 +160,7 @@ describe.only('app/learn/prepare-files.js', () => {
     });
 
     it('should have the same number as input clusters', () => {
-      return fs.readFileAsync(`${env.firstLayer.paths.files}/f0/ivTestMat.ndx`)
+      return fs.readFileAsync(`${firstLayer.paths.files}/f0/ivTestMat.ndx`)
         .then(fileRead => {
           fileRead.toString().split(' ').length.should.be
             .equal(countFiles + 1);
@@ -169,7 +169,7 @@ describe.only('app/learn/prepare-files.js', () => {
 
     it('should not have the .wav in ivTestMat.ndx', () => {
       return fs.readFileAsync(
-        `${env.firstLayer.paths.files}/f0/ivTestMat.ndx`)
+        `${firstLayer.paths.files}/f0/ivTestMat.ndx`)
         .then(read => {
           read.toString().should.not.have.string('.wav');
         });
@@ -177,7 +177,7 @@ describe.only('app/learn/prepare-files.js', () => {
 
     it('should have the same value in pos 0 and 1 in ivTestMat.ndx', () => {
       return fs.readFileAsync(
-        `${env.firstLayer.paths.files}/f0/ivTestMat.ndx`)
+        `${firstLayer.paths.files}/f0/ivTestMat.ndx`)
         .then(read => {
           const [comparedSound, firstTest] = read.toString().split(' ');
           comparedSound.should.be.equal(firstTest);
@@ -186,14 +186,14 @@ describe.only('app/learn/prepare-files.js', () => {
   });
 
   describe('#writePldaNDX', () => {
-    before(() => writePldaNDX(env.firstLayer));
+    before(() => writePldaNDX(firstLayer));
 
     it('should have same lengths as input files', () => {
-      return fs.readdirAsync(`${env.firstLayer.paths.input}/f0`)
+      return fs.readdirAsync(`${firstLayer.paths.input}/f0`)
         .then(dirs => BluebirdPromise.all([
-          fs.readFileAsync(`${env.firstLayer.paths.files}/f0/Plda.ndx`),
+          fs.readFileAsync(`${firstLayer.paths.files}/f0/Plda.ndx`),
           BluebirdPromise.map(dirs,
-            dir => fs.readdirAsync(`${env.firstLayer.paths.input}/f0/${dir}`))
+            dir => fs.readdirAsync(`${firstLayer.paths.input}/f0/${dir}`))
         ]))
         .then(([fileRead, filesLists]) => {
           fileRead.toString().split('\n').map(line => line.split(' ').length)
@@ -203,7 +203,7 @@ describe.only('app/learn/prepare-files.js', () => {
 
     it('should not have the .wav in Plda.ndx', () => {
       return fs.readFileAsync(
-        `${env.firstLayer.paths.files}/f0/Plda.ndx`)
+        `${firstLayer.paths.files}/f0/Plda.ndx`)
         .then(read => {
           read.toString().should.not.have.string('.wav');
         });

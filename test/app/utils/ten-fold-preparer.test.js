@@ -3,7 +3,10 @@ require('chai').should();
 const BluebirdPromise = require('bluebird');
 const fs = BluebirdPromise.promisifyAll(require('fs-extra'));
 const rewire = require('rewire');
-const env = require('../../../config/environment');
+const {
+  firstLayer,
+  layersRootPath, inputPath
+} = require('../../../config/environment');
 
 const tenFoldPreparerModule = rewire('../../../app/utils/ten-fold-preparer');
 
@@ -13,31 +16,31 @@ const createFolds = tenFoldPreparerModule.__get__('createFolds');
 
 describe('app/utils/ten-fold-preparer.js', () => {
   beforeEach(() => {
-    return fs.removeAsync(env.layersRootPath);
+    return fs.removeAsync(layersRootPath);
   });
 
   describe('#clusterFolds_', () => {
     let countClustersFiles = 0;
     let countFilesInput = 0;
     it('should create cluster folds', () => {
-      return clustersFolds_(env.firstLayer)
-        .then(() => fs.readdirAsync(`${env.firstLayer.paths.input}/f0`))
+      return clustersFolds_(firstLayer)
+        .then(() => fs.readdirAsync(`${firstLayer.paths.input}/f0`))
         .then(dirs => {
-          dirs.should.be.deep.equal(env.firstLayer.clusters);
+          dirs.should.be.deep.equal(firstLayer.clusters);
           return BluebirdPromise.map(dirs,
-            dir => fs.readdirAsync(`${env.inputPath}/${dir}`));
+            dir => fs.readdirAsync(`${inputPath}/${dir}`));
         })
         .then(filesInDirs => {
           countClustersFiles =
             filesInDirs.map(a => a.length).reduce((a, b) => a + b);
-          return BluebirdPromise.map(env.firstLayer.clusters,
+          return BluebirdPromise.map(firstLayer.clusters,
             cluster => fs.readdirAsync(
-              `${env.firstLayer.paths.input}/f0/${cluster}`));
+              `${firstLayer.paths.input}/f0/${cluster}`));
         })
         .then(filesInput => {
           countFilesInput =
             filesInput.map(a => a.length).reduce((a, b) => a + b);
-          return fs.readdirAsync(`${env.firstLayer.paths.test}/f0`);
+          return fs.readdirAsync(`${firstLayer.paths.test}/f0`);
         })
         .then(files => {
           (countFilesInput + files.length).should.be.equal(countClustersFiles);
@@ -47,24 +50,24 @@ describe('app/utils/ten-fold-preparer.js', () => {
 
   describe('#aggregateFolds_', () => {
     let countClustersFiles = 0;
-    const aggregateName = env.firstLayer.aggregateClusters[0][0];
+    const aggregateName = firstLayer.aggregateClusters[0][0];
 
     it('should create cluster folds', () => {
-      return aggregateFolds_(env.firstLayer)
-        .then(() => fs.readdirAsync(`${env.firstLayer.paths.input}/f0`))
+      return aggregateFolds_(firstLayer)
+        .then(() => fs.readdirAsync(`${firstLayer.paths.input}/f0`))
         .then(dirs => {
           dirs[0].should.be.deep.equal(aggregateName);
-          return BluebirdPromise.map(env.firstLayer.aggregateClusters[0][1],
+          return BluebirdPromise.map(firstLayer.aggregateClusters[0][1],
             cluster => fs.readdirAsync(
-              `${env.inputPath}/${cluster}`));
+              `${inputPath}/${cluster}`));
         })
         .then(filesInDirs => {
           countClustersFiles =
             filesInDirs.map(a => a.length).reduce((a, b) => a + b);
           return BluebirdPromise.all([
             fs.readdirAsync(
-              `${env.firstLayer.paths.input}/f0/${aggregateName}`),
-            fs.readdirAsync(`${env.firstLayer.paths.test}/f0`)
+              `${firstLayer.paths.input}/f0/${aggregateName}`),
+            fs.readdirAsync(`${firstLayer.paths.test}/f0`)
           ]);
         })
         .then(files => {
@@ -75,7 +78,7 @@ describe('app/utils/ten-fold-preparer.js', () => {
   });
 
   describe('#createFolds', () => {
-    const layer = env.firstLayer;
+    const layer = firstLayer;
     let totalFiles = 0;
     let countFilesInput = 0;
     before(() => {
@@ -83,7 +86,7 @@ describe('app/utils/ten-fold-preparer.js', () => {
       layer.aggregateClusters.forEach(
         aggregate => clusters.push(...aggregate[1]));
       return BluebirdPromise.map(clusters,
-        cluster => fs.readdirAsync(`${env.inputPath}/${cluster}`))
+        cluster => fs.readdirAsync(`${inputPath}/${cluster}`))
         .then(files => {
           totalFiles = files.map(a => a.length).reduce((a, b) => a + b);
         });
