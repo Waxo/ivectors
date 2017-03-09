@@ -10,7 +10,10 @@ const {
   writeTrainModelNDX,
   writeIvTestNDX,
   writeCreateIvTestMatNDX,
-  writePldaNDX
+  writePldaNDX,
+  writeAllLST,
+  writeIvExtractorAllNDX,
+  linkIvExtractorAllNDX
 } = require('../../../app/learn/prepare-files');
 require('chai').should();
 
@@ -118,14 +121,18 @@ describe('app/learn/prepare-files.js', () => {
         return writeTrainModelNDX(firstLayer)
           .then(() => BluebirdPromise.all([
             fs.readFileAsync(`${firstLayer.paths.files}/f0/TrainModel.ndx`),
-            fs.readFileAsync(
-              `${firstLayer.paths.files}/f0/ivExtractor.ndx`),
-            fs.readFileAsync(
-              `${firstLayer.paths.files}/f0/ivExtractorMat.ndx`)
+            fs.readFileAsync(`${firstLayer.paths.files}/f0/ivExtractor.ndx`),
+            fs.readFileAsync(`${firstLayer.paths.files}/f0/ivExtractorMat.ndx`)
           ]))
           .then(([trainModel, ivExtractor, ivExtractorMat]) => {
-            trainModel.toString().should.have.string(ivExtractor.toString());
-            trainModel.toString().should.have.string(ivExtractorMat.toString());
+            trainModel = trainModel.toString();
+            ivExtractor = ivExtractor.toString();
+            ivExtractorMat = ivExtractorMat.toString();
+            trainModel.should.have.string(ivExtractor);
+            trainModel.should.have.string(ivExtractorMat);
+            trainModel.split('\n').length.should.be.equal(
+              ivExtractorMat.split('\n').length +
+              ivExtractor.split('\n').length);
           });
       });
   });
@@ -207,6 +214,90 @@ describe('app/learn/prepare-files.js', () => {
         .then(read => {
           read.toString().should.not.have.string('.wav');
         });
+    });
+  });
+
+  describe('#writeAllLST', () => {
+    before(() => writeAllLST(firstLayer));
+
+    it('should have the same number of files as input', () => {
+      const clusters = [];
+      return fs.readdirAsync(`${firstLayer.paths.input}/f0`)
+        .then(dirs => {
+          clusters.push(...dirs);
+          return BluebirdPromise.all([
+            fs.readFileAsync(`${firstLayer.paths.lRoot}/all.lst`),
+            BluebirdPromise.map(dirs,
+              dir => fs.readdirAsync(`${firstLayer.paths.input}/f0/${dir}`)),
+            fs.readdirAsync(`${firstLayer.paths.test}/f0`)
+          ]);
+        })
+        .then(([fileRead, inputList, testList]) => {
+          const lines = fileRead.toString().split('\n');
+          const plainInputList = [];
+          inputList.forEach(list => {
+            plainInputList.push(...list.map(file => file.replace('.wav', '')));
+          });
+          const countFile = plainInputList.length + testList.length +
+            clusters.length;
+          lines.should.include.members(plainInputList);
+          lines.should.include.members(
+            testList.map(file => file.replace('.wav', '')));
+          lines.should.include.members(clusters);
+          lines.length.should.be.equal(countFile);
+        });
+    });
+
+    it('should not have the .prm in all.lst', () => {
+      return fs.readFileAsync(
+        `${firstLayer.paths.lRoot}/all.lst`)
+        .then(read => {
+          read.toString().should.not.have.string('.prm');
+        });
+    });
+
+    it('should not have the .norm.prm in all.lst', () => {
+      return fs.readFileAsync(
+        `${firstLayer.paths.lRoot}/all.lst`)
+        .then(read => {
+          read.toString().should.not.have.string('.norm');
+        });
+    });
+  });
+
+  describe('#ivExtractorAllNDX', () => {
+    let countInputFiles = 0;
+    before(() => fs.readdirAsync(`${firstLayer.paths.input}/f0`)
+      .then(inputDir => {
+        return BluebirdPromise.all([
+          BluebirdPromise.map(inputDir,
+            dir => fs.readdirAsync(`${firstLayer.paths.input}/f0/${dir}`)),
+          fs.readdirAsync(`${firstLayer.paths.test}/f0`)
+        ]);
+      })
+      .then(([inputList, testList]) => {
+        countInputFiles =
+          inputList.map(list => list.length).reduce((a, b) => a + b) +
+          testList.length;
+      })
+    );
+
+    it('should have the same length as total files', () => {
+      return writeIvExtractorAllNDX(firstLayer)
+        .then(() => fs.readFileAsync(
+          `${firstLayer.paths.lRoot}/ivExtractorAll.ndx`))
+        .then(ivExtractorAll => {
+          ivExtractorAll.toString().split('\n').length.should.be
+            .equal(countInputFiles);
+        });
+    });
+  });
+
+  describe('#linkIvExtractorAllNDX', () => {
+    it('should exist in layer', () => {
+      return linkIvExtractorAllNDX(firstLayer)
+        .then(() => fs.readdirAsync(`${firstLayer.paths.files}/f0`))
+        .then(files => files.should.include('ivExtractorAll.ndx'));
     });
   });
 });

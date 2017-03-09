@@ -1,6 +1,6 @@
 const exec = require('child_process').exec;
 const BluebirdPromise = require('bluebird');
-const logger = require('./logger');
+const {logger} = require('./logger');
 
 const execAsync = (execute, stdoutON, stderrDisabled) => {
   return new BluebirdPromise((resolve, reject) => {
@@ -23,4 +23,4 @@ const execAsync = (execute, stdoutON, stderrDisabled) => {
   });
 };
 
-module.exports = execAsync;
+module.exports = {execAsync};

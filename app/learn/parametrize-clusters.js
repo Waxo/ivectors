@@ -4,7 +4,7 @@ const BluebirdPromise = require('bluebird');
 const fs = BluebirdPromise.promisifyAll(require('fs-extra'));
 const ProgressBar = require('progress');
 const {inputPath} = require('../../config/environment');
-const logger = require('../utils/logger');
+const {logger} = require('../utils/logger');
 
 const getFilesByCluster_ = layer => {
   const arrayClusters = new Array(...layer.clusters);

@@ -4,7 +4,7 @@ const fs = BluebirdPromise.promisifyAll(require('fs-extra'));
 const {
   parametrizeSound
 } = require('../../../app/learn/parametrize-sound');
-const execAsync = require('../../../app/utils/exec-async');
+const {execAsync} = require('../../../app/utils/exec-async');
 const {
   firstLayer,
   secondLayers,

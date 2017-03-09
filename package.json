@@ -50,7 +50,7 @@
     "chai": "^3.5.0",
     "grunt": "^1.0.1",
     "grunt-contrib-watch": "^1.0.0",
-    "grunt-exec": "^1.0.1",
+    "grunt-exec": "^2.0.0",
     "grunt-spawn-process": "^0.1.1",
     "grunt-xo": "^0.15.0",
     "load-grunt-tasks": "^3.5.2",
@@ -59,6 +59,7 @@
   },
   "scripts": {
     "test": "mocha --recursive",
-    "clear-project": "rm -rf layers .nyc_output coverage"
+    "clear-project": "rm -rf layers .nyc_output coverage",
+    "start": "node ivectors.js"
   }
 }

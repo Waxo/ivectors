@@ -70,4 +70,4 @@ const logger = {
   }
 };
 
-module.exports = logger;
+module.exports = {logger};

@@ -143,7 +143,7 @@ const writeTrainModelNDX = layer => {
       ])
         .then(
           ([, ivExtractor]) => fs.appendFileAsync(`${filesPath}/TrainModel.ndx`,
-            ivExtractor.toString()))
+            '\n' + ivExtractor.toString()))
     );
   }
   return BluebirdPromise.all(foldPromises);
@@ -173,6 +173,40 @@ const writePldaNDX = layer => {
   return BluebirdPromise.all(foldsPromises);
 };
 
+const writeAllLST = layer => {
+  return fs.readdirAsync(layer.paths.prm)
+    .then(prmFiles => {
+      let writeBuffer = prmFiles.filter(f => !f.match(/norm/g)).join('\n')
+        .replace(/\.prm/g, '');
+      writeBuffer += '\n' + layer.clusters.join('\n');
+      if (layer.aggregateClusters) {
+        layer.aggregateClusters.forEach(cluster => {
+          writeBuffer += '\n' + cluster[0];
+        });
+      }
+      return fs.writeFileAsync(`${layer.paths.lRoot}/all.lst`, writeBuffer);
+    });
+};
+
+const writeIvExtractorAllNDX = layer => {
+  return fs.readdirAsync(layer.paths.prm)
+    .then(files => {
+      files = files.filter(f => !f.match(/norm/g)).map(f => `${f} ${f}`);
+      return fs.writeFileAsync(`${layer.paths.lRoot}/ivExtractorAll.ndx`,
+        files.join('\n').replace(/\.prm/g, ''));
+    });
+};
+
+const linkIvExtractorAllNDX = layer => {
+  const foldsPromises = [];
+  for (let i = 0; i < 10; i++) {
+    foldsPromises.push(
+      fs.ensureSymlinkAsync(`${layer.paths.lRoot}/ivExtractorAll.ndx`,
+        `${layer.paths.files}/f${i}/ivExtractorAll.ndx`));
+  }
+  return BluebirdPromise.all(foldsPromises);
+};
+
 module.exports = {
   writeDataLST,
   writeTvNDX,
@@ -181,5 +215,8 @@ module.exports = {
   writeTrainModelNDX,
   writeIvTestNDX,
   writeCreateIvTestMatNDX,
-  writePldaNDX
+  writePldaNDX,
+  writeAllLST,
+  writeIvExtractorAllNDX,
+  linkIvExtractorAllNDX
 };
