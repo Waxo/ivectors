@@ -10,11 +10,16 @@ const workbenchCreator = (layer, fold) => {
 
   return {
     cfg,
+    fold,
     files: `${layer.paths.files}/f${fold}`,
     gmm: `${workPath_}/gmm`,
     mat: `${workPath_}/mat`,
     ivRaw: `${workPath_}/iv/raw`,
-    ivLenNorm: `${workPath_}/iv/length-norm`
+    ivLenNorm: `${workPath_}/iv/length-norm`,
+    scores: {
+      sph: `${layer.paths.lRoot}/work/sph`,
+      plda: `${layer.paths.lRoot}/work/plda`
+    }
   };
 };
 

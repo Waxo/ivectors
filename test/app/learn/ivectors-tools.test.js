@@ -8,10 +8,16 @@ const {
   createUBM,
   createTV,
   ivExtractor,
-  normalizePLDA
+  normalizePLDA,
+  createSph,
+  trainPLDA,
+  scoreSph,
+  scorePLDA
 } = require('../../../app/learn/ivectors-tools');
 
 describe.only('app/learn/ivectors-tools.js', () => {
+  const workbench = workbenchCreator(firstLayer, 1);
+
   describe('#normPRM', () => {
     it('should normalize prm files', function () {
       this.timeout(0);
@@ -29,7 +35,6 @@ describe.only('app/learn/ivectors-tools.js', () => {
   });
 
   describe('#createUBM', () => {
-    const workbench = workbenchCreator(firstLayer, 1);
     before(function () {
       this.timeout(0);
       return fs.removeAsync(workbench.gmm)
@@ -47,7 +52,6 @@ describe.only('app/learn/ivectors-tools.js', () => {
   });
 
   describe('#createTV', () => {
-    const workbench = workbenchCreator(firstLayer, 1);
     before(function () {
       this.timeout(0);
       return fs.removeAsync(workbench.mat)
@@ -68,7 +72,6 @@ describe.only('app/learn/ivectors-tools.js', () => {
   });
 
   describe('#ivExtractor', () => {
-    const workbench = workbenchCreator(firstLayer, 1);
     const inputFiles = [];
     const inputClusters = [];
 
@@ -117,9 +120,7 @@ describe.only('app/learn/ivectors-tools.js', () => {
     });
   });
 
-  describe.only('#normalizePLDA', () => {
-    const workbench = workbenchCreator(firstLayer, 1);
-
+  describe('#normalizePLDA', () => {
     before(() => {
       return fs.removeAsync(workbench.ivLenNorm);
     });
@@ -139,6 +140,79 @@ describe.only('app/learn/ivectors-tools.js', () => {
         .then(filesList => {
           filesList.should.include('EfrMat0.matx');
           filesList.should.include('EfrMean0.matx');
+        });
+    });
+  });
+
+  describe('#createSph', () => {
+    it('should create the appropriates matrices for sph scoring', () => {
+      return createSph(firstLayer, workbench)
+        .then(() => fs.readdirAsync(workbench.mat))
+        .then(filesList => {
+          filesList.should.include.members([
+            'plda_SphNorm_G.matx',
+            'plda_SphNorm_minDivMean.matx',
+            'plda_SphNorm_originalMean.matx',
+            'plda_SphNorm_Sigma.matx',
+            'sphNorm_SphNormMat0.matx',
+            'sphNorm_SphNormMat1.matx',
+            'sphNorm_SphNormMean0.matx',
+            'sphNorm_SphNormMean1.matx'
+          ]);
+        });
+    });
+  });
+
+  describe('#trainPLDA', () => {
+    it('should create the appropriates matrices for PLDA scoring', () => {
+      return trainPLDA(firstLayer, workbench)
+        .then(() => fs.readdirAsync(workbench.mat))
+        .then(filesList => {
+          filesList.should.include.members([
+            'plda_F.matx',
+            'plda_G.matx',
+            'plda_minDivMean.matx',
+            'plda_originalMean.matx',
+            'plda_Sigma.matx'
+          ]);
+        });
+    });
+  });
+
+  describe.only('#scoreSph', () => {
+    it('should score all test files', () => {
+      return scoreSph(workbench)
+        .then(() => fs.readdirAsync(workbench.scores.sph))
+        .then(filesList => {
+          filesList.should.include('1.txt');
+          return BluebirdPromise.all([
+            fs.readFileAsync(`${workbench.scores.sph}/1.txt`),
+            fs.readdirAsync(`${firstLayer.paths.input}/f1`),
+            fs.readdirAsync(`${firstLayer.paths.test}/f1`)
+          ]);
+        })
+        .then(([results, inputClusters, testFiles]) => {
+          results.toString().split('\n').filter(line => line !== '').length
+            .should.be.equal(inputClusters.length * testFiles.length);
+        });
+    });
+  });
+
+  describe.only('#scorePLDA', () => {
+    it('should score all test files', () => {
+      return scorePLDA(workbench)
+        .then(() => fs.readdirAsync(workbench.scores.plda))
+        .then(filesList => {
+          filesList.should.include('1.txt');
+          return BluebirdPromise.all([
+            fs.readFileAsync(`${workbench.scores.plda}/1.txt`),
+            fs.readdirAsync(`${firstLayer.paths.input}/f1`),
+            fs.readdirAsync(`${firstLayer.paths.test}/f1`)
+          ]);
+        })
+        .then(([results, inputClusters, testFiles]) => {
+          results.toString().split('\n').filter(line => line !== '').length
+            .should.be.equal(inputClusters.length * testFiles.length);
         });
     });
   });

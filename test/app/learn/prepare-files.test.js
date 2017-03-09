@@ -137,17 +137,28 @@ describe('app/learn/prepare-files.js', () => {
       });
   });
 
-  describe('#writeIvTestNDX', () => {
+  describe.only('#writeIvTestNDX', () => {
     before(() => writeIvTestNDX(firstLayer));
 
     it('should have the same number as input clusters', () => {
       return BluebirdPromise.all([
         fs.readFileAsync(`${firstLayer.paths.files}/f0/ivTest.ndx`),
-        fs.readdirAsync(`${firstLayer.paths.input}/f0`)
+        fs.readdirAsync(`${firstLayer.paths.input}/f0`),
+        fs.readdirAsync(`${firstLayer.paths.test}/f0`)
       ])
-        .then(([fileRead, inputDirs]) => {
-          fileRead.toString().split(' ').length.should.be
-            .equal(inputDirs.length + 1);
+        .then(([fileRead, inputDirs, testFiles]) => {
+          const lines = fileRead.toString().split('\n');
+          lines[0].split(' ').length.should.be.equal(inputDirs.length + 1);
+          lines.length.should.be.equal(testFiles.length);
+          lines.map(line => line.split(' ')[0]).should.be.deep
+            .equal(testFiles.map(file => file.replace('.wav', '')));
+        });
+    });
+
+    it('should not have .wav in it', () => {
+      return fs.readFileAsync(`${firstLayer.paths.files}/f0/ivTest.ndx`)
+        .then(read => {
+          read.toString().should.not.have.string('.wav');
         });
     });
   });

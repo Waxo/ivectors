@@ -63,9 +63,16 @@ const foldIvTestNDX_ = (layer, fold) => {
   const foldInputPath = `${layer.paths.input}/f${fold}`;
 
   return fs.ensureDirAsync(`${layer.paths.files}/f${fold}`)
-    .then(() => fs.readdirAsync(foldInputPath))
-    .then(dirs => fs.writeFileAsync(`${layer.paths.files}/f${fold}/ivTest.ndx`,
-      `<replace> ${dirs.join(' ')}`));
+    .then(() => BluebirdPromise.all([
+      fs.readdirAsync(foldInputPath),
+      fs.readdirAsync(`${layer.paths.test}/f${fold}`)
+    ]))
+    .then(([testClusters, filesTested]) => {
+      testClusters = testClusters.join(' ');
+      return fs.writeFileAsync(`${layer.paths.files}/f${fold}/ivTest.ndx`,
+        filesTested.map(file => `${file.replace('.wav', '')} ${testClusters}`)
+          .join('\n'));
+    });
 };
 
 const foldIvTestMatNDX_ = (layer, fold) => {

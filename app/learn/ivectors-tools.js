@@ -78,4 +78,79 @@ const normalizePLDA = (layer, wbFold) => {
     .then(() => execAsync(normPLDA.join(' ')));
 };
 
-module.exports = {normPRM, createUBM, createTV, ivExtractor, normalizePLDA};
+const scoring_ = (cfg, wbFold) => {
+  const outputName = `${cfg.name}.txt`;
+  const outDir = (cfg.output) ? `${cfg.output}/${outputName}` :
+    '/dev/null';
+  const ivInputPath = (cfg.norm) ? wbFold.ivLenNorm : wbFold.ivRaw;
+  const ndxInput = `${wbFold.files}/${cfg.ndxFile}`;
+
+  const score = [
+    bin.ivTest,
+    `--config ${cfg.configFile}`,
+    `--testVectorFilesPath ${ivInputPath}`,
+    `--loadVectorFilesPath ${ivInputPath}`,
+    `--matrixFilesPath ${wbFold.mat}/`,
+    `--outputFilename ${outDir}`,
+    `--backgroundNdxFilename ${wbFold.files}/Plda.ndx`,
+    `--targetIdList ${wbFold.files}/TrainModel.ndx`,
+    `--ndxFilename ${ndxInput}`
+  ];
+
+  return execAsync(score.join(' '));
+};
+
+const createSph = (layer, wbFold) => {
+  return scoring_({
+    configFile: layer.cfg.sph,
+    ndxFile: 'ivTestMat.ndx',
+    norm: false
+  }, wbFold);
+};
+
+const trainPLDA = (layer, wbFold) => {
+  const train = [
+    bin.plda,
+    `--config ${layer.cfg.plda}`,
+    `--testVectorFilesPath ${wbFold.ivLenNorm}/`,
+    `--loadVectorFilesPath ${wbFold.ivLenNorm}/`,
+    `--matrixFilesPath ${wbFold.mat}/`,
+    `--backgroundNdxFilename ${wbFold.files}/Plda.ndx`
+  ];
+
+  return execAsync(train.join(' '));
+};
+
+const scoreSph = wbFold => {
+  return fs.ensureDirAsync(wbFold.scores.sph)
+    .then(() => scoring_({
+      name: wbFold.fold,
+      configFile: wbFold.cfg.sph,
+      output: wbFold.scores.sph,
+      ndxFile: `ivTest.ndx`,
+      norm: false
+    }, wbFold));
+};
+
+const scorePLDA = wbFold => {
+  return fs.ensureDirAsync(wbFold.scores.plda)
+    .then(() => scoring_({
+      name: wbFold.fold,
+      configFile: wbFold.cfg.plda,
+      output: wbFold.scores.plda,
+      ndxFile: `ivTest.ndx`,
+      norm: true
+    }, wbFold));
+};
+
+module.exports = {
+  normPRM,
+  createUBM,
+  createTV,
+  ivExtractor,
+  normalizePLDA,
+  createSph,
+  trainPLDA,
+  scoreSph,
+  scorePLDA
+};
