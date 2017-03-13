@@ -33,7 +33,7 @@ describe('app/learn/parametrize-clusters.js', () => {
     });
   });
 
-  describe.skip('#parametrizeClusters', () => {
+  describe('#parametrizeClusters', () => {
     const inputFilesLayer1 = [];
     const inputFilesLayer2 = [];
     before(() => {
@@ -47,11 +47,6 @@ describe('app/learn/parametrize-clusters.js', () => {
         .then(files => {
           inputFilesLayer2.push(...files);
         });
-    });
-
-    after(() => {
-      return fs.removeAsync(firstLayer.paths.prm)
-        .then(() => fs.removeAsync(humanLayer.paths.prm));
     });
 
     it('should have have the same count of prm as input files',

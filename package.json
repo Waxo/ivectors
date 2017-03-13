@@ -58,7 +58,7 @@
     "time-grunt": "^1.4.0"
   },
   "scripts": {
-    "test": "mocha --recursive",
+    "test": "mocha",
     "clear-project": "rm -rf layers .nyc_output coverage",
     "start": "node ivectors.js"
   }

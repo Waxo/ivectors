@@ -10,6 +10,7 @@ const threadManager = () => {
         parametrizeSound(msg.file, msg.layer)
           .then(() => process.send({type: 'ready'}));
         break;
+      /* istanbul ignore next */
       case 'terminate':
         process.exit();
         break;

@@ -1,6 +1,7 @@
 /* eslint-disable max-nested-callbacks */
 const BluebirdPromise = require('bluebird');
 const fs = BluebirdPromise.promisifyAll(require('fs-extra'));
+require('chai').should();
 const {firstLayer} = require('../../../config/environment');
 const {
   writeDataLST,
@@ -15,7 +16,6 @@ const {
   writeIvExtractorAllNDX,
   linkIvExtractorAllNDX
 } = require('../../../app/learn/prepare-files');
-require('chai').should();
 
 describe('app/learn/prepare-files.js', () => {
   describe('#writeDataLST', () => {
@@ -137,7 +137,7 @@ describe('app/learn/prepare-files.js', () => {
       });
   });
 
-  describe.only('#writeIvTestNDX', () => {
+  describe('#writeIvTestNDX', () => {
     before(() => writeIvTestNDX(firstLayer));
 
     it('should have the same number as input clusters', () => {

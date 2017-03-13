@@ -15,7 +15,7 @@ const {
   scorePLDA
 } = require('../../../app/learn/ivectors-tools');
 
-describe.only('app/learn/ivectors-tools.js', () => {
+describe('app/learn/ivectors-tools.js', () => {
   const workbench = workbenchCreator(firstLayer, 1);
 
   describe('#normPRM', () => {
@@ -179,7 +179,7 @@ describe.only('app/learn/ivectors-tools.js', () => {
     });
   });
 
-  describe.only('#scoreSph', () => {
+  describe('#scoreSph', () => {
     it('should score all test files', () => {
       return scoreSph(workbench)
         .then(() => fs.readdirAsync(workbench.scores.sph))
@@ -198,7 +198,7 @@ describe.only('app/learn/ivectors-tools.js', () => {
     });
   });
 
-  describe.only('#scorePLDA', () => {
+  describe('#scorePLDA', () => {
     it('should score all test files', () => {
       return scorePLDA(workbench)
         .then(() => fs.readdirAsync(workbench.scores.plda))
