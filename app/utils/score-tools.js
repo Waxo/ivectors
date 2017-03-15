@@ -93,4 +93,91 @@ const humanLayerTestList = wbFold => {
   });
 };
 
-module.exports = {scoreFold, isGoodMatch, humanLayerTestList};
+const linkHumanLayer = (layer, humanLayer, workbenches) => {
+  const promises = [];
+  workbenches.forEach(wb => {
+    wb.goHuman.forEach(file => {
+      promises.push(
+        fs.ensureSymlinkAsync(`${layer.paths.test}/f${wb.fold}/${file}.wav`,
+          `${humanLayer.paths.test}/f${wb.fold}/${file}.wav`));
+    });
+  });
+  return BluebirdPromise.all(promises);
+};
+
+const retrieveClusters_ = layer => {
+  const clusters = new Array(...layer.clusters);
+
+  if (layer.aggregateClusters) {
+    clusters.push(...layer.aggregateClusters.map(([agName]) => agName));
+  }
+  clusters.sort();
+  return clusters;
+};
+
+const initMatrix_ = layer => {
+  const clusters = retrieveClusters_(layer);
+
+  const matrix = {};
+  clusters.forEach(cluster => {
+    matrix[cluster] = {};
+    clusters.forEach(clusterName => {
+      matrix[cluster][clusterName] = 0;
+    });
+  });
+  return matrix;
+};
+
+const createConfuseMat_ = (layer, workbenches) => {
+  const matrix = initMatrix_(layer);
+  const results = workbenches.map(wb => wb.results);
+
+  results.forEach(resultMap => {
+    resultMap.forEach(([match, classMatched], key) => {
+      const [fileCluster] = key.split('-');
+      if (match) {
+        matrix[classMatched][classMatched]++;
+      } else if (matrix[fileCluster] &&
+        matrix[fileCluster][classMatched] !== 'undefined') {
+        matrix[fileCluster][classMatched]++;
+      } else {
+        layer.aggregateClusters.forEach(([clusterName, clusters]) => {
+          if (clusters.indexOf(fileCluster) >= 0) {
+            matrix[clusterName][classMatched]++;
+          }
+        });
+      }
+    });
+  });
+  return matrix;
+};
+
+const writeConfuseMat = (layer, workbenches, path) => {
+  const matrix = createConfuseMat_(layer, workbenches);
+
+  let confuseMat = '';
+  for (const cluster in matrix) {
+    if (Object.prototype.hasOwnProperty.call(matrix, cluster)) {
+      let line = '';
+      let countSamples = 0;
+      for (const matchedCluster in matrix[cluster]) {
+        if (Object.prototype.hasOwnProperty.call(matrix[cluster],
+            matchedCluster)) {
+          countSamples += matrix[cluster][matchedCluster];
+          line += `${matrix[cluster][matchedCluster]},`;
+        }
+      }
+      confuseMat += `${cluster},${countSamples},${line}\n`;
+    }
+  }
+
+  return fs.writeFileAsync(`${path}/${layer.wbName}.csv`, confuseMat);
+};
+
+module.exports = {
+  scoreFold,
+  isGoodMatch,
+  humanLayerTestList,
+  writeConfuseMat,
+  linkHumanLayer
+};

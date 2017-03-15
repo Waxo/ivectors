@@ -214,6 +214,20 @@ const linkIvExtractorAllNDX = layer => {
   return BluebirdPromise.all(foldsPromises);
 };
 
+const prepareFiles = layer => {
+  return writeDataLST(layer)
+    .then(() => writeTvNDX(layer))
+    .then(() => writeIvExtractorNDX(layer))
+    .then(() => writeIvExtractorMatNDX(layer))
+    .then(() => writeTrainModelNDX(layer))
+    .then(() => writeIvTestNDX(layer))
+    .then(() => writeCreateIvTestMatNDX(layer))
+    .then(() => writePldaNDX(layer))
+    .then(() => writeAllLST(layer))
+    .then(() => writeIvExtractorAllNDX(layer))
+    .then(() => linkIvExtractorAllNDX(layer));
+};
+
 module.exports = {
   writeDataLST,
   writeTvNDX,
@@ -225,5 +239,6 @@ module.exports = {
   writePldaNDX,
   writeAllLST,
   writeIvExtractorAllNDX,
-  linkIvExtractorAllNDX
+  linkIvExtractorAllNDX,
+  prepareFiles
 };

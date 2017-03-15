@@ -26,6 +26,8 @@ const workbenchCreator = (layer, fold) => {
 const firstLayer = layerRootPath => {
   const wbName = 'First';
   const lRoot = `${layerRootPath}/l${wbName}`;
+  const prmInput = `${root_}/prmInput/l${wbName}`;
+
   const clusters = ['Dishes', 'DoorClapping', 'DoorOpening',
     'ElectricalShaver', 'GlassBreaking', 'HairDryer', 'HandClapping', 'Keys',
     'Paper', 'Water'];
@@ -70,13 +72,16 @@ const firstLayer = layerRootPath => {
     clusters,
     aggregateClusters,
     mfccSize,
-    cfgMFCC
+    cfgMFCC,
+    prmInput
   };
 };
 
 const humanLayer = layerRootPath => {
   const wbName = 'Human';
   const lRoot = `${layerRootPath}/l${wbName}`;
+  const prmInput = `${root_}/prmInput/l${wbName}`;
+
   const clusters = ['Breathing', 'Cough', 'FemaleCry', 'FemaleScream', 'Laugh',
     'MaleScream', 'Sneeze', 'Yawn'];
 
@@ -93,11 +98,8 @@ const humanLayer = layerRootPath => {
 
   const paths = {
     lRoot,
-    gmm: `${lRoot}/gmm`,
-    mat: `${lRoot}/mat`,
-    ivRaw: `${lRoot}/iv/raw`,
-    ivLenNorm: `${lRoot}/iv/lengthNorm`,
     input: `${lRoot}/input`,
+    test: `${lRoot}/test`,
     prm: `${lRoot}/prm`,
     lbl: `${lRoot}/lbl`,
     files: `${lRoot}/files`
@@ -114,7 +116,7 @@ const humanLayer = layerRootPath => {
     plda: `${ivCfg_}/05_2_PLDA_Plda.cfg`
   };
 
-  return {paths, cfg, clusters, wbName, mfccSize, cfgMFCC, useRER};
+  return {paths, cfg, clusters, wbName, mfccSize, cfgMFCC, useRER, prmInput};
 };
 
 const loadEnvironment = () => {

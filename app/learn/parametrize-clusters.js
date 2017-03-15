@@ -5,6 +5,7 @@ const fs = BluebirdPromise.promisifyAll(require('fs-extra'));
 const ProgressBar = require('progress');
 const {inputPath} = require('../../config/environment');
 const {logger} = require('../utils/logger');
+const {extractLabel} = require('./parametrize-sound');
 
 const getFilesByCluster_ = layer => {
   const arrayClusters = new Array(...layer.clusters);
@@ -27,7 +28,7 @@ const retrieveFiles = layer => {
     });
 };
 
-const parametrizeClusters = (files, layer) => {
+const parametrizeClusters = (files, layer, output = null) => {
   const childrenPromises = [];
   const arrayFiles = new Array(...files);
   const barInfo = '[:bar] :percent :current/:total :etas :elapseds';
@@ -51,10 +52,10 @@ const parametrizeClusters = (files, layer) => {
               child.send({type: 'terminate'});
             } else {
               bar.tick();
-              child.send({type: 'data', file: arrayFiles.pop(), layer});
+              child.send({type: 'data', file: arrayFiles.pop(), layer, output});
             }
             break;
-            /* istanbul ignore next */
+          /* istanbul ignore next */
           default:
             logger.log('error', `Master: Message not recognized : ${msg.type}`);
             break;
@@ -70,4 +71,16 @@ const parametrizeClusters = (files, layer) => {
   return BluebirdPromise.all(childrenPromises);
 };
 
-module.exports = {retrieveFiles, parametrizeClusters};
+const linkPRMFiles = layer => {
+  return fs.removeAsync(layer.paths.prm)
+    .then(() => fs.ensureSymlinkAsync(layer.prmInput, layer.paths.prm))
+    .then(() => retrieveFiles(layer))
+    .then(filesPath => {
+      return BluebirdPromise.map(filesPath, path => {
+        const file = path.split('/').pop().replace('.wav', '');
+        return extractLabel(path, file, layer.paths.lbl);
+      });
+    });
+};
+
+module.exports = {retrieveFiles, parametrizeClusters, linkPRMFiles};

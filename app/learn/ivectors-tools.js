@@ -1,7 +1,11 @@
+const fork = require('child_process').fork;
+const numCPUs = require('os').cpus().length;
 const BluebirdPromise = require('bluebird');
 const fs = BluebirdPromise.promisifyAll(require('fs-extra'));
 const {bin} = require('../../config/environment');
 const {execAsync} = require('../utils/exec-async');
+const {workbenchCreator} = require('../../config/environment');
+const {logger} = require('../utils/logger');
 
 const normPRM = layer => {
   const featNormPRM = [
@@ -143,6 +147,48 @@ const scorePLDA = wbFold => {
     }, wbFold));
 };
 
+const createWorkbenches = layer => {
+  const workbenchList = [];
+  for (let i = 0; i < 10; i++) {
+    workbenchList.push(workbenchCreator(layer, i));
+  }
+  return workbenchList;
+};
+
+const launchIvProcess = (layer, workbenches) => {
+  const childrenPromises = [];
+  let wbIndex = 0;
+
+  for (let i = 0; i < numCPUs; i++) {
+    const child = fork(`${process.cwd()}/app/learn/iv-process-threads.js`);
+
+    childrenPromises.push(new BluebirdPromise(resolve => {
+      child.on('message', msg => {
+        switch (msg.type) {
+          case 'ready':
+            if (wbIndex >= workbenches.length) {
+              child.send({type: 'terminate'});
+            } else {
+              child.send(
+                {type: 'data', workbench: workbenches[wbIndex++], layer});
+            }
+            break;
+          /* istanbul ignore next */
+          default:
+            logger.log('error', `Master: Message not recognized : ${msg.type}`);
+            break;
+        }
+      });
+
+      child.on('exit', () => {
+        resolve();
+      });
+    }));
+  }
+
+  return BluebirdPromise.all(childrenPromises);
+};
+
 module.exports = {
   normPRM,
   createUBM,
@@ -152,5 +198,7 @@ module.exports = {
   createSph,
   trainPLDA,
   scoreSph,
-  scorePLDA
+  scorePLDA,
+  createWorkbenches,
+  launchIvProcess
 };

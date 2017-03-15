@@ -31,7 +31,21 @@ describe('app/learn/parametrize-sound.js', () => {
         fs.removeAsync(firstLayer.paths.prm),
         fs.removeAsync(firstLayer.paths.lbl),
         fs.removeAsync(humanLayer.paths.prm),
-        fs.removeAsync(humanLayer.paths.lbl)
+        fs.removeAsync(humanLayer.paths.lbl),
+        fs.removeAsync(firstLayer.prmInput),
+        fs.removeAsync(humanLayer.prmInput)
+      ])
+        .catch(() => {});
+    });
+
+    afterEach(() => {
+      return BluebirdPromise.all([
+        fs.removeAsync(firstLayer.paths.prm),
+        fs.removeAsync(firstLayer.paths.lbl),
+        fs.removeAsync(humanLayer.paths.prm),
+        fs.removeAsync(humanLayer.paths.lbl),
+        fs.removeAsync(firstLayer.prmInput),
+        fs.removeAsync(humanLayer.prmInput)
       ])
         .catch(() => {});
     });
@@ -104,6 +118,41 @@ describe('app/learn/parametrize-sound.js', () => {
             execAsync([
               `${process.cwd()}/bin-test/ReadFeatFile`,
               `--featureFilesPath ${humanLayer.paths.prm}/`,
+              '--loadFeatureFileExtension .prm',
+              '--loadFeatureFileFormat RAW',
+              `--inputFeatureFileName ${fileName}`,
+              `--loadFeatureFileVectSize ${vectorSize + 1}`,
+              '--featureFlags 100000'
+            ].join(' '))
+          ]);
+        })
+        .then(([success, failed]) => {
+          success.should.not.have.string('Wrong number of data');
+          failed.should.have.string('Wrong number of data');
+        });
+    });
+
+    it('should extract prm outside of the layers path', () => {
+      return parametrizeSound(fileToRead, firstLayer, firstLayer.prmInput)
+        .then(() => fs.readdirAsync(firstLayer.prmInput))
+        .then(prmFiles => {
+          prmFiles.length.should.be.equal(1);
+          prmFiles[0].should.have.string(fileName);
+          const vectorSize = (firstLayer.mfccSize + 3 +
+            ((firstLayer.useRER) ? 1 : 0)) * 3;
+          return BluebirdPromise.all([
+            execAsync([
+              `${process.cwd()}/bin-test/ReadFeatFile`,
+              `--featureFilesPath ${firstLayer.prmInput}/`,
+              '--loadFeatureFileExtension .prm',
+              '--loadFeatureFileFormat RAW',
+              `--inputFeatureFileName ${fileName}`,
+              `--loadFeatureFileVectSize ${vectorSize}`,
+              '--featureFlags 100000'
+            ].join(' ')),
+            execAsync([
+              `${process.cwd()}/bin-test/ReadFeatFile`,
+              `--featureFilesPath ${firstLayer.prmInput}/`,
               '--loadFeatureFileExtension .prm',
               '--loadFeatureFileFormat RAW',
               `--inputFeatureFileName ${fileName}`,

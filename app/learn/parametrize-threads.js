@@ -7,7 +7,7 @@ const threadManager = () => {
   process.on('message', msg => {
     switch (msg.type) {
       case 'data':
-        parametrizeSound(msg.file, msg.layer)
+        parametrizeSound(msg.file, msg.layer, msg.output)
           .then(() => process.send({type: 'ready'}));
         break;
       /* istanbul ignore next */

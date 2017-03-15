@@ -7,16 +7,17 @@ const {
   arrayToRaw
 } = require('sound-parameters-extractor');
 
-const extractLabel_ = (path, file, labelPath) => {
+const extractLabel = (path, file, labelPath) => {
   return fs.ensureDirAsync(labelPath)
     .then(() => wavFileInfo.infoByFilenameAsync(path))
     .then(info => fs.writeFileAsync(`${labelPath}/${file}.lbl`,
       `0 ${info.duration} sound`));
 };
 
-const parametrizeSound = (path, layer) => {
+const parametrizeSound = (path, layer, output = null) => {
   const file = path.split('/').pop().replace('.wav', '');
-  return fs.ensureDirAsync(layer.paths.prm)
+  const outputDir = output || layer.paths.prm;
+  return fs.ensureDirAsync(outputDir)
     .then(() => getParamsFromFile(path, layer.cfgMFCC, layer.mfccSize))
     .then(params => {
       const tmpVector = params.mfcc.map((acousticFeatures, index) => {
@@ -39,9 +40,12 @@ const parametrizeSound = (path, layer) => {
       const vector = tmpVector.map(
         (vector, index) => vector.concat(delta[index],
           deltaDelta[index]));
-      return arrayToRaw(vector, `${file}.prm`, `${layer.paths.prm}/`)
-        .then(() => extractLabel_(path, file, layer.paths.lbl));
+      if (output) {
+        return arrayToRaw(vector, `${file}.prm`, `${outputDir}/`);
+      }
+      return arrayToRaw(vector, `${file}.prm`, `${outputDir}/`)
+        .then(() => extractLabel(path, file, layer.paths.lbl));
     });
 };
 
-module.exports = {parametrizeSound};
+module.exports = {parametrizeSound, extractLabel};

@@ -6,7 +6,7 @@ const {
   scoreFold,
   isGoodMatch,
   humanLayerTestList
-} = require('../../../app/utils/score-reader');
+} = require('../../../app/utils/score-tools');
 
 describe('app/utils/score-reader.js', () => {
   const workbench = workbenchCreator(firstLayer, 1);

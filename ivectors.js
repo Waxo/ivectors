@@ -1,10 +1,23 @@
-const env = require('./config/environment');
+const chalk = require('chalk');
+const vorpal = require('vorpal')();
 const {
-  retrieveFiles,
-  parametrizeClusters
-} = require('./app/learn/parametrize-clusters');
+  extractPRMFiles,
+  tenFolds
+} = require('./app/commands');
 
-retrieveFiles(env.firstLayer)
-  .then(inputFiles => parametrizeClusters(inputFiles, env.firstLayer))
-  .then(() => retrieveFiles(env.secondLayers[0]))
-  .then(inputFiles => parametrizeClusters(inputFiles, env.secondLayers[0]));
+vorpal.delimiter(`${chalk.blue.bold('ivectors')} ${chalk.yellow.bold('#')}`)
+  .show();
+
+vorpal
+  .command('ten-folds', 'Launch the ten-fold scoring')
+  .option('-p, --prm', 'use folder prmInput')
+  .action(args => {
+    // return tenFolds(args.options.prm);
+    return tenFolds(true);
+  });
+
+vorpal
+  .command('parametrize', 'Extract prm into prmInput')
+  .action(() => {
+    return extractPRMFiles();
+  });
