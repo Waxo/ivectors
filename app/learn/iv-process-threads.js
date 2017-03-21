@@ -1,5 +1,6 @@
 const logger = require('../utils/logger');
 const {
+  normPRM,
   createUBM,
   createTV,
   ivExtractor,
@@ -11,7 +12,8 @@ const {
 } = require('./ivectors-tools');
 
 const ivProcess = (layer, workbench) => {
-  return createUBM(layer, workbench)
+  return normPRM(layer, workbench)
+    .then(() => createUBM(layer, workbench))
     .then(() => createTV(layer, workbench))
     .then(() => ivExtractor(layer, workbench, 'ivExtractorAll.ndx'))
     .then(() => ivExtractor(layer, workbench, 'ivExtractor.ndx'))

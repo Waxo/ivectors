@@ -7,12 +7,12 @@ const {execAsync} = require('../utils/exec-async');
 const {workbenchCreator} = require('../../config/environment');
 const {logger} = require('../utils/logger');
 
-const normPRM = layer => {
+const normPRM = (layer, wbFold) => {
   const featNormPRM = [
     bin.normPRM,
     `--config ${layer.cfg.normPRM}`,
-    `--inputFeatureFilename ${layer.paths.lRoot}/all.lst`,
-    `--featureFilesPath ${layer.paths.prm}/`,
+    `--inputFeatureFilename ${layer.paths.lRoot}/normPRM.lst`,
+    `--featureFilesPath ${wbFold.prm}/`,
     `--labelFilesPath ${layer.paths.lbl}/`
   ];
 
@@ -26,7 +26,7 @@ const createUBM = (layer, wbFold) => {
         bin.ubm,
         `--config ${layer.cfg.ubm}`,
         `--inputFeatureFilename ${wbFold.files}/data.lst`,
-        `--featureFilesPath ${layer.paths.prm}/`,
+        `--featureFilesPath ${wbFold.prm}/`,
         `--labelFilesPath ${layer.paths.lbl}/`,
         `--mixtureFilesPath ${wbFold.gmm}/`
       ];
@@ -39,7 +39,7 @@ const createTV = (layer, wbFold) => {
   const tvExec = [
     bin.tv,
     `--config ${layer.cfg.tv}`,
-    `--featureFilesPath ${layer.paths.prm}/`,
+    `--featureFilesPath ${wbFold.prm}/`,
     `--labelFilesPath ${layer.paths.lbl}/`,
     `--mixtureFilesPath ${wbFold.gmm}/`,
     `--matrixFilesPath ${wbFold.mat}/`,
@@ -56,7 +56,7 @@ const ivExtractor = (layer, wbFold, ndxFile) => {
   const ivExtract = [
     bin.ivExtractor,
     `--config ${layer.cfg.ivExtractor}`,
-    `--featureFilesPath ${layer.paths.prm}/`,
+    `--featureFilesPath ${wbFold.prm}/`,
     `--labelFilesPath ${layer.paths.lbl}/`,
     `--mixtureFilesPath ${wbFold.gmm}/`,
     `--matrixFilesPath ${wbFold.mat}/`,

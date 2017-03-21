@@ -10,14 +10,14 @@ vorpal.delimiter(`${chalk.blue.bold('ivectors')} ${chalk.yellow.bold('#')}`)
 
 vorpal
   .command('ten-folds', 'Launch the ten-fold scoring')
-  .option('-p, --prm', 'use folder prmInput')
+  .option('-p, --prm', 'create PRM files')
   .action(args => {
-    // return tenFolds(args.options.prm);
-    return tenFolds(true);
+    return tenFolds(args.options.prm);
   });
 
 vorpal
-  .command('parametrize', 'Extract prm into prmInput')
-  .action(() => {
-    return extractPRMFiles();
+  .command('parametrize', 'Extract prm into prmInput or directory given')
+  .option('-o, --output <directory>')
+  .action(args => {
+    return extractPRMFiles(args.options.output);
   });

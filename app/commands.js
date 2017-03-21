@@ -5,12 +5,12 @@ const {firstLayer, secondLayers} = require('../config/environment');
 const {
   retrieveFiles,
   parametrizeClusters,
-  linkPRMFiles
+  linkPRMFiles,
+  linkPRMWorkbench
 } = require('./learn/parametrize-clusters');
 const {prepareFiles} = require('./learn/prepare-files');
 const {createFolds} = require('./utils/ten-fold-preparer');
 const {
-  normPRM,
   createWorkbenches,
   launchIvProcess
 } = require('./learn/ivectors-tools');
@@ -24,14 +24,21 @@ const {
 
 const humanLayer = secondLayers[0];
 
-const extractPRMFiles = () => {
+const extractPRMFiles = (outputDir = '') => {
+  let firstLayerOutput = firstLayer.prmInput;
+  let humanLayerOutput = humanLayer.prmInput;
+  if (outputDir) {
+    firstLayerOutput = `${process.cwd()}/${outputDir}/l${firstLayer.wbName}`;
+    humanLayerOutput = `${process.cwd()}/${outputDir}/l${humanLayer.wbName}`;
+  }
+
   return retrieveFiles(firstLayer)
-    .then(files => parametrizeClusters(files, firstLayer, firstLayer.prmInput))
+    .then(files => parametrizeClusters(files, firstLayer, firstLayerOutput))
     .then(() => retrieveFiles(humanLayer))
-    .then(files => parametrizeClusters(files, humanLayer, humanLayer.prmInput));
+    .then(files => parametrizeClusters(files, humanLayer, humanLayerOutput));
 };
 
-const tenFolds = prm => {
+const tenFolds = createPRM => {
   console.time('Ten fold scoring');
   let spinner = ora('Ten folds').start();
   const workbenches = createWorkbenches(firstLayer);
@@ -40,12 +47,17 @@ const tenFolds = prm => {
     .then(() => fs.removeAsync(humanLayer.paths.lRoot))
     .then(() => createFolds(firstLayer))
     .then(() => {
-      spinner.text = 'Extracting prm';
-      if (prm) {
-        return linkPRMFiles(firstLayer)
-          .then(linkPRMFiles(humanLayer));
+      spinner.succeed();
+      if (createPRM) {
+        return extractPRMFiles();
       }
-      return extractPRMFiles();
+      return linkPRMFiles(firstLayer)
+        .then(() => linkPRMFiles(humanLayer));
+    })
+    .then(() => {
+      spinner = ora('Link PRM to workbench');
+      return linkPRMWorkbench(firstLayer, workbenches)
+        .then(() => linkPRMWorkbench(humanLayer, wbHumanLayer));
     })
     .then(() => {
       spinner.succeed();
@@ -54,16 +66,13 @@ const tenFolds = prm => {
     })
     .then(() => {
       spinner.succeed();
-      spinner = ora('Normalizing PRM  files').start();
-      return normPRM(firstLayer);
-    }).then(() => {
-      spinner.succeed();
       spinner = ora({
         text: 'Learning systems and testing',
         color: 'red'
       }).start();
       return launchIvProcess(firstLayer, workbenches);
-    }).then(() => {
+    })
+    .then(() => {
       spinner.succeed();
       spinner = ora('Scoring files').start();
       return BluebirdPromise.map(workbenches, wb => scoreFold(wb));
@@ -87,10 +96,6 @@ const tenFolds = prm => {
       return prepareFiles(humanLayer);
     })
     .then(() => {
-      spinner.succeed();
-      spinner = ora('Normalizing PRM  files').start();
-      return normPRM(humanLayer);
-    }).then(() => {
       spinner.succeed();
       spinner = ora({
         text: 'Learning systems and testing',

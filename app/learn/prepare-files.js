@@ -185,13 +185,17 @@ const writeAllLST = layer => {
     .then(prmFiles => {
       let writeBuffer = prmFiles.filter(f => !f.match(/norm/g)).join('\n')
         .replace(/\.prm/g, '');
+      const normPRMLST = writeBuffer;
       writeBuffer += '\n' + layer.clusters.join('\n');
       if (layer.aggregateClusters) {
         layer.aggregateClusters.forEach(cluster => {
           writeBuffer += '\n' + cluster[0];
         });
       }
-      return fs.writeFileAsync(`${layer.paths.lRoot}/all.lst`, writeBuffer);
+      return BluebirdPromise.all([
+        fs.writeFileAsync(`${layer.paths.lRoot}/normPRM.lst`, normPRMLST),
+         fs.writeFileAsync(`${layer.paths.lRoot}/all.lst`, writeBuffer)
+      ]);
     });
 };
 

@@ -100,10 +100,12 @@ typings/
 
 # dotenv environment variables file
 .env
+
+# Custom ignores
 /input/
 /layers/
 /bin/
 /bin-test/
 /cfg-ivectors/
-/prmInput/
 *.csv
+*.prm

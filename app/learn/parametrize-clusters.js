@@ -73,7 +73,10 @@ const parametrizeClusters = (files, layer, output = null) => {
 
 const linkPRMFiles = layer => {
   return fs.removeAsync(layer.paths.prm)
-    .then(() => fs.ensureSymlinkAsync(layer.prmInput, layer.paths.prm))
+    .then(() => fs.readdirAsync(layer.prmInput))
+    .then(files => BluebirdPromise.map(files,
+      file => fs.ensureSymlinkAsync(`${layer.prmInput}/${file}`,
+        `${layer.paths.prm}/${file}`)))
     .then(() => retrieveFiles(layer))
     .then(filesPath => {
       return BluebirdPromise.map(filesPath, path => {
@@ -83,4 +86,15 @@ const linkPRMFiles = layer => {
     });
 };
 
-module.exports = {retrieveFiles, parametrizeClusters, linkPRMFiles};
+const linkPRMWorkbench = (layer, workbenches) => {
+  return BluebirdPromise.map(workbenches, wb => {
+    return fs.copyAsync(layer.paths.prm, wb.prm);
+  });
+};
+
+module.exports = {
+  retrieveFiles,
+  parametrizeClusters,
+  linkPRMFiles,
+  linkPRMWorkbench
+};

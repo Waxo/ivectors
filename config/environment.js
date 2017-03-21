@@ -13,6 +13,7 @@ const workbenchCreator = (layer, fold) => {
     fold,
     files: `${layer.paths.files}/f${fold}`,
     gmm: `${workPath_}/gmm`,
+    prm: `${workPath_}/prm`,
     mat: `${workPath_}/mat`,
     ivRaw: `${workPath_}/iv/raw`,
     ivLenNorm: `${workPath_}/iv/length-norm`,
@@ -108,9 +109,9 @@ const humanLayer = layerRootPath => {
   const cfg = {
     path: ivCfg_,
     normPRM: `${ivCfg_}/01_PRM_NormFeat_RER.cfg`,
-    ubm: `${ivCfg_}/02_UBM_TrainWorld.cfg`,
-    tv: `${ivCfg_}/03_TV_TotalVariability_fast.cfg`,
-    ivExtractor: `${ivCfg_}/04_ivExtractor_fast.cfg`,
+    ubm: `${ivCfg_}/02_UBM_TrainWorld_RER.cfg`,
+    tv: `${ivCfg_}/03_TV_TotalVariability_fast_RER.cfg`,
+    ivExtractor: `${ivCfg_}/04_ivExtractor_fast_RER.cfg`,
     normPLDA: `${ivCfg_}/05_1_PLDA_ivNorm.cfg`,
     sph: `${ivCfg_}/08_sph_ivTest_SphNorm_Plda.cfg`,
     plda: `${ivCfg_}/05_2_PLDA_Plda.cfg`
