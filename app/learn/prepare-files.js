@@ -194,7 +194,7 @@ const writeAllLST = layer => {
       }
       return BluebirdPromise.all([
         fs.writeFileAsync(`${layer.paths.lRoot}/normPRM.lst`, normPRMLST),
-         fs.writeFileAsync(`${layer.paths.lRoot}/all.lst`, writeBuffer)
+        fs.writeFileAsync(`${layer.paths.lRoot}/all.lst`, writeBuffer)
       ]);
     });
 };

@@ -7,7 +7,6 @@
   "author": "Maxime Robin <contact.waxo@gmail.com>",
   "license": "MIT",
   "xo": {
-    "esnext": true,
     "envs": [
       "browser",
       "node",
@@ -61,7 +60,7 @@
   },
   "scripts": {
     "test": "mocha",
-    "clear-project": "rm -rf layers .nyc_output coverage",
+    "clear-project": "rm -rf layers .nyc_output coverage *.csv",
     "start": "node ivectors.js"
   }
 }

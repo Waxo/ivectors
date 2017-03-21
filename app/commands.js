@@ -38,32 +38,9 @@ const extractPRMFiles = (outputDir = '') => {
     .then(files => parametrizeClusters(files, humanLayer, humanLayerOutput));
 };
 
-const tenFolds = createPRM => {
-  console.time('Ten fold scoring');
-  let spinner = ora('Ten folds').start();
-  const workbenches = createWorkbenches(firstLayer);
-  const wbHumanLayer = createWorkbenches(humanLayer);
-  return fs.removeAsync(firstLayer.paths.lRoot)
-    .then(() => fs.removeAsync(humanLayer.paths.lRoot))
-    .then(() => createFolds(firstLayer))
-    .then(() => {
-      spinner.succeed();
-      if (createPRM) {
-        return extractPRMFiles();
-      }
-      return linkPRMFiles(firstLayer)
-        .then(() => linkPRMFiles(humanLayer));
-    })
-    .then(() => {
-      spinner = ora('Link PRM to workbench');
-      return linkPRMWorkbench(firstLayer, workbenches)
-        .then(() => linkPRMWorkbench(humanLayer, wbHumanLayer));
-    })
-    .then(() => {
-      spinner.succeed();
-      spinner = ora(`Writing files for layer : ${firstLayer.wbName}`).start();
-      return prepareFiles(firstLayer);
-    })
+const firstLayerProcess_ = workbenches => {
+  let spinner = ora(`Writing files for layer : ${firstLayer.wbName}`).start();
+  return prepareFiles(firstLayer)
     .then(() => {
       spinner.succeed();
       spinner = ora({
@@ -84,11 +61,12 @@ const tenFolds = createPRM => {
       spinner = ora('Writing confuse matrix').start();
       return writeConfuseMat(firstLayer, workbenches, process.cwd());
     })
-    .then(() => {
-      spinner.succeed();
-      spinner = ora('Preparing second layer').start();
-      return BluebirdPromise.map(workbenches, wb => humanLayerTestList(wb));
-    })
+    .then(() => spinner.succeed());
+};
+
+const humanLayerProcess_ = (workbenches, wbsHumanLayer) => {
+  let spinner = ora('Preparing second layer').start();
+  return BluebirdPromise.map(workbenches, wb => humanLayerTestList(wb))
     .then(() => linkHumanLayer(firstLayer, humanLayer, workbenches))
     .then(() => {
       spinner.succeed();
@@ -101,21 +79,49 @@ const tenFolds = createPRM => {
         text: 'Learning systems and testing',
         color: 'red'
       }).start();
-      return launchIvProcess(humanLayer, wbHumanLayer);
+      return launchIvProcess(humanLayer, wbsHumanLayer);
     }).then(() => {
       spinner.succeed();
       spinner = ora('Scoring files').start();
-      return BluebirdPromise.map(wbHumanLayer, wb => scoreFold(wb));
+      return BluebirdPromise.map(wbsHumanLayer, wb => scoreFold(wb));
     })
     .then(() =>
-      BluebirdPromise.map(wbHumanLayer, wb => isGoodMatch(humanLayer, wb)))
+      BluebirdPromise.map(wbsHumanLayer, wb => isGoodMatch(humanLayer, wb)))
     .then(() => {
       spinner.succeed();
       spinner = ora('Writing confuse matrix').start();
-      return writeConfuseMat(humanLayer, wbHumanLayer, process.cwd());
+      return writeConfuseMat(humanLayer, wbsHumanLayer, process.cwd());
     })
+    .then(() => spinner.succeed());
+};
+
+const tenFolds = createPRM => {
+  console.time('Ten fold scoring');
+  let spinner = ora('Ten folds').start();
+  const workbenches = createWorkbenches(firstLayer);
+  const wbsHumanLayer = createWorkbenches(humanLayer);
+  return fs.removeAsync(firstLayer.paths.lRoot)
+    .then(() => fs.removeAsync(humanLayer.paths.lRoot))
+    .then(() => createFolds(firstLayer))
     .then(() => {
       spinner.succeed();
+      if (createPRM) {
+        return extractPRMFiles();
+      }
+      return linkPRMFiles(firstLayer)
+        .then(() => linkPRMFiles(humanLayer));
+    })
+    .then(() => {
+      spinner = ora('Link PRM to workbench');
+      return linkPRMWorkbench(firstLayer, workbenches);
+    })
+    .then(() => linkPRMWorkbench(humanLayer, wbsHumanLayer))
+    .then(() => {
+      spinner.succeed();
+      return firstLayerProcess_(workbenches);
+    })
+    .then(() => humanLayerProcess_(workbenches, wbsHumanLayer))
+    .then(() => {
       console.timeEnd('Ten fold scoring');
     });
 };
