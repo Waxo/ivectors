@@ -6,7 +6,8 @@ const {
   retrieveFiles,
   parametrizeClusters,
   linkPRMFiles,
-  linkPRMWorkbench
+  linkPRMWorkbench,
+  linkTestPRM
 } = require('./learn/parametrize-clusters');
 const {prepareFiles} = require('./learn/prepare-files');
 const {createFolds} = require('./utils/ten-fold-preparer');
@@ -95,7 +96,7 @@ const humanLayerProcess_ = (workbenches, wbsHumanLayer) => {
     .then(() => spinner.succeed());
 };
 
-const tenFolds = createPRM => {
+const tenFolds = (createPRM, testPRM) => {
   console.time('Ten fold scoring');
   let spinner = ora('Ten folds').start();
   const workbenches = createWorkbenches(firstLayer);
@@ -108,14 +109,33 @@ const tenFolds = createPRM => {
       if (createPRM) {
         return extractPRMFiles();
       }
+      spinner = ora('No PRM creation. Linking existing to layers');
       return linkPRMFiles(firstLayer)
         .then(() => linkPRMFiles(humanLayer));
     })
     .then(() => {
+      spinner.succeed();
       spinner = ora('Link PRM to workbench');
       return linkPRMWorkbench(firstLayer, workbenches);
     })
     .then(() => linkPRMWorkbench(humanLayer, wbsHumanLayer))
+    .then(() => BluebirdPromise.map(workbenches,
+      (wb, index) => fs.readdirAsync(wb.test)
+        .then(files => {
+          files = files.filter(
+            file => humanLayer.clusters.indexOf(file.split('-')[0]) >= 0);
+          return BluebirdPromise.map(files,
+            file => fs.ensureSymlinkAsync(`${wb.test}/${file}`,
+              `${wbsHumanLayer[index].test}/${file}`));
+        })))
+    .then(() => {
+      if (testPRM) {
+        spinner.succeed();
+        spinner = ora('Test PRM different than inputPRM relinking them');
+        return linkTestPRM(workbenches, `${testPRM}/lFirst`)
+          .then(() => linkTestPRM(wbsHumanLayer, `${testPRM}/lHuman`));
+      }
+    })
     .then(() => {
       spinner.succeed();
       return firstLayerProcess_(workbenches);

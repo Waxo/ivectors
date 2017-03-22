@@ -11,8 +11,9 @@ vorpal.delimiter(`${chalk.blue.bold('ivectors')} ${chalk.yellow.bold('#')}`)
 vorpal
   .command('ten-folds', 'Launch the ten-fold scoring')
   .option('-p, --prm', 'create PRM files')
+  .option('-t, --test-prm <directory>')
   .action(args => {
-    return tenFolds(args.options.prm);
+    return tenFolds(args.options.prm, args.options['test-prm']);
   });
 
 vorpal

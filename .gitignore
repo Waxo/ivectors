@@ -109,3 +109,5 @@ typings/
 /cfg-ivectors/
 *.csv
 *.prm
+/noisyPRM/
+/prmInput/

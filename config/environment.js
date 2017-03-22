@@ -12,6 +12,7 @@ const workbenchCreator = (layer, fold) => {
     cfg,
     fold,
     files: `${layer.paths.files}/f${fold}`,
+    test: `${layer.paths.test}/f${fold}`,
     gmm: `${workPath_}/gmm`,
     prm: `${workPath_}/prm`,
     mat: `${workPath_}/mat`,

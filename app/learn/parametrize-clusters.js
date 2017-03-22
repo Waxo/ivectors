@@ -92,9 +92,23 @@ const linkPRMWorkbench = (layer, workbenches) => {
   });
 };
 
+const linkTestPRM = (workbenches, inputDir) => {
+  return BluebirdPromise.map(workbenches, wb => {
+    return fs.readdirAsync(wb.test)
+      .then(files => {
+        files = files.map(file => file.replace('wav', 'prm'));
+        return BluebirdPromise.map(files,
+          file => fs.removeAsync(`${wb.prm}/${file}`).then(
+            () => fs.ensureSymlinkAsync(`${inputDir}/${file}`,
+              `${wb.prm}/${file}`)));
+      });
+  });
+};
+
 module.exports = {
   retrieveFiles,
   parametrizeClusters,
   linkPRMFiles,
-  linkPRMWorkbench
+  linkPRMWorkbench,
+  linkTestPRM
 };
