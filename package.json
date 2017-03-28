@@ -1,6 +1,6 @@
 {
   "name": "ivectors",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "i-vectors system validation",
   "main": "ivectors.js",
   "repository": "https://github.com/Waxo/ivectors.git",
