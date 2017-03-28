@@ -1,3 +1,4 @@
+/* eslint-disable max-nested-callbacks */
 const BluebirdPromise = require('bluebird');
 const fs = BluebirdPromise.promisifyAll(require('fs-extra'));
 const ora = require('ora');
