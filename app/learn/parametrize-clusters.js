@@ -1,7 +1,7 @@
 const fork = require('child_process').fork;
 const numCPUs = require('os').cpus().length;
 const BluebirdPromise = require('bluebird');
-const fs = BluebirdPromise.promisifyAll(require('fs-extra'));
+const fs = require('fs-extra');
 const ProgressBar = require('progress');
 const {inputPath} = require('../../config/environment');
 const {logger} = require('../utils/logger');
@@ -15,7 +15,7 @@ const getFilesByCluster_ = layer => {
     });
   }
   return BluebirdPromise.map(arrayClusters,
-    cluster => fs.readdirAsync(`${inputPath}/${cluster}`)
+    cluster => fs.readdir(`${inputPath}/${cluster}`)
       .then(files => files.map(file => `${inputPath}/${cluster}/${file}`)));
 };
 
@@ -72,10 +72,10 @@ const parametrizeClusters = (files, layer, output = null) => {
 };
 
 const linkPRMFiles = layer => {
-  return fs.removeAsync(layer.paths.prm)
-    .then(() => fs.readdirAsync(layer.prmInput))
+  return fs.remove(layer.paths.prm)
+    .then(() => fs.readdir(layer.prmInput))
     .then(files => BluebirdPromise.map(files,
-      file => fs.ensureSymlinkAsync(`${layer.prmInput}/${file}`,
+      file => fs.ensureSymlink(`${layer.prmInput}/${file}`,
         `${layer.paths.prm}/${file}`)))
     .then(() => retrieveFiles(layer))
     .then(filesPath => {
@@ -88,18 +88,18 @@ const linkPRMFiles = layer => {
 
 const linkPRMWorkbench = (layer, workbenches) => {
   return BluebirdPromise.map(workbenches, wb => {
-    return fs.copyAsync(layer.paths.prm, wb.prm);
+    return fs.copy(layer.paths.prm, wb.prm);
   });
 };
 
 const linkTestPRM = (workbenches, inputDir) => {
   return BluebirdPromise.map(workbenches, wb => {
-    return fs.readdirAsync(wb.test)
+    return fs.readdir(wb.test)
       .then(files => {
         files = files.map(file => file.replace('wav', 'prm'));
         return BluebirdPromise.map(files,
-          file => fs.removeAsync(`${wb.prm}/${file}`).then(
-            () => fs.ensureSymlinkAsync(`${inputDir}/${file}`,
+          file => fs.remove(`${wb.prm}/${file}`).then(
+            () => fs.ensureSymlink(`${inputDir}/${file}`,
               `${wb.prm}/${file}`)));
       });
   });

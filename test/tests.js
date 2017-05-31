@@ -11,4 +11,4 @@
 // require('./app/learn/ivectors-tools.test');
 
 // ###### Part 3 : app/utils : Interpreting output
-// require('./app/utils/score-reader.test');
+// require('./app/utils/score-tools.test');

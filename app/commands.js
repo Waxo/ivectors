@@ -1,6 +1,6 @@
 /* eslint-disable max-nested-callbacks */
 const BluebirdPromise = require('bluebird');
-const fs = BluebirdPromise.promisifyAll(require('fs-extra'));
+const fs = require('fs-extra');
 const ora = require('ora');
 const {firstLayer, secondLayers} = require('../config/environment');
 const {
@@ -23,6 +23,7 @@ const {
   humanLayerTestList,
   linkHumanLayer
 } = require('./utils/score-tools');
+const {testDNNScore} = require('./utils/dnn-score');
 
 const humanLayer = secondLayers[0];
 
@@ -102,8 +103,8 @@ const tenFolds = (createPRM, testPRM) => {
   let spinner = ora('Ten folds').start();
   const workbenches = createWorkbenches(firstLayer);
   const wbsHumanLayer = createWorkbenches(humanLayer);
-  return fs.removeAsync(firstLayer.paths.lRoot)
-    .then(() => fs.removeAsync(humanLayer.paths.lRoot))
+  return fs.remove(firstLayer.paths.lRoot)
+    .then(() => fs.remove(humanLayer.paths.lRoot))
     .then(() => createFolds(firstLayer))
     .then(() => {
       spinner.succeed();
@@ -121,12 +122,12 @@ const tenFolds = (createPRM, testPRM) => {
     })
     .then(() => linkPRMWorkbench(humanLayer, wbsHumanLayer))
     .then(() => BluebirdPromise.map(workbenches,
-      (wb, index) => fs.readdirAsync(wb.test)
+      (wb, index) => fs.readdir(wb.test)
         .then(files => {
           files = files.filter(
             file => humanLayer.clusters.indexOf(file.split('-')[0]) >= 0);
           return BluebirdPromise.map(files,
-            file => fs.ensureSymlinkAsync(`${wb.test}/${file}`,
+            file => fs.ensureSymlink(`${wb.test}/${file}`,
               `${wbsHumanLayer[index].test}/${file}`));
         })))
     .then(() => {
@@ -147,4 +148,4 @@ const tenFolds = (createPRM, testPRM) => {
     });
 };
 
-module.exports = {extractPRMFiles, tenFolds};
+module.exports = {extractPRMFiles, tenFolds, testDNNScore};

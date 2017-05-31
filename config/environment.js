@@ -43,7 +43,7 @@ const firstLayer = layerRootPath => {
     fftSize: 256,
     bankCount: 24,
     lowFrequency: 1,
-    highFrequency: 8000, // samplerate/2 here
+    highFrequency: 8000, // Samplerate/2 here
     sampleRate: 16000
   };
 
@@ -94,7 +94,7 @@ const humanLayer = layerRootPath => {
     fftSize: 256,
     bankCount: 24,
     lowFrequency: 1,
-    highFrequency: 8000, // samplerate/2 here
+    highFrequency: 8000, // Samplerate/2 here
     sampleRate: 16000
   };
 
