@@ -49,7 +49,7 @@ const firstLayerProcess_ = (workbenches, dnnScorer = true) => {
         text: 'Learning systems and testing',
         color: 'red'
       }).start();
-      return launchIvProcess(firstLayer, workbenches);
+      return launchIvProcess(firstLayer, workbenches, dnnScorer);
     })
     .then(() => {
       spinner.succeed();
@@ -81,7 +81,7 @@ const humanLayerProcess_ = (workbenches, wbsHumanLayer, dnnScorer = true) => {
         text: 'Learning systems and testing',
         color: 'red'
       }).start();
-      return launchIvProcess(humanLayer, wbsHumanLayer);
+      return launchIvProcess(humanLayer, wbsHumanLayer, dnnScorer);
     }).then(() => {
       spinner.succeed();
       spinner = ora('Scoring files').start();

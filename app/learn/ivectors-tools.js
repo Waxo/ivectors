@@ -155,7 +155,7 @@ const createWorkbenches = layer => {
   return workbenchList;
 };
 
-const launchIvProcess = (layer, workbenches) => {
+const launchIvProcess = (layer, workbenches, dnnScorer = true) => {
   const childrenPromises = [];
   let wbIndex = 0;
 
@@ -169,8 +169,12 @@ const launchIvProcess = (layer, workbenches) => {
             if (wbIndex >= workbenches.length) {
               child.send({type: 'terminate'});
             } else {
-              child.send(
-                {type: 'data', workbench: workbenches[wbIndex++], layer});
+              child.send({
+                type: 'data',
+                workbench: workbenches[wbIndex++],
+                layer,
+                dnnScorer
+              });
             }
             break;
           /* istanbul ignore next */

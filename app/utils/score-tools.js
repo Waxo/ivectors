@@ -67,7 +67,6 @@ const scoreFold = (wbFold, dnnScorer = true) => {
       sphResults = parseResults_(sphResults);
       pldaResults = parseResults_(pldaResults);
       wbFold.results = compareResults_([sphResults, pldaResults]);
-      console.log(wbFold.results);
     });
 };
 
