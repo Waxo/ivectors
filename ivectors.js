@@ -3,7 +3,6 @@ const vorpal = require('vorpal')();
 const {
   extractPRMFiles,
   tenFolds,
-  testDNNScore
 } = require('./app/commands');
 const {suffixChanger} = require('./app/utils/suffix-changer');
 
@@ -13,9 +12,11 @@ vorpal.delimiter(`${chalk.blue.bold('ivectors')} ${chalk.yellow.bold('#')}`)
 vorpal
   .command('ten-folds', 'Launch the ten-fold scoring')
   .option('-p, --prm', 'create PRM files')
-  .option('-t, --test-prm <directory>')
+  .option('-t, --test-prm <directory>', 'choose a given directory for testing')
+  .option('-vs, --vanilla-scorer', 'use sph and plda norm with plda scorer')
   .action(args => {
-    return tenFolds(args.options.prm, args.options['test-prm']);
+    return tenFolds(args.options.prm, args.options['test-prm'],
+      !args.options['vanilla-scorer']);
   });
 
 vorpal
@@ -23,12 +24,6 @@ vorpal
   .option('-o, --output <directory>')
   .action(args => {
     return extractPRMFiles(args.options.output);
-  });
-
-vorpal
-  .command('dnn', 'dnn')
-  .action(() => {
-    return testDNNScore();
   });
 
 vorpal

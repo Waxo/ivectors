@@ -35,7 +35,7 @@ const threadManager = () => {
   process.on('message', msg => {
     switch (msg.type) {
       case 'data':
-        ivProcess(msg.layer, msg.workbench)
+        ivProcess(msg.layer, msg.workbench, msg.dnnScorer)
           .then(() => process.send({type: 'ready'}));
         break;
       /* istanbul ignore next */

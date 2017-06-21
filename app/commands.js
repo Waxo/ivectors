@@ -23,7 +23,6 @@ const {
   humanLayerTestList,
   linkHumanLayer
 } = require('./utils/score-tools');
-const {testDNNScore} = require('./utils/dnn-score');
 
 const humanLayer = secondLayers[0];
 
@@ -41,7 +40,7 @@ const extractPRMFiles = (outputDir = '') => {
     .then(files => parametrizeClusters(files, humanLayer, humanLayerOutput));
 };
 
-const firstLayerProcess_ = workbenches => {
+const firstLayerProcess_ = (workbenches, dnnScorer = true) => {
   let spinner = ora(`Writing files for layer : ${firstLayer.wbName}`).start();
   return prepareFiles(firstLayer)
     .then(() => {
@@ -55,7 +54,7 @@ const firstLayerProcess_ = workbenches => {
     .then(() => {
       spinner.succeed();
       spinner = ora('Scoring files').start();
-      return BluebirdPromise.map(workbenches, wb => scoreFold(wb));
+      return BluebirdPromise.map(workbenches, wb => scoreFold(wb, dnnScorer));
     })
     .then(() =>
       BluebirdPromise.map(workbenches, wb => isGoodMatch(firstLayer, wb)))
@@ -67,7 +66,7 @@ const firstLayerProcess_ = workbenches => {
     .then(() => spinner.succeed());
 };
 
-const humanLayerProcess_ = (workbenches, wbsHumanLayer) => {
+const humanLayerProcess_ = (workbenches, wbsHumanLayer, dnnScorer = true) => {
   let spinner = ora('Preparing second layer').start();
   return BluebirdPromise.map(workbenches, wb => humanLayerTestList(wb))
     .then(() => linkHumanLayer(firstLayer, humanLayer, workbenches))
@@ -86,7 +85,7 @@ const humanLayerProcess_ = (workbenches, wbsHumanLayer) => {
     }).then(() => {
       spinner.succeed();
       spinner = ora('Scoring files').start();
-      return BluebirdPromise.map(wbsHumanLayer, wb => scoreFold(wb));
+      return BluebirdPromise.map(wbsHumanLayer, wb => scoreFold(wb, dnnScorer));
     })
     .then(() =>
       BluebirdPromise.map(wbsHumanLayer, wb => isGoodMatch(humanLayer, wb)))
@@ -98,7 +97,7 @@ const humanLayerProcess_ = (workbenches, wbsHumanLayer) => {
     .then(() => spinner.succeed());
 };
 
-const tenFolds = (createPRM, testPRM, addNoises = false) => {
+const tenFolds = (createPRM, testPRM, dnnScorer = true, addNoises = false) => {
   console.time('Ten fold scoring');
   let spinner = ora('Ten folds').start();
   const workbenches = createWorkbenches(firstLayer);
@@ -146,12 +145,12 @@ const tenFolds = (createPRM, testPRM, addNoises = false) => {
     })
     .then(() => {
       spinner.succeed();
-      return firstLayerProcess_(workbenches);
+      return firstLayerProcess_(workbenches, dnnScorer);
     })
-    .then(() => humanLayerProcess_(workbenches, wbsHumanLayer))
+    .then(() => humanLayerProcess_(workbenches, wbsHumanLayer, dnnScorer))
     .then(() => {
       console.timeEnd('Ten fold scoring');
     });
 };
 
-module.exports = {extractPRMFiles, tenFolds, testDNNScore};
+module.exports = {extractPRMFiles, tenFolds};
