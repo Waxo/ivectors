@@ -1,5 +1,6 @@
 const BluebirdPromise = require('bluebird');
 const fs = require('fs-extra');
+const {testDNNScore} = require('./dnn-score.js');
 
 const absoluteNormalizationAdd_ = results => {
   const sums = {};
@@ -51,7 +52,13 @@ const parseResults_ = results => {
   return resultsByFile;
 };
 
-const scoreFold = wbFold => {
+const scoreFold = (wbFold, dnnScorer = true) => {
+  if (dnnScorer) {
+    return testDNNScore(wbFold)
+      .then(res => {
+        wbFold.results = res;
+      });
+  }
   return BluebirdPromise.all([
     fs.readFile(`${wbFold.scores.sph}/${wbFold.fold}.txt`),
     fs.readFile(`${wbFold.scores.plda}/${wbFold.fold}.txt`)
@@ -60,6 +67,7 @@ const scoreFold = wbFold => {
       sphResults = parseResults_(sphResults);
       pldaResults = parseResults_(pldaResults);
       wbFold.results = compareResults_([sphResults, pldaResults]);
+      console.log(wbFold.results);
     });
 };
 

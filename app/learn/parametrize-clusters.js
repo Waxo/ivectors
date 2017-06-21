@@ -105,6 +105,10 @@ const linkTestPRM = (workbenches, inputDir) => {
   });
 };
 
+const addNoises_ = layer => {
+
+};
+
 module.exports = {
   retrieveFiles,
   parametrizeClusters,

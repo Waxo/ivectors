@@ -98,7 +98,7 @@ const humanLayerProcess_ = (workbenches, wbsHumanLayer) => {
     .then(() => spinner.succeed());
 };
 
-const tenFolds = (createPRM, testPRM) => {
+const tenFolds = (createPRM, testPRM, addNoises = false) => {
   console.time('Ten fold scoring');
   let spinner = ora('Ten folds').start();
   const workbenches = createWorkbenches(firstLayer);
@@ -114,6 +114,12 @@ const tenFolds = (createPRM, testPRM) => {
       spinner = ora('No PRM creation. Linking existing to layers');
       return linkPRMFiles(firstLayer)
         .then(() => linkPRMFiles(humanLayer));
+    })
+    .then(() => {
+      if (addNoises) {
+        return addNoises(firstLayer)
+          .then(() => addNoises(humanLayer));
+      }
     })
     .then(() => {
       spinner.succeed();

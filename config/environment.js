@@ -3,6 +3,8 @@ const ivCfg_ = `${root_}/cfg-ivectors`;
 
 const workbenchCreator = (layer, fold) => {
   const workPath_ = `${layer.paths.lRoot}/work/f${fold}`;
+  const aggregateClusters = Boolean(layer.aggregateClusters);
+
   const cfg = {
     sph: `${ivCfg_}/08_sph_ivTest_SphNorm_Plda_no_load.cfg`,
     plda: `${ivCfg_}/05_3_PLDA_ivTest_Plda.cfg`
@@ -11,8 +13,10 @@ const workbenchCreator = (layer, fold) => {
   return {
     cfg,
     fold,
+    aggregateClusters,
     files: `${layer.paths.files}/f${fold}`,
     test: `${layer.paths.test}/f${fold}`,
+    input: `${layer.paths.input}/f${fold}`,
     gmm: `${workPath_}/gmm`,
     prm: `${workPath_}/prm`,
     mat: `${workPath_}/mat`,
