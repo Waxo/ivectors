@@ -1,6 +1,6 @@
 /* eslint-disable max-nested-callbacks */
 const BluebirdPromise = require('bluebird');
-const fs = BluebirdPromise.promisifyAll(require('fs-extra'));
+const fs = require('fs-extra');
 const ora = require('ora');
 const {firstLayer, secondLayers} = require('../config/environment');
 const {
@@ -40,7 +40,7 @@ const extractPRMFiles = (outputDir = '') => {
     .then(files => parametrizeClusters(files, humanLayer, humanLayerOutput));
 };
 
-const firstLayerProcess_ = workbenches => {
+const firstLayerProcess_ = (workbenches, dnnScorer = true) => {
   let spinner = ora(`Writing files for layer : ${firstLayer.wbName}`).start();
   return prepareFiles(firstLayer)
     .then(() => {
@@ -49,12 +49,12 @@ const firstLayerProcess_ = workbenches => {
         text: 'Learning systems and testing',
         color: 'red'
       }).start();
-      return launchIvProcess(firstLayer, workbenches);
+      return launchIvProcess(firstLayer, workbenches, dnnScorer);
     })
     .then(() => {
       spinner.succeed();
       spinner = ora('Scoring files').start();
-      return BluebirdPromise.map(workbenches, wb => scoreFold(wb));
+      return BluebirdPromise.map(workbenches, wb => scoreFold(wb, dnnScorer));
     })
     .then(() =>
       BluebirdPromise.map(workbenches, wb => isGoodMatch(firstLayer, wb)))
@@ -66,7 +66,7 @@ const firstLayerProcess_ = workbenches => {
     .then(() => spinner.succeed());
 };
 
-const humanLayerProcess_ = (workbenches, wbsHumanLayer) => {
+const humanLayerProcess_ = (workbenches, wbsHumanLayer, dnnScorer = true) => {
   let spinner = ora('Preparing second layer').start();
   return BluebirdPromise.map(workbenches, wb => humanLayerTestList(wb))
     .then(() => linkHumanLayer(firstLayer, humanLayer, workbenches))
@@ -81,11 +81,11 @@ const humanLayerProcess_ = (workbenches, wbsHumanLayer) => {
         text: 'Learning systems and testing',
         color: 'red'
       }).start();
-      return launchIvProcess(humanLayer, wbsHumanLayer);
+      return launchIvProcess(humanLayer, wbsHumanLayer, dnnScorer);
     }).then(() => {
       spinner.succeed();
       spinner = ora('Scoring files').start();
-      return BluebirdPromise.map(wbsHumanLayer, wb => scoreFold(wb));
+      return BluebirdPromise.map(wbsHumanLayer, wb => scoreFold(wb, dnnScorer));
     })
     .then(() =>
       BluebirdPromise.map(wbsHumanLayer, wb => isGoodMatch(humanLayer, wb)))
@@ -97,13 +97,13 @@ const humanLayerProcess_ = (workbenches, wbsHumanLayer) => {
     .then(() => spinner.succeed());
 };
 
-const tenFolds = (createPRM, testPRM) => {
+const tenFolds = (createPRM, testPRM, dnnScorer = true, addNoises = false) => {
   console.time('Ten fold scoring');
   let spinner = ora('Ten folds').start();
   const workbenches = createWorkbenches(firstLayer);
   const wbsHumanLayer = createWorkbenches(humanLayer);
-  return fs.removeAsync(firstLayer.paths.lRoot)
-    .then(() => fs.removeAsync(humanLayer.paths.lRoot))
+  return fs.remove(firstLayer.paths.lRoot)
+    .then(() => fs.remove(humanLayer.paths.lRoot))
     .then(() => createFolds(firstLayer))
     .then(() => {
       spinner.succeed();
@@ -115,18 +115,24 @@ const tenFolds = (createPRM, testPRM) => {
         .then(() => linkPRMFiles(humanLayer));
     })
     .then(() => {
+      if (addNoises) {
+        return addNoises(firstLayer)
+          .then(() => addNoises(humanLayer));
+      }
+    })
+    .then(() => {
       spinner.succeed();
       spinner = ora('Link PRM to workbench');
       return linkPRMWorkbench(firstLayer, workbenches);
     })
     .then(() => linkPRMWorkbench(humanLayer, wbsHumanLayer))
     .then(() => BluebirdPromise.map(workbenches,
-      (wb, index) => fs.readdirAsync(wb.test)
+      (wb, index) => fs.readdir(wb.test)
         .then(files => {
           files = files.filter(
             file => humanLayer.clusters.indexOf(file.split('-')[0]) >= 0);
           return BluebirdPromise.map(files,
-            file => fs.ensureSymlinkAsync(`${wb.test}/${file}`,
+            file => fs.ensureSymlink(`${wb.test}/${file}`,
               `${wbsHumanLayer[index].test}/${file}`));
         })))
     .then(() => {
@@ -139,9 +145,9 @@ const tenFolds = (createPRM, testPRM) => {
     })
     .then(() => {
       spinner.succeed();
-      return firstLayerProcess_(workbenches);
+      return firstLayerProcess_(workbenches, dnnScorer);
     })
-    .then(() => humanLayerProcess_(workbenches, wbsHumanLayer))
+    .then(() => humanLayerProcess_(workbenches, wbsHumanLayer, dnnScorer))
     .then(() => {
       console.timeEnd('Ten fold scoring');
     });

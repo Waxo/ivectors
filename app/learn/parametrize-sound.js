@@ -1,5 +1,5 @@
 const BluebirdPromise = require('bluebird');
-const fs = BluebirdPromise.promisifyAll(require('fs-extra'));
+const fs = require('fs-extra');
 const wavFileInfo = BluebirdPromise.promisifyAll(require('wav-file-info'));
 const {
   getParamsFromFile,
@@ -8,16 +8,16 @@ const {
 } = require('sound-parameters-extractor');
 
 const extractLabel = (path, file, labelPath) => {
-  return fs.ensureDirAsync(labelPath)
+  return fs.ensureDir(labelPath)
     .then(() => wavFileInfo.infoByFilenameAsync(path))
-    .then(info => fs.writeFileAsync(`${labelPath}/${file}.lbl`,
+    .then(info => fs.writeFile(`${labelPath}/${file}.lbl`,
       `0 ${info.duration} sound`));
 };
 
 const parametrizeSound = (path, layer, output = null) => {
   const file = path.split('/').pop().replace('.wav', '');
   const outputDir = output || layer.paths.prm;
-  return fs.ensureDirAsync(outputDir)
+  return fs.ensureDir(outputDir)
     .then(() => getParamsFromFile(path, layer.cfgMFCC, layer.mfccSize))
     .then(params => {
       const tmpVector = params.mfcc.map((acousticFeatures, index) => {

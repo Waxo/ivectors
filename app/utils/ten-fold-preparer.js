@@ -1,5 +1,5 @@
 const BluebirdPromise = require('bluebird');
-const fs = BluebirdPromise.promisifyAll(require('fs-extra'));
+const fs = require('fs-extra');
 const {inputPath, layersRootPath} = require('../../config/environment');
 const {splitter} = require('./splitter');
 
@@ -24,14 +24,14 @@ const linkFiles_ = (layer, params, sInput = null) => {
   const input = `${inputPath}/${clusterName}/${file}`;
   const linkTest = `${testDir}/f${foldIndex}/${file}`;
 
-  return fs.ensureSymlinkAsync(input, linkTest)
+  return fs.ensureSymlink(input, linkTest)
     .then(() => {
       const promisesOthers = [];
       for (let i = 0; i < 10; i++) {
         if (i !== foldIndex) {
           const linkInput = `${sInput ||
           inputDir}/f${i}/${clusterName}/${file}`;
-          promisesOthers.push(fs.ensureSymlinkAsync(input, linkInput));
+          promisesOthers.push(fs.ensureSymlink(input, linkInput));
         }
       }
       return BluebirdPromise.all(promisesOthers);
@@ -60,7 +60,7 @@ const dispatchAggregated_ = (foldLists, layer, cluster) => {
           promises.push(BluebirdPromise.map(fold, file => {
             const input = `${inputPath}/${cluster[1][clusterIndex]}/${file}`;
             const link = `${layer.paths.input}/f${i}/${cluster[0]}/${file}`;
-            return fs.ensureSymlinkAsync(input, link);
+            return fs.ensureSymlink(input, link);
           }));
         }
       }
@@ -72,7 +72,7 @@ const dispatchAggregated_ = (foldLists, layer, cluster) => {
 const aggregateFolds_ = layer => {
   return BluebirdPromise.map(layer.aggregateClusters,
     cluster => BluebirdPromise.map(cluster[1],
-      c => fs.readdirAsync(`${inputPath}/${c}`))
+      c => fs.readdir(`${inputPath}/${c}`))
       .then(filesLists => {
         const sInput = `${layersRootPath}/l${cluster[0]}/input`;
         return dispatchFolds_(layer, cluster[1], filesLists, sInput);
@@ -83,7 +83,7 @@ const aggregateFolds_ = layer => {
 
 const clustersFolds_ = layer => {
   return BluebirdPromise.map(layer.clusters,
-    cluster => fs.readdirAsync(`${inputPath}/${cluster}`))
+    cluster => fs.readdir(`${inputPath}/${cluster}`))
     .then(filesLists => dispatchFolds_(layer, layer.clusters, filesLists));
 };
 

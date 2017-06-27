@@ -11,17 +11,22 @@ const {
   scorePLDA
 } = require('./ivectors-tools');
 
-const ivProcess = (layer, workbench) => {
+const ivProcess = (layer, workbench, dnnScorer = true) => {
   return normPRM(layer, workbench)
     .then(() => createUBM(layer, workbench))
     .then(() => createTV(layer, workbench))
     .then(() => ivExtractor(layer, workbench, 'ivExtractorAll.ndx'))
     .then(() => ivExtractor(layer, workbench, 'ivExtractor.ndx'))
-    .then(() => normalizePLDA(layer, workbench))
-    .then(() => createSph(layer, workbench))
-    .then(() => trainPLDA(layer, workbench))
-    .then(() => scoreSph(workbench))
-    .then(() => scorePLDA(workbench));
+    .then(() => {
+      if (dnnScorer) {
+        return;
+      }
+      return normalizePLDA(layer, workbench)
+        .then(() => createSph(layer, workbench))
+        .then(() => trainPLDA(layer, workbench))
+        .then(() => scoreSph(workbench))
+        .then(() => scorePLDA(workbench));
+    });
 };
 
 const threadManager = () => {
@@ -30,7 +35,7 @@ const threadManager = () => {
   process.on('message', msg => {
     switch (msg.type) {
       case 'data':
-        ivProcess(msg.layer, msg.workbench)
+        ivProcess(msg.layer, msg.workbench, msg.dnnScorer)
           .then(() => process.send({type: 'ready'}));
         break;
       /* istanbul ignore next */

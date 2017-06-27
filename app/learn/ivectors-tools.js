@@ -1,7 +1,7 @@
 const fork = require('child_process').fork;
 const numCPUs = require('os').cpus().length;
 const BluebirdPromise = require('bluebird');
-const fs = BluebirdPromise.promisifyAll(require('fs-extra'));
+const fs = require('fs-extra');
 const {bin} = require('../../config/environment');
 const {execAsync} = require('../utils/exec-async');
 const {workbenchCreator} = require('../../config/environment');
@@ -20,7 +20,7 @@ const normPRM = (layer, wbFold) => {
 };
 
 const createUBM = (layer, wbFold) => {
-  return fs.ensureDirAsync(wbFold.gmm)
+  return fs.ensureDir(wbFold.gmm)
     .then(() => {
       const ubmExec = [
         bin.ubm,
@@ -46,7 +46,7 @@ const createTV = (layer, wbFold) => {
     `--ndxFilename ${wbFold.files}/tv.ndx`
   ];
 
-  return fs.ensureDirAsync(wbFold.mat)
+  return fs.ensureDir(wbFold.mat)
     .then(() => {
       return execAsync(tvExec.join(' '));
     });
@@ -64,7 +64,7 @@ const ivExtractor = (layer, wbFold, ndxFile) => {
     `--targetIdList ${wbFold.files}/${ndxFile}`
   ];
 
-  return fs.ensureDirAsync(wbFold.ivRaw)
+  return fs.ensureDir(wbFold.ivRaw)
     .then(() => execAsync(ivExtract.join(' ')));
 };
 
@@ -78,7 +78,7 @@ const normalizePLDA = (layer, wbFold) => {
     `--backgroundNdxFilename ${wbFold.files}/Plda.ndx`,
     `--inputVectorFilename ${layer.paths.lRoot}/all.lst`
   ];
-  return fs.ensureDirAsync(wbFold.ivLenNorm)
+  return fs.ensureDir(wbFold.ivLenNorm)
     .then(() => execAsync(normPLDA.join(' ')));
 };
 
@@ -126,7 +126,7 @@ const trainPLDA = (layer, wbFold) => {
 };
 
 const scoreSph = wbFold => {
-  return fs.ensureDirAsync(wbFold.scores.sph)
+  return fs.ensureDir(wbFold.scores.sph)
     .then(() => scoring_({
       name: wbFold.fold,
       configFile: wbFold.cfg.sph,
@@ -137,7 +137,7 @@ const scoreSph = wbFold => {
 };
 
 const scorePLDA = wbFold => {
-  return fs.ensureDirAsync(wbFold.scores.plda)
+  return fs.ensureDir(wbFold.scores.plda)
     .then(() => scoring_({
       name: wbFold.fold,
       configFile: wbFold.cfg.plda,
@@ -155,7 +155,7 @@ const createWorkbenches = layer => {
   return workbenchList;
 };
 
-const launchIvProcess = (layer, workbenches) => {
+const launchIvProcess = (layer, workbenches, dnnScorer = true) => {
   const childrenPromises = [];
   let wbIndex = 0;
 
@@ -169,8 +169,12 @@ const launchIvProcess = (layer, workbenches) => {
             if (wbIndex >= workbenches.length) {
               child.send({type: 'terminate'});
             } else {
-              child.send(
-                {type: 'data', workbench: workbenches[wbIndex++], layer});
+              child.send({
+                type: 'data',
+                workbench: workbenches[wbIndex++],
+                layer,
+                dnnScorer
+              });
             }
             break;
           /* istanbul ignore next */

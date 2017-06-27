@@ -1,17 +1,17 @@
 const BluebirdPromise = require('bluebird');
-const fs = BluebirdPromise.promisifyAll(require('fs-extra'));
+const fs = require('fs-extra');
 
 const foldDataLST_ = (layer, fold) => {
-  return fs.ensureDirAsync(`${layer.paths.files}/f${fold}`)
-    .then(() => fs.readdirAsync(`${layer.paths.input}/f${fold}`))
+  return fs.ensureDir(`${layer.paths.files}/f${fold}`)
+    .then(() => fs.readdir(`${layer.paths.input}/f${fold}`))
     .then(dirs => BluebirdPromise.map(dirs,
-      dir => fs.readdirAsync(`${layer.paths.input}/f${fold}/${dir}`)))
+      dir => fs.readdir(`${layer.paths.input}/f${fold}/${dir}`)))
     .then(results => {
       const catResults = [];
       results.forEach(result => {
         catResults.push(...result);
       });
-      return fs.writeFileAsync(`${layer.paths.files}/f${fold}/data.lst`,
+      return fs.writeFile(`${layer.paths.files}/f${fold}/data.lst`,
         catResults.join('\n').replace(/\.wav/g, ''));
     });
 };
@@ -20,19 +20,19 @@ const foldIvExtractorNDX_ = (layer, fold) => {
   const foldInputPath = `${layer.paths.input}/f${fold}`;
   const clusters = [];
 
-  return fs.ensureDirAsync(`${layer.paths.files}/f${fold}`)
-    .then(() => fs.readdirAsync(foldInputPath))
+  return fs.ensureDir(`${layer.paths.files}/f${fold}`)
+    .then(() => fs.readdir(foldInputPath))
     .then(dirs => {
       clusters.push(...dirs);
       return BluebirdPromise.map(dirs,
-        dir => fs.readdirAsync(`${foldInputPath}/${dir}`));
+        dir => fs.readdir(`${foldInputPath}/${dir}`));
     })
     .then(filesLists => {
       const buffWrite = [];
       filesLists.forEach((list, index) => {
         buffWrite.push(`${clusters[index]} ${list.join(' ')}`);
       });
-      return fs.writeFileAsync(`${layer.paths.files}/f${fold}/ivExtractor.ndx`,
+      return fs.writeFile(`${layer.paths.files}/f${fold}/ivExtractor.ndx`,
         buffWrite.join('\n').replace(/\.wav/g, ''));
     });
 };
@@ -41,19 +41,19 @@ const foldIvExtractorMatNDX_ = (layer, fold) => {
   const foldInputPath = `${layer.paths.input}/f${fold}`;
   const clusters = [];
 
-  return fs.ensureDirAsync(`${layer.paths.files}/f${fold}`)
-    .then(() => fs.readdirAsync(foldInputPath))
+  return fs.ensureDir(`${layer.paths.files}/f${fold}`)
+    .then(() => fs.readdir(foldInputPath))
     .then(dirs => {
       clusters.push(...dirs);
       return BluebirdPromise.map(dirs,
-        dir => fs.readdirAsync(`${foldInputPath}/${dir}`));
+        dir => fs.readdir(`${foldInputPath}/${dir}`));
     })
     .then(filesLists => {
       const buffWrite = [];
       filesLists.forEach(list => {
         buffWrite.push(list.map(element => `${element} ${element}`).join('\n'));
       });
-      return fs.writeFileAsync(
+      return fs.writeFile(
         `${layer.paths.files}/f${fold}/ivExtractorMat.ndx`,
         buffWrite.join('\n').replace(/\.wav/g, ''));
     });
@@ -62,14 +62,14 @@ const foldIvExtractorMatNDX_ = (layer, fold) => {
 const foldIvTestNDX_ = (layer, fold) => {
   const foldInputPath = `${layer.paths.input}/f${fold}`;
 
-  return fs.ensureDirAsync(`${layer.paths.files}/f${fold}`)
+  return fs.ensureDir(`${layer.paths.files}/f${fold}`)
     .then(() => BluebirdPromise.all([
-      fs.readdirAsync(foldInputPath),
-      fs.readdirAsync(`${layer.paths.test}/f${fold}`)
+      fs.readdir(foldInputPath),
+      fs.readdir(`${layer.paths.test}/f${fold}`)
     ]))
     .then(([testClusters, filesTested]) => {
       testClusters = testClusters.join(' ');
-      return fs.writeFileAsync(`${layer.paths.files}/f${fold}/ivTest.ndx`,
+      return fs.writeFile(`${layer.paths.files}/f${fold}/ivTest.ndx`,
         filesTested.map(file => `${file.replace('.wav', '')} ${testClusters}`)
           .join('\n'));
     });
@@ -77,16 +77,16 @@ const foldIvTestNDX_ = (layer, fold) => {
 
 const foldIvTestMatNDX_ = (layer, fold) => {
   const foldInputPath = `${layer.paths.input}/f${fold}`;
-  return fs.ensureDirAsync(`${layer.paths.files}/f${fold}`)
-    .then(() => fs.readdirAsync(foldInputPath))
+  return fs.ensureDir(`${layer.paths.files}/f${fold}`)
+    .then(() => fs.readdir(foldInputPath))
     .then(dirs => BluebirdPromise.map(dirs,
-      dir => fs.readdirAsync(`${foldInputPath}/${dir}`)))
+      dir => fs.readdir(`${foldInputPath}/${dir}`)))
     .then(filesLists => {
       const joinedList = [];
       filesLists.forEach(list => {
         joinedList.push(...list);
       });
-      return fs.writeFileAsync(`${layer.paths.files}/f${fold}/ivTestMat.ndx`,
+      return fs.writeFile(`${layer.paths.files}/f${fold}/ivTestMat.ndx`,
         `${joinedList[0].replace('.wav', '')} ${joinedList.join(' ')
           .replace(/\.wav/g, '')}`);
     });
@@ -94,11 +94,11 @@ const foldIvTestMatNDX_ = (layer, fold) => {
 
 const foldPldaNDX_ = (layer, fold) => {
   const foldInputPath = `${layer.paths.input}/f${fold}`;
-  return fs.readdirAsync(foldInputPath)
+  return fs.readdir(foldInputPath)
     .then(dirs => BluebirdPromise.map(dirs,
-      dir => fs.readdirAsync(`${foldInputPath}/${dir}`)))
+      dir => fs.readdir(`${foldInputPath}/${dir}`)))
     .then(
-      filesLists => fs.writeFileAsync(`${layer.paths.files}/f${fold}/Plda.ndx`,
+      filesLists => fs.writeFile(`${layer.paths.files}/f${fold}/Plda.ndx`,
         filesLists.map(list => list.join(' ')).join('\n')
           .replace(/\.wav/g, '')));
 };
@@ -115,7 +115,7 @@ const writeTvNDX = layer => {
   const foldPromises = [];
   for (let i = 0; i < 10; i++) {
     foldPromises.push(
-      fs.copyAsync(`${layer.paths.files}/f${i}/data.lst`,
+      fs.copy(`${layer.paths.files}/f${i}/data.lst`,
         `${layer.paths.files}/f${i}/tv.ndx`));
   }
   return BluebirdPromise.all(foldPromises);
@@ -144,12 +144,12 @@ const writeTrainModelNDX = layer => {
     const filesPath = `${layer.paths.files}/f${i}`;
     foldPromises.push(
       BluebirdPromise.all([
-        fs.copyAsync(`${filesPath}/ivExtractorMat.ndx`,
+        fs.copy(`${filesPath}/ivExtractorMat.ndx`,
           `${filesPath}/TrainModel.ndx`),
-        fs.readFileAsync(`${filesPath}/ivExtractor.ndx`)
+        fs.readFile(`${filesPath}/ivExtractor.ndx`)
       ])
         .then(
-          ([, ivExtractor]) => fs.appendFileAsync(`${filesPath}/TrainModel.ndx`,
+          ([, ivExtractor]) => fs.appendFile(`${filesPath}/TrainModel.ndx`,
             '\n' + ivExtractor.toString()))
     );
   }
@@ -181,7 +181,7 @@ const writePldaNDX = layer => {
 };
 
 const writeAllLST = layer => {
-  return fs.readdirAsync(layer.paths.prm)
+  return fs.readdir(layer.paths.prm)
     .then(prmFiles => {
       let writeBuffer = prmFiles.filter(f => !f.match(/norm/g)).join('\n')
         .replace(/\.prm/g, '');
@@ -193,17 +193,17 @@ const writeAllLST = layer => {
         });
       }
       return BluebirdPromise.all([
-        fs.writeFileAsync(`${layer.paths.lRoot}/normPRM.lst`, normPRMLST),
-        fs.writeFileAsync(`${layer.paths.lRoot}/all.lst`, writeBuffer)
+        fs.writeFile(`${layer.paths.lRoot}/normPRM.lst`, normPRMLST),
+        fs.writeFile(`${layer.paths.lRoot}/all.lst`, writeBuffer)
       ]);
     });
 };
 
 const writeIvExtractorAllNDX = layer => {
-  return fs.readdirAsync(layer.paths.prm)
+  return fs.readdir(layer.paths.prm)
     .then(files => {
       files = files.filter(f => !f.match(/norm/g)).map(f => `${f} ${f}`);
-      return fs.writeFileAsync(`${layer.paths.lRoot}/ivExtractorAll.ndx`,
+      return fs.writeFile(`${layer.paths.lRoot}/ivExtractorAll.ndx`,
         files.join('\n').replace(/\.prm/g, ''));
     });
 };
@@ -212,7 +212,7 @@ const linkIvExtractorAllNDX = layer => {
   const foldsPromises = [];
   for (let i = 0; i < 10; i++) {
     foldsPromises.push(
-      fs.ensureSymlinkAsync(`${layer.paths.lRoot}/ivExtractorAll.ndx`,
+      fs.ensureSymlink(`${layer.paths.lRoot}/ivExtractorAll.ndx`,
         `${layer.paths.files}/f${i}/ivExtractorAll.ndx`));
   }
   return BluebirdPromise.all(foldsPromises);

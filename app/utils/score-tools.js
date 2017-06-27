@@ -1,5 +1,6 @@
 const BluebirdPromise = require('bluebird');
-const fs = BluebirdPromise.promisifyAll(require('fs-extra'));
+const fs = require('fs-extra');
+const {testDNNScore} = require('./dnn-score.js');
 
 const absoluteNormalizationAdd_ = results => {
   const sums = {};
@@ -51,10 +52,16 @@ const parseResults_ = results => {
   return resultsByFile;
 };
 
-const scoreFold = wbFold => {
+const scoreFold = (wbFold, dnnScorer = true) => {
+  if (dnnScorer) {
+    return testDNNScore(wbFold)
+      .then(res => {
+        wbFold.results = res;
+      });
+  }
   return BluebirdPromise.all([
-    fs.readFileAsync(`${wbFold.scores.sph}/${wbFold.fold}.txt`),
-    fs.readFileAsync(`${wbFold.scores.plda}/${wbFold.fold}.txt`)
+    fs.readFile(`${wbFold.scores.sph}/${wbFold.fold}.txt`),
+    fs.readFile(`${wbFold.scores.plda}/${wbFold.fold}.txt`)
   ])
     .then(([sphResults, pldaResults]) => {
       sphResults = parseResults_(sphResults);
@@ -98,7 +105,7 @@ const linkHumanLayer = (layer, humanLayer, workbenches) => {
   workbenches.forEach(wb => {
     wb.goHuman.forEach(file => {
       promises.push(
-        fs.ensureSymlinkAsync(`${layer.paths.test}/f${wb.fold}/${file}.wav`,
+        fs.ensureSymlink(`${layer.paths.test}/f${wb.fold}/${file}.wav`,
           `${humanLayer.paths.test}/f${wb.fold}/${file}.wav`));
     });
   });
@@ -171,7 +178,7 @@ const writeConfuseMat = (layer, workbenches, path) => {
     }
   }
 
-  return fs.writeFileAsync(`${path}/${layer.wbName}.csv`, confuseMat);
+  return fs.writeFile(`${path}/${layer.wbName}.csv`, confuseMat);
 };
 
 module.exports = {
