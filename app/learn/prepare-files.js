@@ -1,22 +1,27 @@
 const BluebirdPromise = require('bluebird');
 const fs = require('fs-extra');
 
+const noisesAdder_ = (list, noisesSuffixes) => {
+  if (!noisesSuffixes) {
+    return list;
+  }
+  return [].concat.apply([], list.map(a => {
+    const miniList = [a];
+    miniList.push(...noisesSuffixes.map(b => `${a}_${b}`));
+    return miniList;
+  }));
+};
+
 const foldDataLST_ = (layer, fold) => {
   return fs.ensureDir(`${layer.paths.files}/f${fold}`)
-    .then(() => fs.readdir(`${layer.paths.input}/f${fold}`))
-    .then(dirs => BluebirdPromise.map(dirs,
-      dir => fs.readdir(`${layer.paths.input}/f${fold}/${dir}`)))
+    .then(() => fs.readdir(`${layer.paths.prm}`))
     .then(results => {
-      const catResults = [];
-      results.forEach(result => {
-        catResults.push(...result);
-      });
       return fs.writeFile(`${layer.paths.files}/f${fold}/data.lst`,
-        catResults.join('\n').replace(/\.wav/g, ''));
+        results.join('\n').replace(/\.prm/g, ''));
     });
 };
 
-const foldIvExtractorNDX_ = (layer, fold) => {
+const foldIvExtractorNDX_ = (layer, fold, noisesSuffixes) => {
   const foldInputPath = `${layer.paths.input}/f${fold}`;
   const clusters = [];
 
@@ -30,6 +35,7 @@ const foldIvExtractorNDX_ = (layer, fold) => {
     .then(filesLists => {
       const buffWrite = [];
       filesLists.forEach((list, index) => {
+        list = noisesAdder_(list, noisesSuffixes);
         buffWrite.push(`${clusters[index]} ${list.join(' ')}`);
       });
       return fs.writeFile(`${layer.paths.files}/f${fold}/ivExtractor.ndx`,
@@ -37,7 +43,7 @@ const foldIvExtractorNDX_ = (layer, fold) => {
     });
 };
 
-const foldIvExtractorMatNDX_ = (layer, fold) => {
+const foldIvExtractorMatNDX_ = (layer, fold, noisesSuffixes) => {
   const foldInputPath = `${layer.paths.input}/f${fold}`;
   const clusters = [];
 
@@ -51,6 +57,7 @@ const foldIvExtractorMatNDX_ = (layer, fold) => {
     .then(filesLists => {
       const buffWrite = [];
       filesLists.forEach(list => {
+        list = noisesAdder_(list, noisesSuffixes);
         buffWrite.push(list.map(element => `${element} ${element}`).join('\n'));
       });
       return fs.writeFile(
@@ -75,7 +82,7 @@ const foldIvTestNDX_ = (layer, fold) => {
     });
 };
 
-const foldIvTestMatNDX_ = (layer, fold) => {
+const foldIvTestMatNDX_ = (layer, fold, noisesSuffixes) => {
   const foldInputPath = `${layer.paths.input}/f${fold}`;
   return fs.ensureDir(`${layer.paths.files}/f${fold}`)
     .then(() => fs.readdir(foldInputPath))
@@ -84,6 +91,7 @@ const foldIvTestMatNDX_ = (layer, fold) => {
     .then(filesLists => {
       const joinedList = [];
       filesLists.forEach(list => {
+        list = noisesAdder_(list, noisesSuffixes);
         joinedList.push(...list);
       });
       return fs.writeFile(`${layer.paths.files}/f${fold}/ivTestMat.ndx`,
@@ -92,15 +100,15 @@ const foldIvTestMatNDX_ = (layer, fold) => {
     });
 };
 
-const foldPldaNDX_ = (layer, fold) => {
+const foldPldaNDX_ = (layer, fold, noisesSuffixes) => {
   const foldInputPath = `${layer.paths.input}/f${fold}`;
   return fs.readdir(foldInputPath)
     .then(dirs => BluebirdPromise.map(dirs,
       dir => fs.readdir(`${foldInputPath}/${dir}`)))
     .then(
       filesLists => fs.writeFile(`${layer.paths.files}/f${fold}/Plda.ndx`,
-        filesLists.map(list => list.join(' ')).join('\n')
-          .replace(/\.wav/g, '')));
+        filesLists.map(list => noisesAdder_(list, noisesSuffixes).join(' '))
+          .join('\n').replace(/\.wav/g, '')));
 };
 
 const writeDataLST = layer => {
@@ -121,18 +129,18 @@ const writeTvNDX = layer => {
   return BluebirdPromise.all(foldPromises);
 };
 
-const writeIvExtractorNDX = layer => {
+const writeIvExtractorNDX = (layer, noisesSuffixes) => {
   const foldsPromises = [];
   for (let i = 0; i < 10; i++) {
-    foldsPromises.push(foldIvExtractorNDX_(layer, i));
+    foldsPromises.push(foldIvExtractorNDX_(layer, i, noisesSuffixes));
   }
   return BluebirdPromise.all(foldsPromises);
 };
 
-const writeIvExtractorMatNDX = layer => {
+const writeIvExtractorMatNDX = (layer, noisesSuffixes) => {
   const foldsPromises = [];
   for (let i = 0; i < 10; i++) {
-    foldsPromises.push(foldIvExtractorMatNDX_(layer, i));
+    foldsPromises.push(foldIvExtractorMatNDX_(layer, i, noisesSuffixes));
   }
   return BluebirdPromise.all(foldsPromises);
 };
@@ -164,18 +172,18 @@ const writeIvTestNDX = layer => {
   return BluebirdPromise.all(foldsPromises);
 };
 
-const writeCreateIvTestMatNDX = layer => {
+const writeCreateIvTestMatNDX = (layer, noisesSuffixes) => {
   const foldsPromises = [];
   for (let i = 0; i < 10; i++) {
-    foldsPromises.push(foldIvTestMatNDX_(layer, i));
+    foldsPromises.push(foldIvTestMatNDX_(layer, i, noisesSuffixes));
   }
   return BluebirdPromise.all(foldsPromises);
 };
 
-const writePldaNDX = layer => {
+const writePldaNDX = (layer, noisesSuffixes) => {
   const foldsPromises = [];
   for (let i = 0; i < 10; i++) {
-    foldsPromises.push(foldPldaNDX_(layer, i));
+    foldsPromises.push(foldPldaNDX_(layer, i, noisesSuffixes));
   }
   return BluebirdPromise.all(foldsPromises);
 };
@@ -218,15 +226,15 @@ const linkIvExtractorAllNDX = layer => {
   return BluebirdPromise.all(foldsPromises);
 };
 
-const prepareFiles = layer => {
+const prepareFiles = (layer, noisesSuffixes) => {
   return writeDataLST(layer)
     .then(() => writeTvNDX(layer))
-    .then(() => writeIvExtractorNDX(layer))
-    .then(() => writeIvExtractorMatNDX(layer))
+    .then(() => writeIvExtractorNDX(layer, noisesSuffixes))
+    .then(() => writeIvExtractorMatNDX(layer, noisesSuffixes))
     .then(() => writeTrainModelNDX(layer))
     .then(() => writeIvTestNDX(layer))
-    .then(() => writeCreateIvTestMatNDX(layer))
-    .then(() => writePldaNDX(layer))
+    .then(() => writeCreateIvTestMatNDX(layer, noisesSuffixes))
+    .then(() => writePldaNDX(layer, noisesSuffixes))
     .then(() => writeAllLST(layer))
     .then(() => writeIvExtractorAllNDX(layer))
     .then(() => linkIvExtractorAllNDX(layer));

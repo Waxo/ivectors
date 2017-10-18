@@ -2,7 +2,7 @@ const chalk = require('chalk');
 const vorpal = require('vorpal')();
 const {
   extractPRMFiles,
-  tenFolds,
+  tenFolds
 } = require('./app/commands');
 const {suffixChanger} = require('./app/utils/suffix-changer');
 
@@ -14,9 +14,13 @@ vorpal
   .option('-p, --prm', 'create PRM files')
   .option('-t, --test-prm <directory>', 'choose a given directory for testing')
   .option('-vs, --vanilla-scorer', 'use sph and plda norm with plda scorer')
+  .option('-a, --add-noises [paths...]', 'add repository noises')
   .action(args => {
+    if (typeof args.options['add-noises'] === 'string') {
+      args.options['add-noises'] = [args.options['add-noises']];
+    }
     return tenFolds(args.options.prm, args.options['test-prm'],
-      !args.options['vanilla-scorer']);
+      !args.options['vanilla-scorer'], args.options['add-noises']);
   });
 
 vorpal

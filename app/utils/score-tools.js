@@ -52,9 +52,9 @@ const parseResults_ = results => {
   return resultsByFile;
 };
 
-const scoreFold = (wbFold, dnnScorer = true) => {
+const scoreFold = (wbFold, dnnScorer = true, noisesSuffixes) => {
   if (dnnScorer) {
-    return testDNNScore(wbFold)
+    return testDNNScore(wbFold, noisesSuffixes)
       .then(res => {
         wbFold.results = res;
       });

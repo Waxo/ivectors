@@ -8,14 +8,21 @@ const layerAbstraction_ = clusterName => {
     clusterName;
 };
 
-const oneByOneIVData_ = wbFold => {
-  const inputList = [];
+const oneByOneIVData_ = (wbFold, noisesSuffixes) => {
+  let inputList = [];
   return fs.readdir(wbFold.input)
     .then(dirs => BluebirdPromise.map(dirs, dir => fs.readdir(
       `${wbFold.input}/${dir}`)))
     .then(fileLists => {
       inputList.push(...[].concat.apply([], fileLists)
         .map(file => file.replace('.wav', '')));
+      if (noisesSuffixes) {
+        inputList = [].concat.apply([], inputList.map(a => {
+          const miniList = [a];
+          miniList.push(...noisesSuffixes.map(b => `${a}_${b}`));
+          return miniList;
+        }));
+      }
       return BluebirdPromise.map(inputList, file => fs.readFile(
         `${wbFold.ivRaw}/${file}.y`));
     })
@@ -48,10 +55,10 @@ const retrieveBest_ = res => {
   return resArray[0][0];
 };
 
-const testDNNScore = wbFold => {
+const testDNNScore = (wbFold, noisesSuffixes) => {
   const net = new brain.NeuralNetwork();
   const list = [];
-  return oneByOneIVData_(wbFold)
+  return oneByOneIVData_(wbFold, noisesSuffixes)
     .then(base => {
       net.train(base, {
         errorThresh: 0.00015,

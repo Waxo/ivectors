@@ -105,8 +105,50 @@ const linkTestPRM = (workbenches, inputDir) => {
   });
 };
 
-const addNoises_ = layer => {
+const linkTestNoise_ = (wb, file, suffixList) => {
+  return BluebirdPromise.map(suffixList, suffix => {
+    const noiseName = file.replace('.', `_${suffix}.`);
+    return fs.ensureSymlink(`${wb.test}/${file}`, `${wb.test}/${noiseName}`);
+  });
+};
 
+const relinkFiles = (workbenches, suffixList) => {
+
+  return BluebirdPromise.map(workbenches, wb => {
+    return fs.readdir(wb.test)
+      .then(fileList => {
+        return BluebirdPromise.map(fileList,
+          file => linkTestNoise_(wb, file, suffixList));
+      });
+  });
+};
+
+const linkNoises = (layer, noiseDirs) => {
+  const filesToLink = [];
+  const suffixList = [];
+  return fs.readdir(layer.paths.prm)
+    .then(files => {
+      filesToLink.push(...files);
+      return BluebirdPromise.map(noiseDirs,
+        noiseDir => fs.readdir(
+          `${process.cwd()}/${noiseDir}/l${layer.wbName}`));
+    })
+    .then(filesLists => {
+      const promisesLink = [];
+      filesLists.forEach((list, idx) => {
+        const suffix = list[0].split('_')[1].replace('.prm', '');
+        suffixList.push(suffix);
+        promisesLink.push(BluebirdPromise.map(filesToLink, file => {
+          const [name, ext] = file.split('.');
+          const fileName = `${name}_${suffix}.${ext}`;
+          return fs.ensureSymlink(
+            `${process.cwd()}/${noiseDirs[idx]}/l${layer.wbName}/${fileName}`,
+            `${layer.paths.prm}/${fileName}`);
+        }));
+      });
+      return BluebirdPromise.all(promisesLink);
+    })
+    .then(() => suffixList);
 };
 
 module.exports = {
@@ -114,5 +156,7 @@ module.exports = {
   parametrizeClusters,
   linkPRMFiles,
   linkPRMWorkbench,
-  linkTestPRM
+  linkTestPRM,
+  relinkFiles,
+  linkNoises
 };
