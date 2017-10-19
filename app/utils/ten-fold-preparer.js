@@ -89,7 +89,7 @@ const clustersFolds_ = layer => {
 
 const createFolds = layer => {
   return clustersFolds_(layer)
-    .then(() => aggregateFolds_(layer));
+    // .then(() => aggregateFolds_(layer));
 };
 
 module.exports = {createFolds};

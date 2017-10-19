@@ -34,13 +34,14 @@ const firstLayer = layerRootPath => {
   const lRoot = `${layerRootPath}/l${wbName}`;
   const prmInput = `${root_}/prmInput/l${wbName}`;
 
-  const clusters = ['Dishes', 'DoorClapping', 'DoorOpening',
-    'ElectricalShaver', 'GlassBreaking', 'HairDryer', 'HandClapping', 'Keys',
-    'Paper', 'Water'];
-  const aggregateClusters = [
-    ['Human', ['Breathing', 'Cough', 'FemaleCry', 'FemaleScream', 'Laugh',
-      'MaleScream', 'Sneeze', 'Yawn']]
-  ];
+  const clusters = ['Sound', 'Speech'];
+  // const clusters = ['Dishes', 'DoorClapping', 'DoorOpening',
+  //   'ElectricalShaver', 'GlassBreaking', 'HairDryer', 'HandClapping', 'Keys',
+  //   'Paper', 'Water'];
+  // const aggregateClusters = [
+  //   ['Human', ['Breathing', 'Cough', 'FemaleCry', 'FemaleScream', 'Laugh',
+  //     'MaleScream', 'Sneeze', 'Yawn']]
+  // ];
 
   const mfccSize = 19;
   const cfgMFCC = {
@@ -76,7 +77,7 @@ const firstLayer = layerRootPath => {
     cfg,
     wbName,
     clusters,
-    aggregateClusters,
+    // aggregateClusters,
     mfccSize,
     cfgMFCC,
     prmInput

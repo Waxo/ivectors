@@ -32,7 +32,7 @@ const parametrizeSound = (path, layer, output = null) => {
         return acousticFeatures.concat([
           params.sc2[index],
           params.srf[index],
-          params.zcr[index]
+          // params.zcr[index]
         ]);
       });
       const delta = parameters.deltaCustomAllSignal(tmpVector);
